@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import killua.dev.aitalk.ui.components.AIResponseCard
+import killua.dev.aitalk.ui.components.BaseResponseCardContainer
 import killua.dev.aitalk.ui.components.Greetings
 import killua.dev.aitalk.ui.components.MainpageTextfield
 import killua.dev.aitalk.ui.components.MainpageTopBar
@@ -89,15 +90,17 @@ fun Mainpage(){
                         Greetings()
                     }
                 } else {
-                    LazyColumn {
-                        items(5) {
-                            AIResponseCard(
-                                "Gemini",
-                                content = "This is AI Generated",
-                                onCopyClicked = {},
-                                onSaveClicked = {},
-                                onRegenerateClicked = {},
-                            )
+                    BaseResponseCardContainer({},{}) {
+                        LazyColumn {
+                            items(5) {
+                                AIResponseCard(
+                                    "Gemini",
+                                    content = "This is AI Generated",
+                                    onCopyClicked = {},
+                                    onSaveClicked = {},
+                                    onRegenerateClicked = {},
+                                )
+                            }
                         }
                     }
                 }
