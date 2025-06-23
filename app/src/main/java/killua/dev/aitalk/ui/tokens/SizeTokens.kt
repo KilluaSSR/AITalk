@@ -1,4 +1,4 @@
-package killua.dev.aitalk.ui.viewmodels
+package killua.dev.aitalk.ui.tokens
 
 import androidx.compose.ui.unit.dp
 

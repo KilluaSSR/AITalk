@@ -1,6 +1,7 @@
 package killua.dev.aitalk.ui.components
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
@@ -23,13 +24,12 @@ fun PrimaryScaffold(
             if(snackbarHostState != null) SnackbarHost(snackbarHostState)
         }
     ) { innerPadding ->
-        Box(
+        Box (
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
         ){
             content()
         }
-
     }
 }

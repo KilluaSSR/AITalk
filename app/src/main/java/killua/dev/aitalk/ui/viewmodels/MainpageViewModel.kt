@@ -20,6 +20,8 @@ sealed interface MainpageUIIntent : UIIntent {
     data object ClearResults : MainpageUIIntent
     data object LoadSearchHistory : MainpageUIIntent
     data class SelectFromHistory(val query: String) : MainpageUIIntent
+    data object OnSendButtonClick : MainpageUIIntent
+    data object OnStopButtonClick : MainpageUIIntent
 }
 
 data class MainpageUIState(
@@ -31,7 +33,7 @@ data class MainpageUIState(
     val completedCount: Int = 0,
     val totalCount: Int = 0,
     val showResults: Boolean = false,
-    val searchHistory: List<String> = emptyList()
+    val searchHistory: List<String> = emptyList(),
 ) : UIState
 
 class MainpageViewModel @Inject constructor(
