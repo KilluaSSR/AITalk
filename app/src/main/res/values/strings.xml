@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">AI Talk</string>
     <string name="maintextfield_ask">Ask something</string>
+    <string name="onSaveButton">保存</string>
+    <string name="onRegenerateButton">重新生成</string>
+    <string name="onCopyButton">复制</string>
 </resources>

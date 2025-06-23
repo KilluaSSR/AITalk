@@ -10,21 +10,22 @@ import javax.inject.Inject
 
 sealed interface MainpageUIIntent : UIIntent {
     data class UpdateSearchQuery(val query: String) : MainpageUIIntent
-    data class StartSearch(val query: String) : MainpageUIIntent
-    data object ClearInput : MainpageUIIntent
-    data object CancelSearch : MainpageUIIntent
-    data object RetrySearch : MainpageUIIntent
-    data class RetrySpecificModel(val model: AIModel) : MainpageUIIntent
-    data class CopyResponse(val model: AIModel) : MainpageUIIntent
-    data class ShareResponse(val model: AIModel) : MainpageUIIntent
-    data object ClearResults : MainpageUIIntent
-    data object LoadSearchHistory : MainpageUIIntent
-    data class SelectFromHistory(val query: String) : MainpageUIIntent
+//    data class StartSearch(val query: String) : MainpageUIIntent
+//    data object ClearInput : MainpageUIIntent
+//    data object CancelSearch : MainpageUIIntent
+//    data object RetrySearch : MainpageUIIntent
+//    data class RetrySpecificModel(val model: AIModel) : MainpageUIIntent
+//    data class CopyResponse(val model: AIModel) : MainpageUIIntent
+//    data class ShareResponse(val model: AIModel) : MainpageUIIntent
+//    data object ClearResults : MainpageUIIntent
+//    data object LoadSearchHistory : MainpageUIIntent
+//    data class SelectFromHistory(val query: String) : MainpageUIIntent
     data object OnSendButtonClick : MainpageUIIntent
     data object OnStopButtonClick : MainpageUIIntent
 }
 
 data class MainpageUIState(
+    val showGreetings: Boolean = true,
     val searchQuery: String = "",
     val isInputEnabled: Boolean = true,
     val aiResponses: Map<AIModel, AIResponseState> = emptyMap(),
@@ -41,5 +42,18 @@ class MainpageViewModel @Inject constructor(
 ): BaseViewModel<MainpageUIIntent, MainpageUIState, SnackbarUIEffect>(
     MainpageUIState()
 ){
+    override suspend fun onEvent(state: MainpageUIState, intent: MainpageUIIntent) {
+        when(intent){
+            MainpageUIIntent.OnSendButtonClick -> {
+                emitState(uiState.value.copy(showGreetings = false))
+            }
 
+            MainpageUIIntent.OnStopButtonClick -> {
+
+            }
+            is MainpageUIIntent.UpdateSearchQuery -> {
+
+            }
+        }
+    }
 }

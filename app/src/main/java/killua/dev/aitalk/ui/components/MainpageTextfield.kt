@@ -1,7 +1,6 @@
 package killua.dev.aitalk.ui.components
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Send
@@ -19,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import killua.dev.aitalk.R
+import killua.dev.aitalk.ui.tokens.SizeTokens
 import killua.dev.aitalk.ui.viewmodels.MainpageUIIntent
 import killua.dev.aitalk.ui.viewmodels.MainpageUIState
 import kotlinx.coroutines.delay
@@ -49,28 +49,37 @@ fun MainpageTextfield(
     val showSendButton = !uiState.isSearching && localText.isNotBlank()
     val showStopButton = uiState.isSearching
 
-    RainbowTextField(
-        value = localText,
-        onValueChange = { localText = it },
-        modifier = Modifier.fillMaxWidth(0.9f),
-        placeholder = {
-            Text(context.getString(R.string.maintextfield_ask))
-        },
-        trailingIcon = {
-            when {
-                showStopButton -> {
-                    IconButton(onClick = { onIntent(MainpageUIIntent.OnStopButtonClick) }) {
-                        Icon(Icons.Default.Stop, contentDescription = "Stop")
+    val radiusCorner = SizeTokens.Level16
+
+    Box(
+        modifier = modifier
+            .fillMaxWidth(),
+        contentAlignment = Alignment.Center
+    ) {
+        BaseTextField(
+            value = localText,
+            onValueChange = { localText = it },
+            placeholder = {
+                Text(context.getString(R.string.maintextfield_ask))
+            },
+            trailingIcon = {
+                when {
+                    showStopButton -> {
+                        IconButton(onClick = { onIntent(MainpageUIIntent.OnStopButtonClick) }) {
+                            Icon(Icons.Default.Stop, contentDescription = "Stop")
+                        }
+                    }
+                    showSendButton -> {
+                        IconButton(onClick = { onIntent(MainpageUIIntent.OnSendButtonClick) }) {
+                            Icon(Icons.Default.Send, contentDescription = "Send")
+                        }
                     }
                 }
-                showSendButton -> {
-                    IconButton(onClick = { onIntent(MainpageUIIntent.OnSendButtonClick) }) {
-                        Icon(Icons.Default.Send, contentDescription = "Send")
-                    }
-                }
-            }
-        },
-        enabled = uiState.isInputEnabled
-    )
+            },
+            enabled = uiState.isInputEnabled,
+            radiusCorner = radiusCorner,
+            modifier = modifier
+        )
+    }
 
 }
