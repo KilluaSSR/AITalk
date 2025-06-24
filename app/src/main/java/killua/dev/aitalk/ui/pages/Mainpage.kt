@@ -10,26 +10,16 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.DpOffset
-import androidx.compose.ui.unit.dp
-import androidx.core.util.TypedValueCompat.pxToDp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import killua.dev.aitalk.ui.Routes
 import killua.dev.aitalk.ui.components.AIResponseCard
 import killua.dev.aitalk.ui.components.BaseResponseCardContainer
 import killua.dev.aitalk.ui.components.Greetings
-import killua.dev.aitalk.ui.components.MainpageMenu
 import killua.dev.aitalk.ui.components.MainpageTextfield
 import killua.dev.aitalk.ui.components.MainpageTopBar
 import killua.dev.aitalk.ui.components.PrimaryScaffold
@@ -37,7 +27,6 @@ import killua.dev.aitalk.ui.tokens.SizeTokens
 import killua.dev.aitalk.ui.viewmodels.MainpageViewModel
 import killua.dev.aitalk.utils.BiometricAuth
 import killua.dev.aitalk.utils.LocalNavHostController
-import killua.dev.aitalk.utils.navigateSingle
 import kotlinx.coroutines.launch
 
 @SuppressLint("StateFlowValueCalledInComposition")
@@ -94,7 +83,7 @@ fun Mainpage(){
                         Greetings()
                     }
                 } else {
-                    BaseResponseCardContainer({},{}) {
+                    BaseResponseCardContainer({},{},{}) {
                         LazyColumn {
                             items(5) {
                                 AIResponseCard(

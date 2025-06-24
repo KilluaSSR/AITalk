@@ -426,7 +426,7 @@ fun Switchable(
 fun SwitchableSecured(
     enabled: Boolean = true,
     key: Preferences.Key<Boolean>,
-    defValue: Boolean = true,
+    defValue: Boolean = false,
     icon: ImageVector? = null,
     title: String,
     checkedText: String,

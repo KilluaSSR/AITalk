@@ -76,7 +76,6 @@ fun MainpageTextfield(
                     }
                 }
             },
-            enabled = uiState.isInputEnabled,
             radiusCorner = radiusCorner,
             modifier = modifier
         )

@@ -19,4 +19,10 @@
     <string name="help">帮助</string>
     <string name="about">关于</string>
     <string name="feedback">反馈</string>
+    <string name="onRevokeAllButton">撤销全部</string>
+    <string name="biometrics">生物身份识别</string>
+    <string name="biometrics_desc">查看历史纪录列表需要通过身份认证</string>
+    <string name="biometric_auth_disabled_desc">你的设备可能不支持生物身份认证</string>
+    <string name="biometric_auth_desc_on">历史记录已被保护</string>
+    <string name="biometric_auth_desc_off">历史记录不受保护</string>
 </resources>
