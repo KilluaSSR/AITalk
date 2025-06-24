@@ -426,7 +426,7 @@ fun Switchable(
 fun SwitchableSecured(
     enabled: Boolean = true,
     key: Preferences.Key<Boolean>,
-    defValue: Boolean = false,
+    initValue: Boolean = false,
     icon: ImageVector? = null,
     title: String,
     checkedText: String,
@@ -437,8 +437,6 @@ fun SwitchableSecured(
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val stored by context.readStoreBoolean(key = key, defValue = defValue)
-        .collectAsStateWithLifecycle(initialValue = defValue)
     val authenticator = remember { BiometricAuth() }
     val onClick: suspend (Boolean) -> Unit = {
         val authenticated = authenticator.authenticate()
@@ -449,7 +447,7 @@ fun SwitchableSecured(
     }
     Switchable(
         enabled = enabled,
-        checked = stored,
+        checked = initValue,
         icon = icon,
         title = title,
         checkedText = checkedText,
@@ -457,7 +455,7 @@ fun SwitchableSecured(
         desc = desc,
         onCheckedChange = {
             scope.launch {
-                onClick(stored)
+                onClick(initValue)
             }
         }
     )

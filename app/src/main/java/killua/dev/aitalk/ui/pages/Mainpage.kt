@@ -16,7 +16,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import killua.dev.aitalk.datastore.readSecureHistory
 import killua.dev.aitalk.ui.Routes
+import killua.dev.aitalk.ui.SnackbarUIEffect
 import killua.dev.aitalk.ui.components.AIResponseCard
 import killua.dev.aitalk.ui.components.BaseResponseCardContainer
 import killua.dev.aitalk.ui.components.Greetings
@@ -27,6 +29,8 @@ import killua.dev.aitalk.ui.tokens.SizeTokens
 import killua.dev.aitalk.ui.viewmodels.MainpageViewModel
 import killua.dev.aitalk.utils.BiometricAuth
 import killua.dev.aitalk.utils.LocalNavHostController
+import killua.dev.aitalk.utils.navigateSingle
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 @SuppressLint("StateFlowValueCalledInComposition")
@@ -43,10 +47,14 @@ fun Mainpage(){
             navController,
             upLeftOnClick = {
                 scope.launch {
-                    BiometricAuth().authenticateAndNavigate(
-                        navController,
-                        Routes.HistoryPage.route
-                    )
+                    if (context.readSecureHistory().first()) {
+                        BiometricAuth().authenticateAndNavigate(
+                            navController = navController,
+                            route = Routes.HistoryPage.route,
+                        )
+                    }else{
+                        navController.navigateSingle(Routes.HistoryPage.route)
+                    }
                 }
             }
         )

@@ -48,15 +48,10 @@ fun SettingsPage(){
     val scope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState()
     var showThemeMenu by remember { mutableStateOf(false) }
-    val currentTheme by context.readTheme()
-        .collectAsStateWithLifecycle(initialValue = ThemeMode.SYSTEM.name)
     val viewModel: SettingsViewmodel = hiltViewModel()
-    val uiState = viewModel.uiState.collectAsStateWithLifecycle()
-    val isBiometricAvailable = uiState.value.isBiometricAvailable
-    LaunchedEffect(Unit) {
-        viewModel.emitIntentOnIO(SettingsUIIntent.onArrive)
-    }
-    val securedHistoryList by context.readSecureHistory().collectAsStateWithLifecycle(initialValue = false)
+    val isBiometricAvailable by viewModel.settingsState.isBiometricAvailable.collectAsStateWithLifecycle()
+    val currentTheme by viewModel.settingsState.themeMode.collectAsStateWithLifecycle()
+    val securedHistoryList by viewModel.settingsState.securedHistoryList.collectAsStateWithLifecycle()
     SettingsScaffold(
         scrollBehavior = scrollBehavior,
         title = stringResource(R.string.settings),
@@ -86,13 +81,13 @@ fun SettingsPage(){
                 SwitchableSecured(
                     key = SECURE_HISTORY,
                     enabled = isBiometricAvailable,
+                    initValue = securedHistoryList,
                     title = stringResource(R.string.biometrics),
                     checkedText = when {
                         !isBiometricAvailable -> stringResource(R.string.biometric_auth_disabled_desc)
                         securedHistoryList -> stringResource(R.string.biometric_auth_desc_on)
                         else -> stringResource(R.string.biometric_auth_desc_off)
-                    },
-                    desc = stringResource(R.string.biometrics_desc),
+                    }
                 ){ errMsg ->
                     scope.launch {
                         viewModel.emitEffect(

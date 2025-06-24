@@ -25,4 +25,5 @@
     <string name="biometric_auth_disabled_desc">你的设备可能不支持生物身份认证</string>
     <string name="biometric_auth_desc_on">历史记录已被保护</string>
     <string name="biometric_auth_desc_off">历史记录不受保护</string>
+    <string name="title_activity_floating">FloatingActivity</string>
 </resources>
