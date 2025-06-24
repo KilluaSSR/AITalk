@@ -13,7 +13,7 @@ android {
 
     defaultConfig {
         applicationId = "killua.dev.aitalk"
-        minSdk = 29
+        minSdk = 31
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"

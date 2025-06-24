@@ -1,5 +1,6 @@
 package killua.dev.aitalk.ui.components
 
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -20,8 +21,7 @@ fun TopBar(
     upLeftIcon: ImageVector? = null,
     upLeftOnClick: () -> Unit,
     showExtraIcon: Boolean = true,
-    extraIcon: ImageVector? = null,
-    showMoreOnClick: () -> Unit
+    extraIconAction: @Composable (RowScope.() -> Unit) = {}
 ){
     CenterAlignedTopAppBar(
         title = {
@@ -44,15 +44,8 @@ fun TopBar(
             }
         },
         actions = {
-            if(showExtraIcon && extraIcon != null){
-                IconButton(
-                    onClick = showMoreOnClick
-                ) {
-                    Icon(
-                        imageVector = extraIcon,
-                        null
-                    )
-                }
+            if(showExtraIcon){
+                extraIconAction()
             }
         }
     )

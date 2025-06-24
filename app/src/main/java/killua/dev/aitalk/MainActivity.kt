@@ -12,6 +12,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import killua.dev.aitalk.ui.Routes
 import killua.dev.aitalk.ui.pages.HistoryPage
 import killua.dev.aitalk.ui.pages.Mainpage
+import killua.dev.aitalk.ui.pages.SettingsPage
 import killua.dev.aitalk.ui.theme.AITalkTheme
 import killua.dev.aitalk.utils.AnimatedNavHost
 import killua.dev.aitalk.utils.BiometricManagerSingleton
@@ -40,6 +41,9 @@ class MainActivity : FragmentActivity() {
                         }
                         composable (Routes.HistoryPage.route){
                             HistoryPage()
+                        }
+                        composable (Routes.SettingsPage.route){
+                            SettingsPage()
                         }
                     }
                 }

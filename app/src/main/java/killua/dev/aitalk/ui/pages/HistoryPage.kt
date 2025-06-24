@@ -19,10 +19,7 @@ fun HistoryPage(){
     PrimaryScaffold(
         topBar = {
             HistoryPageTopBar (
-                navController,
-                upLeftOnClick = {
-                    navController.popBackStack()
-                }
+                navController
             ) { showMore = true }
         }
     ) {

@@ -17,22 +17,27 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.DpOffset
+import androidx.compose.ui.unit.dp
+import androidx.core.util.TypedValueCompat.pxToDp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import killua.dev.aitalk.ui.Routes
-import killua.dev.aitalk.ui.SnackbarUIEffect
 import killua.dev.aitalk.ui.components.AIResponseCard
 import killua.dev.aitalk.ui.components.BaseResponseCardContainer
 import killua.dev.aitalk.ui.components.Greetings
+import killua.dev.aitalk.ui.components.MainpageMenu
 import killua.dev.aitalk.ui.components.MainpageTextfield
 import killua.dev.aitalk.ui.components.MainpageTopBar
 import killua.dev.aitalk.ui.components.PrimaryScaffold
 import killua.dev.aitalk.ui.tokens.SizeTokens
 import killua.dev.aitalk.ui.viewmodels.MainpageViewModel
 import killua.dev.aitalk.utils.BiometricAuth
-import killua.dev.aitalk.utils.BiometricHelper
 import killua.dev.aitalk.utils.LocalNavHostController
+import killua.dev.aitalk.utils.navigateSingle
 import kotlinx.coroutines.launch
 
 @SuppressLint("StateFlowValueCalledInComposition")
@@ -40,10 +45,10 @@ import kotlinx.coroutines.launch
 fun Mainpage(){
     val context = LocalContext.current
     val navController = LocalNavHostController.current!!
-    var showMore by remember { mutableStateOf(false) }
     val viewModel: MainpageViewModel = hiltViewModel()
     val uiState = viewModel.uiState.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
+
     PrimaryScaffold(
         topBar = { MainpageTopBar(
             navController,
@@ -55,7 +60,7 @@ fun Mainpage(){
                     )
                 }
             }
-        ) { showMore = true }
+        )
         },
         snackbarHostState = viewModel.snackbarHostState
     ) {
@@ -64,6 +69,7 @@ fun Mainpage(){
                 .fillMaxSize()
                 .padding(horizontal = SizeTokens.Level12)
         ) {
+
             MainpageTextfield(
                 uiState = viewModel.uiState.value,
                 onIntent = { intent ->

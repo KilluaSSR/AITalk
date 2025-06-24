@@ -10,4 +10,13 @@
     <string name="protected_content_desc">请验证你的身份</string>
     <string name="cancel">取消</string>
     <string name="history">历史记录</string>
+    <string name="light">亮色模式</string>
+    <string name="dark">夜间模式</string>
+    <string name="system">系统默认</string>
+    <string name="settings">设置</string>
+    <string name="application_settings">应用设置</string>
+    <string name="theme">主题</string>
+    <string name="help">帮助</string>
+    <string name="about">关于</string>
+    <string name="feedback">反馈</string>
 </resources>
