@@ -36,4 +36,10 @@
     <string name="flowting_window_settings">悬浮窗搜索设置</string>
     <string name="flowting_window_search_mode">悬浮窗搜索询问模式</string>
     <string name="apikey_settings">API密钥设置</string>
+    <string name="save">保存</string>
+    <string name="openai_api_settings">OpenAI API 设置</string>
+    <string name="gemini_api_settings">Gemini API 设置</string>
+    <string name="deepseek_api_settings">Deepseek API 设置</string>
+    <string name="grok_api_settings">Grok API 设置</string>
+    <string name="claude_api_settings">Claude API 设置</string>
 </resources>

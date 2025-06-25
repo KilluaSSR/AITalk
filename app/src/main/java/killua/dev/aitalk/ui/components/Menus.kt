@@ -2,6 +2,7 @@ package killua.dev.aitalk.ui.components
 
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.SheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -10,6 +11,8 @@ import killua.dev.aitalk.models.FloatingWindowQuestionMode
 import killua.dev.aitalk.models.MainpageMenuItems
 import killua.dev.aitalk.models.floatingWindowQuestionModeItemsItems
 import killua.dev.aitalk.models.mainpageMeunItems
+import killua.dev.aitalk.models.themeSettingItems
+import killua.dev.aitalk.ui.theme.ThemeMode
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -62,6 +65,31 @@ fun QuestionModeMenu(
                 scope.launch {
                     onSelected(item.mode)
                     onDismissRequest()
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ThemeModeMenu(
+    expanded: Boolean,
+    onDismiss: () -> Unit,
+    onThemeSelected: (ThemeMode) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val scope = rememberCoroutineScope()
+
+    DropdownMenu(expanded, onDismiss, modifier) {
+        themeSettingItems.forEach { item ->
+            BottomSheetItem(
+                icon = item.icon,
+                text = stringResource(item.titleRes)
+            ) {
+                scope.launch {
+                    onThemeSelected(item.mode)
+                    onDismiss()
                 }
             }
         }

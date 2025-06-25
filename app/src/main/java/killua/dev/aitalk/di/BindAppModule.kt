@@ -7,9 +7,11 @@ import dagger.hilt.components.SingletonComponent
 import killua.dev.aitalk.repository.AiNetworkRepository
 import killua.dev.aitalk.repository.impl.AiNetworkRepositoryImpl
 import killua.dev.aitalk.repository.AiRepository
+import killua.dev.aitalk.repository.ApiConfigRepository
 import killua.dev.aitalk.repository.HistoryRepository
 import killua.dev.aitalk.repository.SettingsRepository
 import killua.dev.aitalk.repository.impl.AiRepositoryImpl
+import killua.dev.aitalk.repository.impl.ApiConfigRepositoryImpl
 import killua.dev.aitalk.repository.impl.HistoryRepositoryImpl
 import killua.dev.aitalk.repository.impl.SettingsRepositoryImpl
 import killua.dev.aitalk.utils.ClipboardHelper
@@ -42,6 +44,12 @@ abstract class BindAppModule {
     abstract fun bindHistoryRepository(
         impl: HistoryRepositoryImpl
     ): HistoryRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindApiConfigRepository(
+        impl: ApiConfigRepositoryImpl
+    ): ApiConfigRepository
 
     @Binds
     @Singleton

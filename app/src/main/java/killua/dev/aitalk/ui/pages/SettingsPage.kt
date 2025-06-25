@@ -36,20 +36,24 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import killua.dev.aitalk.R
 import killua.dev.aitalk.datastore.SECURE_HISTORY
+import killua.dev.aitalk.models.AIModel
 import killua.dev.aitalk.models.FloatingWindowQuestionMode
+import killua.dev.aitalk.models.stringRes
+import killua.dev.aitalk.ui.Routes
 import killua.dev.aitalk.ui.SnackbarUIEffect
 import killua.dev.aitalk.ui.components.Clickable
 import killua.dev.aitalk.ui.components.ClickableMenu
 import killua.dev.aitalk.ui.components.QuestionModeMenu
 import killua.dev.aitalk.ui.components.SettingsScaffold
 import killua.dev.aitalk.ui.components.SwitchableSecured
-import killua.dev.aitalk.ui.components.ThemeSettingsBottomSheet
+import killua.dev.aitalk.ui.components.ThemeModeMenu
 import killua.dev.aitalk.ui.components.Title
 import killua.dev.aitalk.ui.theme.getThemeModeName
 import killua.dev.aitalk.ui.viewmodels.SettingsNavigationEvent
 import killua.dev.aitalk.ui.viewmodels.SettingsUIIntent
 import killua.dev.aitalk.ui.viewmodels.SettingsViewmodel
 import killua.dev.aitalk.utils.LocalNavHostController
+import killua.dev.aitalk.utils.navigateSingle
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
@@ -60,7 +64,6 @@ fun SettingsPage() {
     val scrollBehavior =
         TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
     val scope = rememberCoroutineScope()
-    val sheetState = rememberModalBottomSheetState()
     var showThemeMenu by remember { mutableStateOf(false) }
     var showQuestionModeMenu by remember { mutableStateOf(false) }
     val viewModel: SettingsViewmodel = hiltViewModel()
@@ -110,9 +113,9 @@ fun SettingsPage() {
                 }
             } else {
                 if (showThemeMenu) {
-                    ThemeSettingsBottomSheet(
+                    ThemeModeMenu(
+                        expanded = showThemeMenu,
                         onDismiss = { showThemeMenu = false },
-                        sheetState = sheetState,
                         onThemeSelected = { theme ->
                             scope.launch {
                                 viewModel.emitIntent(SettingsUIIntent.UpdateTheme(theme))
@@ -200,7 +203,13 @@ fun SettingsPage() {
                     Title(
                         title = stringResource(R.string.apikey_settings)
                     ) {
-
+                        AIModel.entries.forEach { model ->
+                            Clickable(
+                                title = stringResource(model.stringRes()),
+                            ) {
+                                navController.navigate(Routes.APIConfigurationPage.createRoute(model))
+                            }
+                        }
                     }
                 }
             }
