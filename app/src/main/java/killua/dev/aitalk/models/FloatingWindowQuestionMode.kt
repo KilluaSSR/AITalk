@@ -1,13 +1,6 @@
 package killua.dev.aitalk.models
 
 import androidx.annotation.StringRes
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.Help
-import androidx.compose.material.icons.rounded.Check
-import androidx.compose.material.icons.rounded.Checklist
-import androidx.compose.material.icons.rounded.Report
-import androidx.compose.material.icons.rounded.Settings
-import androidx.compose.ui.graphics.vector.ImageVector
 import killua.dev.aitalk.R
 
 enum class FloatingWindowQuestionMode {

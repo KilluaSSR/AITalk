@@ -35,4 +35,5 @@
     <string name="explainVerbose">详细解释</string>
     <string name="flowting_window_settings">悬浮窗搜索设置</string>
     <string name="flowting_window_search_mode">悬浮窗搜索询问模式</string>
+    <string name="apikey_settings">API密钥设置</string>
 </resources>

@@ -6,10 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.DpOffset
-import androidx.compose.ui.unit.dp
 import killua.dev.aitalk.models.FloatingWindowQuestionMode
-import killua.dev.aitalk.models.FloatingWindowQuestionModeItems
 import killua.dev.aitalk.models.MainpageMenuItems
 import killua.dev.aitalk.models.floatingWindowQuestionModeItemsItems
 import killua.dev.aitalk.models.mainpageMeunItems

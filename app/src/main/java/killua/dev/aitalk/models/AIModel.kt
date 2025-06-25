@@ -4,5 +4,6 @@ enum class AIModel {
     ChatGPT,
     Claude,
     Gemini,
-    DeepSeek
+    DeepSeek,
+    Grok
 }

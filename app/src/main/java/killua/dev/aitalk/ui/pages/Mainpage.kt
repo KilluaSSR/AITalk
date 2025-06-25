@@ -18,7 +18,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import killua.dev.aitalk.datastore.readSecureHistory
 import killua.dev.aitalk.ui.Routes
-import killua.dev.aitalk.ui.SnackbarUIEffect
 import killua.dev.aitalk.ui.components.AIResponseCard
 import killua.dev.aitalk.ui.components.BaseResponseCardContainer
 import killua.dev.aitalk.ui.components.Greetings

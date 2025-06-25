@@ -1,4 +1,4 @@
-package killua.dev.aitalk.repository
+package killua.dev.aitalk.repository.impl
 
 import android.content.Context
 import android.provider.Settings
@@ -9,6 +9,7 @@ import killua.dev.aitalk.datastore.readTheme
 import killua.dev.aitalk.datastore.writeFloatingWindowQuestionMode
 import killua.dev.aitalk.datastore.writeSecureMyHistory
 import killua.dev.aitalk.datastore.writeTheme
+import killua.dev.aitalk.repository.SettingsRepository
 import killua.dev.aitalk.utils.BiometricManagerSingleton
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject

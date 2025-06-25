@@ -13,7 +13,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberTopAppBarState
@@ -41,7 +40,6 @@ import killua.dev.aitalk.models.FloatingWindowQuestionMode
 import killua.dev.aitalk.ui.SnackbarUIEffect
 import killua.dev.aitalk.ui.components.Clickable
 import killua.dev.aitalk.ui.components.ClickableMenu
-import killua.dev.aitalk.ui.components.MainpageMenu
 import killua.dev.aitalk.ui.components.QuestionModeMenu
 import killua.dev.aitalk.ui.components.SettingsScaffold
 import killua.dev.aitalk.ui.components.SwitchableSecured
@@ -52,7 +50,6 @@ import killua.dev.aitalk.ui.viewmodels.SettingsNavigationEvent
 import killua.dev.aitalk.ui.viewmodels.SettingsUIIntent
 import killua.dev.aitalk.ui.viewmodels.SettingsViewmodel
 import killua.dev.aitalk.utils.LocalNavHostController
-import killua.dev.aitalk.utils.navigateSingle
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
@@ -198,6 +195,12 @@ fun SettingsPage() {
                         ){
                             showQuestionModeMenu = true
                         }
+                    }
+
+                    Title(
+                        title = stringResource(R.string.apikey_settings)
+                    ) {
+
                     }
                 }
             }
