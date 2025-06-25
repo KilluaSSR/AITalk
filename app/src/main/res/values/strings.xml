@@ -26,4 +26,7 @@
     <string name="biometric_auth_desc_on">历史记录已被保护</string>
     <string name="biometric_auth_desc_off">历史记录不受保护</string>
     <string name="title_activity_floating">FloatingActivity</string>
+    <string name="overlay_permission">显示在其他应用上层</string>
+    <string name="overlay_permission_on">您已经打开显示在其他应用上层权限</string>
+    <string name="overlay_permission_off">您未打开显示在其他应用上层权限，点击前去设置</string>
 </resources>
