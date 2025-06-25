@@ -60,6 +60,7 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.material.icons.extended)
+    implementation(libs.androidx.lifecycle.service)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation(libs.androidx.hilt.navigation.compose)
