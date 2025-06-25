@@ -17,9 +17,9 @@ import killua.dev.aitalk.ui.tokens.SizeTokens
 
 @Composable
 fun BaseDropdownMenu(
-    icon: ImageVector,
-    text: String,
     modifier: Modifier = Modifier,
+    icon: ImageVector? = null,
+    text: String,
     onClick: () -> Unit,
 ) {
     Row(
@@ -29,11 +29,13 @@ fun BaseDropdownMenu(
             .padding(horizontal = SizeTokens.Level20, vertical = SizeTokens.Level16),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant
-        )
+        if (icon != null){
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
         Spacer(modifier = Modifier.width(SizeTokens.Level16))
         Text(
             text = text,

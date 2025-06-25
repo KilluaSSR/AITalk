@@ -182,7 +182,7 @@ fun Clickable(
 
 @ExperimentalAnimationApi
 @Composable
-fun Clickable(
+fun ClickableMenu(
     enabled: Boolean = true,
     title: String, value: String? = null,
     desc: String? = null,

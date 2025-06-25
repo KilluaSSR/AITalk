@@ -1,7 +1,6 @@
 package killua.dev.aitalk.ui.pages
 
 import android.content.Intent
-import android.net.Uri
 import android.provider.Settings
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -14,6 +13,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberTopAppBarState
@@ -29,28 +29,31 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import killua.dev.aitalk.R
 import killua.dev.aitalk.datastore.SECURE_HISTORY
+import killua.dev.aitalk.models.FloatingWindowQuestionMode
 import killua.dev.aitalk.ui.SnackbarUIEffect
 import killua.dev.aitalk.ui.components.Clickable
+import killua.dev.aitalk.ui.components.ClickableMenu
+import killua.dev.aitalk.ui.components.MainpageMenu
+import killua.dev.aitalk.ui.components.QuestionModeMenu
 import killua.dev.aitalk.ui.components.SettingsScaffold
 import killua.dev.aitalk.ui.components.SwitchableSecured
 import killua.dev.aitalk.ui.components.ThemeSettingsBottomSheet
 import killua.dev.aitalk.ui.components.Title
-import killua.dev.aitalk.ui.theme.ThemeMode
 import killua.dev.aitalk.ui.theme.getThemeModeName
 import killua.dev.aitalk.ui.viewmodels.SettingsNavigationEvent
 import killua.dev.aitalk.ui.viewmodels.SettingsUIIntent
 import killua.dev.aitalk.ui.viewmodels.SettingsViewmodel
 import killua.dev.aitalk.utils.LocalNavHostController
+import killua.dev.aitalk.utils.navigateSingle
 import kotlinx.coroutines.launch
-import androidx.core.net.toUri
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.compose.LocalLifecycleOwner
-import androidx.lifecycle.repeatOnLifecycle
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
@@ -62,6 +65,7 @@ fun SettingsPage() {
     val scope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState()
     var showThemeMenu by remember { mutableStateOf(false) }
+    var showQuestionModeMenu by remember { mutableStateOf(false) }
     val viewModel: SettingsViewmodel = hiltViewModel()
     val uiState = viewModel.uiState.collectAsStateWithLifecycle()
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -134,18 +138,6 @@ fun SettingsPage() {
                             showThemeMenu = true
                         }
 
-                        Clickable(
-                            title = stringResource(R.string.overlay_permission),
-                            value = if(uiState.value.canDrawOverlays){
-                                stringResource(R.string.overlay_permission_on)
-                            }else{
-                                stringResource(R.string.overlay_permission_off)
-                            }
-                        ) {
-                            scope.launch {
-                                viewModel.emitIntent(SettingsUIIntent.GoToOverlaySettingsClicked)
-                            }
-                        }
                         SwitchableSecured(
                             key = SECURE_HISTORY,
                             enabled = uiState.value.isBiometricAvailable,
@@ -164,6 +156,47 @@ fun SettingsPage() {
                                     )
                                 )
                             }
+                        }
+                    }
+
+                    Title(title = stringResource(R.string.flowting_window_settings)){
+
+                        Clickable(
+                            title = stringResource(R.string.overlay_permission),
+                            value = if(uiState.value.canDrawOverlays){
+                                stringResource(R.string.overlay_permission_on)
+                            }else{
+                                stringResource(R.string.overlay_permission_off)
+                            }
+                        ) {
+                            scope.launch {
+                                viewModel.emitIntent(SettingsUIIntent.GoToOverlaySettingsClicked)
+                            }
+                        }
+
+                        ClickableMenu(
+                            title = stringResource(R.string.flowting_window_search_mode),
+                            value = when(uiState.value.questionMode){
+                                FloatingWindowQuestionMode.isThatTrueYNQuestion -> stringResource(R.string.isThatTrueYNQuestion)
+                                FloatingWindowQuestionMode.isThatTrueWithExplain -> stringResource(R.string.isThatTrueWithExplain)
+                                FloatingWindowQuestionMode.explainBriefly -> stringResource(R.string.explainBriefly)
+                                FloatingWindowQuestionMode.explainVerbose -> stringResource(R.string.explainVerbose)
+                            },
+                            content = {
+                                QuestionModeMenu(
+                                    expanded = showQuestionModeMenu,
+                                    onDismissRequest = {showQuestionModeMenu = false},
+                                    onSelected = { item ->
+                                        scope.launch {
+                                            viewModel.emitIntent(SettingsUIIntent.UpdateQuestionMode(item))
+                                            showQuestionModeMenu = false
+                                        }
+                                    },
+                                    modifier = Modifier,
+                                )
+                            }
+                        ){
+                            showQuestionModeMenu = true
                         }
                     }
                 }

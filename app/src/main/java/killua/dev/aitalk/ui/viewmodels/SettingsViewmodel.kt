@@ -2,6 +2,7 @@ package killua.dev.aitalk.ui.viewmodels
 
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import killua.dev.aitalk.models.FloatingWindowQuestionMode
 import killua.dev.aitalk.repository.SettingsRepository
 import killua.dev.aitalk.ui.SnackbarUIEffect
 import killua.dev.aitalk.ui.theme.ThemeMode
@@ -17,6 +18,7 @@ import javax.inject.Inject
 sealed interface SettingsUIIntent : UIIntent {
     data class UpdateTheme(val theme: ThemeMode) : SettingsUIIntent
     data class UpdateSecureHistory(val isEnabled: Boolean) : SettingsUIIntent
+    data class UpdateQuestionMode(val mode: FloatingWindowQuestionMode) : SettingsUIIntent
     data object GoToOverlaySettingsClicked : SettingsUIIntent
     data object OnArrive : SettingsUIIntent
 }
@@ -30,7 +32,8 @@ data class SettingsUIState(
     val themeMode: ThemeMode = ThemeMode.SYSTEM,
     val isBiometricAvailable: Boolean = false,
     val isHistorySecured: Boolean = false,
-    val canDrawOverlays: Boolean = false
+    val canDrawOverlays: Boolean = false,
+    val questionMode: FloatingWindowQuestionMode = FloatingWindowQuestionMode.isThatTrueWithExplain
 ) : UIState
 
 @HiltViewModel
@@ -45,12 +48,13 @@ class SettingsViewmodel @Inject constructor(
     init {
         val themeFlow = repository.getThemeMode()
         val securedHistoryFlow = repository.isHistorySecured()
-
+        val questionMode = repository.getFloatingWindowQuestionMode()
         viewModelScope.launch {
-            combine(themeFlow, securedHistoryFlow) { themeName, isSecured ->
+            combine(themeFlow, securedHistoryFlow, questionMode) { themeName, isSecured, questionMode ->
                 SettingsUIState(
                     isLoading = false,
                     themeMode = ThemeMode.valueOf(themeName),
+                    questionMode = FloatingWindowQuestionMode.valueOf(questionMode),
                     isBiometricAvailable = repository.isBiometricAvailable(),
                     isHistorySecured = isSecured,
                     canDrawOverlays = repository.canDrawOverlays()
@@ -81,6 +85,11 @@ class SettingsViewmodel @Inject constructor(
                 val canOverlay = repository.canDrawOverlays()
                 // 其他检查
                 emitState(state.copy(canDrawOverlays = canOverlay, isLoading = false))
+            }
+
+            is SettingsUIIntent.UpdateQuestionMode -> {
+                repository.setFloatingWindowQuestionMode(intent.mode.name)
+                emitState(state.copy(questionMode = intent.mode))
             }
         }
     }

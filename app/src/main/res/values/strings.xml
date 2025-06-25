@@ -14,7 +14,7 @@
     <string name="dark">夜间模式</string>
     <string name="system">系统默认</string>
     <string name="settings">设置</string>
-    <string name="application_settings">应用设置</string>
+    <string name="application_settings">主应用设置</string>
     <string name="theme">主题</string>
     <string name="help">帮助</string>
     <string name="about">关于</string>
@@ -29,4 +29,10 @@
     <string name="overlay_permission">显示在其他应用上层</string>
     <string name="overlay_permission_on">您已经打开显示在其他应用上层权限</string>
     <string name="overlay_permission_off">您未打开显示在其他应用上层权限，点击前去设置</string>
+    <string name="isThatTrueYNQuestion">判断真假并用是/否回答</string>
+    <string name="isThatTrueWithExplain">判断真假并解释</string>
+    <string name="explainBriefly">简短解释</string>
+    <string name="explainVerbose">详细解释</string>
+    <string name="flowting_window_settings">悬浮窗搜索设置</string>
+    <string name="flowting_window_search_mode">悬浮窗搜索询问模式</string>
 </resources>

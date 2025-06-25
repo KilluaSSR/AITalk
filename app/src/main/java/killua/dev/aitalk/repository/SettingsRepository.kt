@@ -8,10 +8,11 @@ interface SettingsRepository {
 
     fun getThemeMode(): Flow<String>
     fun isHistorySecured(): Flow<Boolean>
-
+    fun getFloatingWindowQuestionMode(): Flow<String>
     fun isBiometricAvailable(): Boolean
     fun canDrawOverlays(): Boolean
 
     suspend fun setThemeMode(theme: String)
+    suspend fun setFloatingWindowQuestionMode(mode: String)
     suspend fun setHistorySecured(isSecured: Boolean)
 }
