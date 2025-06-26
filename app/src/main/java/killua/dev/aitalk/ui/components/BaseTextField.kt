@@ -25,6 +25,7 @@ fun BaseTextField(
         trailingIcon = trailingIcon,
         enabled = enabled,
         shape = shape,
-        modifier = modifier
+        modifier = modifier,
+        singleLine = true
     )
 }
