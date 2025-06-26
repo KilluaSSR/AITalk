@@ -1,7 +1,10 @@
 package killua.dev.aitalk.ui.pages
 
 import android.content.Intent
+import android.net.Uri
 import android.provider.Settings
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.tween
@@ -35,6 +38,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import killua.dev.aitalk.R
+import killua.dev.aitalk.consts.DEFAULT_SAVE_DIR
 import killua.dev.aitalk.datastore.SECURE_HISTORY
 import killua.dev.aitalk.models.AIModel
 import killua.dev.aitalk.models.FloatingWindowQuestionMode
@@ -69,6 +73,17 @@ fun SettingsPage() {
     val viewModel: SettingsViewmodel = hiltViewModel()
     val uiState = viewModel.uiState.collectAsStateWithLifecycle()
     val lifecycleOwner = LocalLifecycleOwner.current
+
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri: Uri? ->
+        uri?.let {
+            context.contentResolver.takePersistableUriPermission(
+                it, Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+            )
+            scope.launch {
+                viewModel.emitIntent(SettingsUIIntent.SaveDirSelected(it.toString()))
+            }
+        }
+    }
     SettingsScaffold(
         scrollBehavior = scrollBehavior,
         title = stringResource(R.string.settings),
@@ -87,6 +102,12 @@ fun SettingsPage() {
                 }
             }
         }
+        LaunchedEffect(uiState.value.isChoosingDir) {
+            if (uiState.value.isChoosingDir) {
+                launcher.launch(null)
+            }
+        }
+
         DisposableEffect(lifecycleOwner) {
             val observer = LifecycleEventObserver { _, event ->
                 if (event == Lifecycle.Event.ON_RESUME) {
@@ -136,6 +157,15 @@ fun SettingsPage() {
                             value = getThemeModeName(uiState.value.themeMode)
                         ) {
                             showThemeMenu = true
+                        }
+
+                        Clickable(
+                            title = stringResource(R.string.save_dir),
+                            value = uiState.value.saveDir.ifBlank { DEFAULT_SAVE_DIR }
+                        ) {
+                            scope.launch {
+                                viewModel.emitIntent(SettingsUIIntent.ChooseSaveDir)
+                            }
                         }
 
                         SwitchableSecured(

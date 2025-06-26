@@ -21,14 +21,19 @@ sealed interface SettingsUIIntent : UIIntent {
     data class UpdateQuestionMode(val mode: FloatingWindowQuestionMode) : SettingsUIIntent
     data object GoToOverlaySettingsClicked : SettingsUIIntent
     data object OnArrive : SettingsUIIntent
+    data object ChooseSaveDir : SettingsUIIntent
+    data class SaveDirSelected(val uri: String) : SettingsUIIntent
 }
 
 sealed interface SettingsNavigationEvent {
     data object NavigateToOverlaySettings : SettingsNavigationEvent
+
 }
 
 data class SettingsUIState(
     val isLoading: Boolean = true,
+    val saveDir: String = "",
+    val isChoosingDir: Boolean = false,
     val themeMode: ThemeMode = ThemeMode.SYSTEM,
     val isBiometricAvailable: Boolean = false,
     val isHistorySecured: Boolean = false,
@@ -49,11 +54,13 @@ class SettingsViewmodel @Inject constructor(
         val themeFlow = repository.getThemeMode()
         val securedHistoryFlow = repository.isHistorySecured()
         val questionMode = repository.getFloatingWindowQuestionMode()
+        val saveDir = repository.getSaveDir()
         viewModelScope.launch {
-            combine(themeFlow, securedHistoryFlow, questionMode) { themeName, isSecured, questionMode ->
+            combine(themeFlow, securedHistoryFlow, questionMode, saveDir) { themeName, isSecured, questionMode, saveDir ->
                 SettingsUIState(
                     isLoading = false,
                     themeMode = ThemeMode.valueOf(themeName),
+                    saveDir = saveDir,
                     questionMode = FloatingWindowQuestionMode.valueOf(questionMode),
                     isBiometricAvailable = repository.isBiometricAvailable(),
                     isHistorySecured = isSecured,
@@ -90,6 +97,13 @@ class SettingsViewmodel @Inject constructor(
             is SettingsUIIntent.UpdateQuestionMode -> {
                 repository.setFloatingWindowQuestionMode(intent.mode.name)
                 emitState(state.copy(questionMode = intent.mode))
+            }
+            is SettingsUIIntent.ChooseSaveDir -> {
+                emitState(state.copy(isChoosingDir = true))
+            }
+            is SettingsUIIntent.SaveDirSelected -> {
+                repository.setSaveDir(intent.uri)
+                emitState(state.copy(saveDir = intent.uri, isChoosingDir = false))
             }
         }
     }

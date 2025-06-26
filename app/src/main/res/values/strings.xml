@@ -42,4 +42,5 @@
     <string name="deepseek_api_settings">Deepseek API 设置</string>
     <string name="grok_api_settings">Grok API 设置</string>
     <string name="claude_api_settings">Claude API 设置</string>
+    <string name="save_dir">文件保存目录</string>
 </resources>
