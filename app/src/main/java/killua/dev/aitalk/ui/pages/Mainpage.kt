@@ -17,6 +17,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import killua.dev.aitalk.datastore.readSecureHistory
+import killua.dev.aitalk.models.AIModel
 import killua.dev.aitalk.ui.Routes
 import killua.dev.aitalk.ui.components.AIResponseCard
 import killua.dev.aitalk.ui.components.BaseResponseCardContainer
@@ -25,6 +26,7 @@ import killua.dev.aitalk.ui.components.MainpageTextfield
 import killua.dev.aitalk.ui.components.MainpageTopBar
 import killua.dev.aitalk.ui.components.PrimaryScaffold
 import killua.dev.aitalk.ui.tokens.SizeTokens
+import killua.dev.aitalk.ui.viewmodels.MainpageUIIntent
 import killua.dev.aitalk.ui.viewmodels.MainpageViewModel
 import killua.dev.aitalk.utils.BiometricAuth
 import killua.dev.aitalk.utils.LocalNavHostController
@@ -96,7 +98,12 @@ fun Mainpage(){
                                 AIResponseCard(
                                     "Gemini",
                                     content = "This is AI Generated",
-                                    onCopyClicked = {},
+                                    onCopyClicked = {
+                                        scope.launch {
+                                            viewModel.emitIntent(MainpageUIIntent.CopyResponse(
+                                                AIModel.ChatGPT))
+                                        }
+                                    },
                                     onSaveClicked = {},
                                     onRegenerateClicked = {},
                                 )
