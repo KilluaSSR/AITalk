@@ -1,10 +1,14 @@
 package killua.dev.aitalk.ui.viewmodels
 
+import android.net.Uri
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import killua.dev.aitalk.consts.DEFAULT_SAVE_DIR
 import killua.dev.aitalk.models.AIModel
 import killua.dev.aitalk.repository.AiRepository
+import killua.dev.aitalk.repository.FileRepository
 import killua.dev.aitalk.repository.HistoryRepository
+import killua.dev.aitalk.repository.SettingsRepository
 import killua.dev.aitalk.states.AIResponseState
 import killua.dev.aitalk.states.ResponseStatus
 import killua.dev.aitalk.ui.SnackbarUIEffect
@@ -12,10 +16,12 @@ import killua.dev.aitalk.ui.viewmodels.base.BaseViewModel
 import killua.dev.aitalk.ui.viewmodels.base.UIIntent
 import killua.dev.aitalk.ui.viewmodels.base.UIState
 import killua.dev.aitalk.utils.ClipboardHelper
+import kotlinx.coroutines.flow.firstOrNull
 import javax.inject.Inject
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.launchIn
+import androidx.core.net.toUri
 
 sealed interface MainpageUIIntent : UIIntent {
     data class UpdateSearchQuery(val query: String) : MainpageUIIntent
@@ -48,8 +54,10 @@ data class MainpageUIState(
 class MainpageViewModel @Inject constructor(
     private val aiRepository: AiRepository,
     private val historyRepository: HistoryRepository,
-    private val clipboardHelper: ClipboardHelper
-): BaseViewModel<MainpageUIIntent, MainpageUIState, SnackbarUIEffect>(
+    private val settingsRepository: SettingsRepository,
+    private val clipboardHelper: ClipboardHelper,
+    private val fileRepository: FileRepository,
+    ): BaseViewModel<MainpageUIIntent, MainpageUIState, SnackbarUIEffect>(
     MainpageUIState()
 ){
     override suspend fun onEvent(state: MainpageUIState, intent: MainpageUIIntent) {
@@ -99,8 +107,37 @@ class MainpageViewModel @Inject constructor(
             MainpageUIIntent.RegenerateAll -> TODO()
             is MainpageUIIntent.RegenerateSpecificModel -> TODO()
             MainpageUIIntent.RevokeAll -> TODO()
-            MainpageUIIntent.SaveAll -> TODO()
-            is MainpageUIIntent.SaveSpecificModel -> TODO()
+            MainpageUIIntent.SaveAll -> {
+                val allSuccess = state.aiResponses.values.all { it.status == ResponseStatus.Success && !it.content.isNullOrBlank() }
+                if (allSuccess) {
+                    val saveDir = settingsRepository.getSaveDir().firstOrNull().orEmpty()
+                    val directoryUri = if (saveDir.isNotBlank() && saveDir != DEFAULT_SAVE_DIR) saveDir.toUri() else null
+                    fileRepository.saveAllResponsesToFile(
+                        prompt = state.searchQuery,
+                        responses = state.aiResponses,
+                        directoryUri = directoryUri
+                    )
+                    emitEffect(SnackbarUIEffect.ShowSnackbar("全部保存成功"))
+                } else {
+                    emitEffect(SnackbarUIEffect.ShowSnackbar("请等待所有模型回复完成后再保存"))
+                }
+            }
+            is MainpageUIIntent.SaveSpecificModel -> {
+                val responseState = state.aiResponses[intent.model]
+                if (responseState?.status == ResponseStatus.Success && !responseState.content.isNullOrBlank()) {
+                    val saveDir = settingsRepository.getSaveDir().firstOrNull().orEmpty()
+                    val directoryUri = if (saveDir.isNotBlank() && saveDir != DEFAULT_SAVE_DIR) saveDir.toUri() else null
+                    fileRepository.saveResponseToFile(
+                        model = intent.model,
+                        prompt = state.searchQuery,
+                        response = responseState.content,
+                        directoryUri = directoryUri
+                    )
+                    emitEffect(SnackbarUIEffect.ShowSnackbar("保存成功"))
+                } else {
+                    emitEffect(SnackbarUIEffect.ShowSnackbar("该模型回复未完成，无法保存"))
+                }
+            }
             is MainpageUIIntent.ShareResponse -> TODO()
             is MainpageUIIntent.StartSearch -> TODO()
         }

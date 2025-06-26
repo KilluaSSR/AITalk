@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -36,7 +37,7 @@ import kotlinx.coroutines.launch
 
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable
-fun Mainpage(){
+fun Mainpage() {
     val context = LocalContext.current
     val navController = LocalNavHostController.current!!
     val viewModel: MainpageViewModel = hiltViewModel()
@@ -44,25 +45,26 @@ fun Mainpage(){
     val scope = rememberCoroutineScope()
 
     PrimaryScaffold(
-        topBar = { MainpageTopBar(
-            navController,
-            upLeftOnClick = {
-                scope.launch {
-                    if (context.readSecureHistory().first()) {
-                        BiometricAuth().authenticateAndNavigate(
-                            navController = navController,
-                            route = Routes.HistoryPage.route,
-                        )
-                    }else{
-                        navController.navigateSingle(Routes.HistoryPage.route)
+        topBar = {
+            MainpageTopBar(
+                navController,
+                upLeftOnClick = {
+                    scope.launch {
+                        if (context.readSecureHistory().first()) {
+                            BiometricAuth().authenticateAndNavigate(
+                                navController = navController,
+                                route = Routes.HistoryPage.route,
+                            )
+                        } else {
+                            navController.navigateSingle(Routes.HistoryPage.route)
+                        }
                     }
                 }
-            }
-        )
+            )
         },
         snackbarHostState = viewModel.snackbarHostState
     ) {
-        Column (
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = SizeTokens.Level12)
@@ -92,20 +94,22 @@ fun Mainpage(){
                         Greetings()
                     }
                 } else {
-                    BaseResponseCardContainer({},{},{}) {
+                    BaseResponseCardContainer({
+                        scope.launch { viewModel.emitIntent(MainpageUIIntent.RegenerateAll) }
+                    }, {
+                        scope.launch { viewModel.emitIntent(MainpageUIIntent.SaveAll) }
+                    }, {
+                        scope.launch { viewModel.emitIntent(MainpageUIIntent.RevokeAll) }
+                    }) {
                         LazyColumn {
-                            items(5) {
+                            items(AIModel.entries) { model ->
+                                val responseState = uiState.value.aiResponses[model]
                                 AIResponseCard(
-                                    "Gemini",
-                                    content = "This is AI Generated",
-                                    onCopyClicked = {
-                                        scope.launch {
-                                            viewModel.emitIntent(MainpageUIIntent.CopyResponse(
-                                                AIModel.ChatGPT))
-                                        }
-                                    },
-                                    onSaveClicked = {},
-                                    onRegenerateClicked = {},
+                                    modelName = model.name,
+                                    content = responseState?.content.orEmpty(),
+                                    onCopyClicked = { scope.launch { viewModel.emitIntent(MainpageUIIntent.CopyResponse(model)) } },
+                                    onSaveClicked = { scope.launch { viewModel.emitIntent(MainpageUIIntent.SaveSpecificModel(model)) } },
+                                    onRegenerateClicked = { scope.launch { viewModel.emitIntent(MainpageUIIntent.RegenerateSpecificModel(model)) } },
                                 )
                             }
                         }
