@@ -17,7 +17,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -38,7 +37,6 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import killua.dev.aitalk.R
-import killua.dev.aitalk.consts.DEFAULT_SAVE_DIR
 import killua.dev.aitalk.datastore.SECURE_HISTORY
 import killua.dev.aitalk.models.AIModel
 import killua.dev.aitalk.models.FloatingWindowQuestionMode
@@ -57,7 +55,7 @@ import killua.dev.aitalk.ui.viewmodels.SettingsNavigationEvent
 import killua.dev.aitalk.ui.viewmodels.SettingsUIIntent
 import killua.dev.aitalk.ui.viewmodels.SettingsViewmodel
 import killua.dev.aitalk.utils.LocalNavHostController
-import killua.dev.aitalk.utils.navigateSingle
+import killua.dev.aitalk.utils.getVirtualPathFromTreeUri
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
@@ -161,7 +159,7 @@ fun SettingsPage() {
 
                         Clickable(
                             title = stringResource(R.string.save_dir),
-                            value = uiState.value.saveDir.ifBlank { DEFAULT_SAVE_DIR }
+                            value = context.getVirtualPathFromTreeUri(uiState.value.saveDir)
                         ) {
                             scope.launch {
                                 viewModel.emitIntent(SettingsUIIntent.ChooseSaveDir)
