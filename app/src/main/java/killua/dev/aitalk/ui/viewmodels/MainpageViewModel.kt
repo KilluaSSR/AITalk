@@ -34,7 +34,7 @@ sealed interface MainpageUIIntent : UIIntent {
     data class ShareResponse(val model: AIModel) : MainpageUIIntent
     data class SaveSpecificModel(val model: AIModel) : MainpageUIIntent
     data object SaveAll: MainpageUIIntent
-    data object OnSendButtonClick : MainpageUIIntent
+    data class OnSendButtonClick(val query: String) : MainpageUIIntent
     data object OnStopButtonClick : MainpageUIIntent
 }
 
@@ -62,16 +62,21 @@ class MainpageViewModel @Inject constructor(
 ){
     override suspend fun onEvent(state: MainpageUIState, intent: MainpageUIIntent) {
         when(intent){
-            MainpageUIIntent.OnSendButtonClick -> {
-                emitState(uiState.value.copy(
-                    showGreetings = false,
-                    isSearching = true,
-                    searchStartTime = System.currentTimeMillis(),
-                    aiResponses = AIModel.entries.associateWith {
-                        AIResponseState(status = ResponseStatus.Loading)
-                    }
-                ))
-                aiRepository.fetchAiResponses(state.searchQuery)
+            is MainpageUIIntent.OnSendButtonClick -> {
+                val newQuery = intent.query
+                val initialResponses = AIModel.entries.associateWith {
+                    AIResponseState(status = ResponseStatus.Loading)
+                }
+                emitState(
+                    state.copy(
+                        showGreetings = false,
+                        isSearching = true,
+                        searchStartTime = System.currentTimeMillis(),
+                        searchQuery = newQuery,
+                        aiResponses = initialResponses
+                    )
+                )
+                aiRepository.fetchAiResponses(newQuery)
                     .onEach { (model, response) ->
                         updateState { old ->
                             val updatedMap = old.aiResponses.toMutableMap()
@@ -80,13 +85,14 @@ class MainpageViewModel @Inject constructor(
                         }
                     }
                     .onCompletion {
+                        val latestResponses = uiState.value.aiResponses
+                        historyRepository.insertHistoryRecord(
+                            prompt = newQuery,
+                            modelResponses = latestResponses
+                        )
                         updateState { old ->
                             old.copy(isSearching = false, showResults = true)
                         }
-                        historyRepository.insertHistoryRecord(
-                            prompt = state.searchQuery,
-                            modelResponses = uiState.value.aiResponses
-                        )
                     }
                     .launchIn(viewModelScope)
             }

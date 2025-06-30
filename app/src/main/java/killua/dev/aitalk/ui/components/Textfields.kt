@@ -70,7 +70,7 @@ fun MainpageTextfield(
                         }
                     }
                     showSendButton -> {
-                        IconButton(onClick = { onIntent(MainpageUIIntent.OnSendButtonClick) }) {
+                        IconButton(onClick = { onIntent(MainpageUIIntent.OnSendButtonClick(localText)) }) { // 传递最新输入
                             Icon(Icons.Default.Send, contentDescription = "Send")
                         }
                     }
@@ -80,5 +80,4 @@ fun MainpageTextfield(
             modifier = modifier
         )
     }
-
 }

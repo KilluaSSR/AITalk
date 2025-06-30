@@ -29,6 +29,9 @@ class HistoryRepositoryImpl @Inject constructor(
     }
 
     override suspend fun deleteRecord(id: Long) = dao.deleteById(id)
+    override suspend fun getSpecificRecord(id: Long): SearchHistoryEntity? {
+        return dao.getById(id)
+    }
 
     override suspend fun deleteAll() {
         dao.deleteAll()
