@@ -12,8 +12,9 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 sealed interface HistoryPageUIIntent : UIIntent {
-    object LoadHistory : HistoryPageUIIntent
     data class DeleteHistory(val id: Long) : HistoryPageUIIntent
+
+    data object DeleteAllHistory: HistoryPageUIIntent
 }
 
 data class HistoryPageUIState(
@@ -25,28 +26,33 @@ data class HistoryPageUIState(
 class HistoryPageViewModel @Inject constructor(
     private val historyRepository: HistoryRepository
 ): BaseViewModel<HistoryPageUIIntent, HistoryPageUIState, SnackbarUIEffect>(
-    HistoryPageUIState()
+    HistoryPageUIState(isLoading = true)
 ) {
     init {
         viewModelScope.launch {
             historyRepository.getAllHistory()
                 .stateInScope(emptyList())
                 .collect { list ->
-                    emitState(uiState.value.copy(historyList = list))
+                    emitState(uiState.value.copy(historyList = list, isLoading = false))
                 }
         }
     }
 
     override suspend fun onEvent(state: HistoryPageUIState, intent: HistoryPageUIIntent) {
         when (intent) {
-            HistoryPageUIIntent.LoadHistory -> {
-                emitState(state.copy(isLoading = true))
-                // Load history from repository
-                emitState(state.copy(isLoading = false))
-            }
             is HistoryPageUIIntent.DeleteHistory -> {
                 historyRepository.deleteRecord(intent.id)
             }
+
+            HistoryPageUIIntent.DeleteAllHistory -> {
+                emitState(uiState.value.copy(isLoading = true))
+                deleteAllHistory()
+                emitState(uiState.value.copy(isLoading = false))
+            }
         }
+    }
+
+    private suspend fun deleteAllHistory(){
+        historyRepository.deleteAll()
     }
 }

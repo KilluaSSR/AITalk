@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
 import killua.dev.aitalk.R
+import killua.dev.aitalk.ui.viewmodels.HistoryPageUIIntent
 import killua.dev.aitalk.utils.LocalNavHostController
 import killua.dev.aitalk.utils.navigateSingle
 import killua.dev.aitalk.utils.popBackStackNotNull
@@ -64,8 +65,9 @@ fun MainpageTopBar(
 fun HistoryPageTopBar(
     navHostController: NavHostController,
     onBackClick: (() -> Unit)? = null,
-    showMoreOnClick: () -> Unit
+    onMenuClick: (HistoryPageUIIntent) -> Unit = {}
 ){
+    var expandedMenu by remember { mutableStateOf(false) }
     val context = LocalContext.current
     val navController = LocalNavHostController.current!!
     TopBar(
@@ -78,7 +80,20 @@ fun HistoryPageTopBar(
             else navController.popBackStackNotNull()
         },
         showExtraIcon = true,
-        extraIconAction = {}
+        extraIconAction = {
+            IconButton (
+                onClick = {expandedMenu = true}
+            ){
+                Icon(Icons.Rounded.ExpandMore, null)
+            }
+
+            HistorypageMenu(
+                expanded = expandedMenu,
+                onDismissRequest = {expandedMenu = false},
+                onSelected = onMenuClick,
+                modifier = Modifier,
+            )
+        }
     )
 }
 

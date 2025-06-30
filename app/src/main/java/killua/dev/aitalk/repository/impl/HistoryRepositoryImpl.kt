@@ -29,4 +29,8 @@ class HistoryRepositoryImpl @Inject constructor(
     }
 
     override suspend fun deleteRecord(id: Long) = dao.deleteById(id)
+
+    override suspend fun deleteAll() {
+        dao.deleteAll()
+    }
 }

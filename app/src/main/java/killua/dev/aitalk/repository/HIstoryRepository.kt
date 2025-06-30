@@ -10,5 +10,7 @@ interface HistoryRepository {
     fun getAllHistory(): Flow<List<SearchHistoryEntity>>
     suspend fun insertHistoryRecord(prompt: String, modelResponses: Map<AIModel, AIResponseState>)
     suspend fun deleteRecord(id: Long)
+
+    suspend fun deleteAll()
 }
 

@@ -1,6 +1,7 @@
 package killua.dev.aitalk.db
 
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
@@ -16,4 +17,7 @@ interface SearchHistoryDao {
 
     @Query("DELETE FROM search_history WHERE id = :id")
     suspend fun deleteById(id: Long)
+
+    @Query("DELETE FROM search_history")
+    suspend fun deleteAll()
 }

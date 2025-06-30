@@ -16,7 +16,7 @@ data class MainpageMenuItems(
     val route: String
 )
 
-val mainpageMeunItems = listOf(
+val mainpageMenuItems = listOf(
     MainpageMenuItems(
         titleRes = R.string.settings,
         icon = Icons.Rounded.Settings,
