@@ -159,7 +159,7 @@ fun SettingsPage() {
 
                         Clickable(
                             title = stringResource(R.string.save_dir),
-                            value = context.getVirtualPathFromTreeUri(uiState.value.saveDir)
+                            value = getVirtualPathFromTreeUri(uiState.value.saveDir)
                         ) {
                             scope.launch {
                                 viewModel.emitIntent(SettingsUIIntent.ChooseSaveDir)
