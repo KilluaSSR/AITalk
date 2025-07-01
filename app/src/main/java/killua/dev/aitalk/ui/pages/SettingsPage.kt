@@ -229,7 +229,7 @@ fun SettingsPage() {
                     }
 
                     Title(
-                        title = stringResource(R.string.apikey_settings)
+                        title = stringResource(R.string.api_settings)
                     ) {
                         AIModel.entries.forEach { model ->
                             Clickable(

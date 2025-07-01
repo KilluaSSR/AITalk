@@ -1,3 +1,5 @@
+import com.android.build.api.dsl.Packaging
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -40,9 +42,16 @@ android {
     buildFeatures {
         compose = true
     }
+    packaging {
+        resources.excludes.add("META-INF/*")
+    }
 }
 
 dependencies {
+
+    //Gemini
+    implementation(libs.google.genai)
+
     implementation (libs.sqlite)
     implementation (libs.jsoup)
     implementation(libs.coil.compose)

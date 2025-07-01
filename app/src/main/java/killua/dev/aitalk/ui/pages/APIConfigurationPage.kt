@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -37,6 +38,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -69,7 +71,8 @@ fun PageConfigurations(
     val context = LocalContext.current
     val subModels = remember(parentModel) { SubModel.entries.filter { it.parent == parentModel } }
     var selectedSubModel by remember { mutableStateOf(subModels.firstOrNull()) }
-
+    val radiusCorner = SizeTokens.Level16
+    val shape: Shape = RoundedCornerShape(radiusCorner)
     ConfigurationsScaffold(
         scrollBehavior = scrollBehavior,
         snackbarHostState = viewModel.snackbarHostState,
@@ -85,9 +88,10 @@ fun PageConfigurations(
                 onClick = {
                     selectedSubModel?.let { subModel ->
                         scope.launch {
-                            viewModel.emitIntent(ApiConfigUIIntent.SaveApiKey(subModel))
+                            viewModel.emitIntent(ApiConfigUIIntent.SaveApiKey(parentModel))
                         }
                     }
+                    navController.popBackStack()
                 }
             ) {
                 Text(text = stringResource(R.string.save))
@@ -109,13 +113,32 @@ fun PageConfigurations(
             } else {
                 Column(modifier = Modifier
                     .fillMaxSize()
-                    .padding(SizeTokens.Level16),) {
+                    .padding(horizontal = SizeTokens.Level16)
+                    .padding(top = SizeTokens.Level4)
+                ) {
                     var enabled by remember { mutableStateOf(true) }
+
+                    BaseTextField(
+                        value = uiState.value.apiKey,
+                        onValueChange = { newValue ->
+                            scope.launch {
+                                viewModel.emitIntent(ApiConfigUIIntent.UpdateApiKey(parentModel, newValue))
+                            }
+                        },
+                        label = { Text("${parentModel.name} ${context.getString(R.string.api_key)}") },
+                        shape = shape,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = SizeTokens.Level16)
+                    )
+
+
                     SingleChoiceSegmentedButtonRow(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = SizeTokens.Level16)
                             .padding(bottom = SizeTokens.Level16)
+                            .padding(top = SizeTokens.Level12)
                     ) {
                         subModels.forEachIndexed { index, subModel ->
                             SegmentedButton(
@@ -147,18 +170,7 @@ fun PageConfigurations(
                             modifier = Modifier
                                 .padding(SizeTokens.Level16)
                         ) { submodel ->
-                            BaseTextField(
-                                value = uiState.value.apiKeys[submodel] ?: "",
-                                onValueChange = { newValue ->
-                                    scope.launch {
-                                        viewModel.emitIntent(ApiConfigUIIntent.UpdateApiKey(submodel, newValue))
-                                    }
-                                },
-                                label = { Text("${submodel.displayName} ${context.getString(R.string.api_key)}") },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = SizeTokens.Level8)
-                            )
+                            Text(submodel.name)
                         }
                     }
 

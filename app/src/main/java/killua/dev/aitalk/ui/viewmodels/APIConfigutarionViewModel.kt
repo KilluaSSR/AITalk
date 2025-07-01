@@ -15,7 +15,7 @@ data class ApiConfigUIState(
     val parentModel: AIModel,
     val subModels: List<SubModel>,
     val optionIndex: Int = 0,
-    val apiKeys: Map<SubModel, String> = emptyMap(),
+    val apiKey: String = "",
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
     val isSaved: Boolean = false
@@ -23,8 +23,8 @@ data class ApiConfigUIState(
 
 sealed interface ApiConfigUIIntent : UIIntent {
     data class LoadAll(val parentModel: AIModel) : ApiConfigUIIntent
-    data class UpdateApiKey(val subModel: SubModel, val apiKey: String) : ApiConfigUIIntent
-    data class SaveApiKey(val subModel: SubModel) : ApiConfigUIIntent
+    data class UpdateApiKey(val model: AIModel, val apiKey: String) : ApiConfigUIIntent
+    data class SaveApiKey(val model: AIModel) : ApiConfigUIIntent
     data class SelectOption(val index: Int) : ApiConfigUIIntent
     data object ClearError : ApiConfigUIIntent
 }
@@ -40,30 +40,22 @@ class ApiConfigViewModel @Inject constructor(
             is ApiConfigUIIntent.LoadAll -> {
                 emitState(state.copy(isLoading = true, parentModel = intent.parentModel))
                 val subModels = SubModel.entries.filter { it.parent == intent.parentModel }
-                val apiKeys = mutableMapOf<SubModel, String>()
-                for (sub in subModels) {
-                    repository.getApiKeyForSubModel(sub).firstOrNull()?.let { key ->
-                        apiKeys[sub] = key
-                    }
-                }
+                val apiKey = repository.getApiKeyForModel(intent.parentModel).firstOrNull().orEmpty()
                 emitState(
                     state.copy(
                         subModels = subModels,
-                        apiKeys = apiKeys,
+                        apiKey = apiKey,
                         isLoading = false
                     )
                 )
             }
             is ApiConfigUIIntent.UpdateApiKey -> {
                 updateState { old ->
-                    old.copy(apiKeys = old.apiKeys + (intent.subModel to intent.apiKey), isSaved = false)
+                    old.copy(apiKey = intent.apiKey, isSaved = false)
                 }
             }
             is ApiConfigUIIntent.SaveApiKey -> {
-                emitState(state.copy(isLoading = true))
-                val apiKey = state.apiKeys[intent.subModel] ?: ""
-                repository.setApiKeyForSubModel(intent.subModel, apiKey)
-                updateState { it.copy(isLoading = false, isSaved = true) }
+                repository.setApiKeyForModel(state.parentModel, state.apiKey)
             }
             ApiConfigUIIntent.ClearError -> {
                 updateState { it.copy(errorMessage = null) }
