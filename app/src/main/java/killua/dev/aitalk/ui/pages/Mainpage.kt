@@ -101,7 +101,7 @@ fun Mainpage() {
                         scope.launch { viewModel.emitIntent(MainpageUIIntent.SaveAll) }
                     }) {
                         LazyColumn {
-                            items(AIModel.entries) { model ->
+                            items(uiState.value.aiResponses.keys.toList()) { model ->
                                 val responseState = uiState.value.aiResponses[model]
                                 val isSearching = responseState?.status == ResponseStatus.Loading
                                 AIResponseCard(

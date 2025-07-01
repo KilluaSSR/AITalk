@@ -7,4 +7,7 @@ import kotlinx.coroutines.flow.Flow
 interface ApiConfigRepository {
     fun getApiKeyForModel(model: AIModel): Flow<String>
     suspend fun setApiKeyForModel(model: AIModel, apiKey: String)
+
+    fun getDefaultSubModelForModel(model: AIModel): Flow<SubModel?>
+    suspend fun setDefaultSubModelForModel(model: AIModel, subModel: SubModel)
 }

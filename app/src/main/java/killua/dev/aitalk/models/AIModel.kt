@@ -21,8 +21,8 @@ enum class SubModel(val parent: AIModel, val displayName: String) {
     Claude_Sonnet_3_5(AIModel.Claude, "Claude Sonnet 3.5"),
     Claude_Sonnet_4(AIModel.Claude, "Claude Sonnet 4"),
     // Gemini
-    Gemini_2_5_Flash(AIModel.Gemini, "Gemini 2.5 Flash"),
-    Gemini_2_5_Pro(AIModel.Gemini, "Gemini 2.5 Pro"),
+    Gemini_2_5_Flash(AIModel.Gemini, "Gemini-2.5-Flash"),
+    Gemini_2_5_Pro(AIModel.Gemini, "Gemini-2.5-Pro"),
     // DeepSeek
     DeepSeek_Chat(AIModel.DeepSeek, "DeepSeek Chat"),
     DeepSeek_Reasoner(AIModel.DeepSeek, "DeepSeek Reasoner"),

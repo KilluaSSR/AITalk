@@ -5,7 +5,9 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import killua.dev.aitalk.consts.DEFAULT_SAVE_DIR
 import killua.dev.aitalk.models.AIModel
+import killua.dev.aitalk.models.SubModel
 import killua.dev.aitalk.repository.AiRepository
+import killua.dev.aitalk.repository.ApiConfigRepository
 import killua.dev.aitalk.repository.FileRepository
 import killua.dev.aitalk.repository.HistoryRepository
 import killua.dev.aitalk.repository.SettingsRepository
@@ -47,6 +49,7 @@ class FloatingWindowViewModel @Inject constructor(
     private val aiRepository: AiRepository,
     private val historyRepository: HistoryRepository,
     private val settingsRepository: SettingsRepository,
+    private val apiConfigRepository: ApiConfigRepository,
     private val clipboardHelper: ClipboardHelper,
     private val fileRepository: FileRepository,
 ): BaseViewModel<FloatingWindowUIIntent, FloatingWindowUIState, SnackbarUIEffect>(
@@ -55,15 +58,39 @@ class FloatingWindowViewModel @Inject constructor(
     override suspend fun onEvent(state: FloatingWindowUIState, intent: FloatingWindowUIIntent) {
         when(intent){
             is FloatingWindowUIIntent.StartSearch -> {
-                val initialResponses = AIModel.entries.associateWith {
+                val query = intent.query
+
+                // 1. 获取每个模型的SubModel（优先DataStore，没有则默认）
+                val subModelMap: Map<AIModel, SubModel> = AIModel.entries.associateWith { model ->
+                    apiConfigRepository.getDefaultSubModelForModel(model).firstOrNull()
+                        ?: SubModel.entries.first { it.parent == model }
+                }
+
+                // 2. 获取每个模型的API Key
+                val apiKeyMap: Map<AIModel, String> = AIModel.entries.associateWith { model ->
+                    apiConfigRepository.getApiKeyForModel(model).firstOrNull().orEmpty()
+                }
+
+                // 3. 只保留有API Key的模型
+                val filteredSubModelMap: Map<AIModel, SubModel> = subModelMap.filter { (model, _) ->
+                    apiKeyMap[model]?.isNotBlank() == true
+                }
+
+                // 4. 初始化responses
+                val initialResponses: Map<AIModel, AIResponseState> = filteredSubModelMap.keys.associateWith {
                     AIResponseState(status = ResponseStatus.Loading)
                 }
-                emitState(uiState.value.copy(
-                    searchStartTime = System.currentTimeMillis(),
-                    searchQuery = intent.query,
-                    aiResponses = initialResponses
-                ))
-                aiRepository.fetchAiResponses(intent.query)
+
+                emitState(
+                    state.copy(
+                        searchStartTime = System.currentTimeMillis(),
+                        searchQuery = query,
+                        aiResponses = initialResponses
+                    )
+                )
+
+                // 5. 只对有Key的模型发起请求
+                aiRepository.fetchAiResponses(query, filteredSubModelMap)
                     .onEach { (model, response) ->
                         updateState { old ->
                             val updatedMap = old.aiResponses.toMutableMap()
@@ -74,7 +101,7 @@ class FloatingWindowViewModel @Inject constructor(
                     .onCompletion {
                         val latestResponses = uiState.value.aiResponses.filter { it.value.status == ResponseStatus.Success }
                         historyRepository.insertHistoryRecord(
-                            prompt = intent.query,
+                            prompt = query,
                             modelResponses = latestResponses
                         )
                         updateState { old ->
@@ -83,7 +110,8 @@ class FloatingWindowViewModel @Inject constructor(
                     }
                     .launchIn(viewModelScope)
             }
-            is FloatingWindowUIIntent.CopyResponse ->{
+
+            is FloatingWindowUIIntent.CopyResponse -> {
                 val response = state.aiResponses[intent.model]?.content.orEmpty()
                 if (response.isNotEmpty()) {
                     clipboardHelper.copy(response)

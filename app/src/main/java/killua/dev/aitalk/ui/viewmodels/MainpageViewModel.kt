@@ -5,7 +5,9 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import killua.dev.aitalk.consts.DEFAULT_SAVE_DIR
 import killua.dev.aitalk.models.AIModel
+import killua.dev.aitalk.models.SubModel
 import killua.dev.aitalk.repository.AiRepository
+import killua.dev.aitalk.repository.ApiConfigRepository
 import killua.dev.aitalk.repository.FileRepository
 import killua.dev.aitalk.repository.HistoryRepository
 import killua.dev.aitalk.repository.SettingsRepository
@@ -41,6 +43,7 @@ data class MainpageUIState(
     val showGreetings: Boolean = true,
     val searchQuery: String = "",
     val aiResponses: Map<AIModel, AIResponseState> = emptyMap(),
+    val subModelMap: Map<AIModel, SubModel> = emptyMap(),
     val searchStartTime: Long? = null,
     val completedCount: Int = 0,
     val totalCount: Int = 0,
@@ -55,6 +58,7 @@ class MainpageViewModel @Inject constructor(
     private val aiRepository: AiRepository,
     private val historyRepository: HistoryRepository,
     private val settingsRepository: SettingsRepository,
+    private val apiConfigRepository: ApiConfigRepository,
     private val clipboardHelper: ClipboardHelper,
     private val fileRepository: FileRepository,
     ): BaseViewModel<MainpageUIIntent, MainpageUIState, SnackbarUIEffect>(
@@ -64,7 +68,18 @@ class MainpageViewModel @Inject constructor(
         when(intent){
             is MainpageUIIntent.OnSendButtonClick -> {
                 val newQuery = intent.query
-                val initialResponses = AIModel.entries.associateWith {
+                val subModelMap: Map<AIModel, SubModel> = AIModel.entries.associateWith { model ->
+                    state.subModelMap[model]
+                        ?: apiConfigRepository.getDefaultSubModelForModel(model).firstOrNull()
+                        ?: SubModel.entries.first { it.parent == model }
+                }
+                val apiKeyMap: Map<AIModel, String> = AIModel.entries.associateWith { model ->
+                    apiConfigRepository.getApiKeyForModel(model).firstOrNull().orEmpty()
+                }
+                val filteredSubModelMap: Map<AIModel, SubModel> = subModelMap.filter { (model, _) ->
+                    apiKeyMap[model]?.isNotBlank() == true
+                }
+                val initialResponses: Map<AIModel, AIResponseState> = filteredSubModelMap.keys.associateWith {
                     AIResponseState(status = ResponseStatus.Loading)
                 }
                 emitState(
@@ -72,10 +87,11 @@ class MainpageViewModel @Inject constructor(
                         showGreetings = false,
                         searchStartTime = System.currentTimeMillis(),
                         searchQuery = newQuery,
-                        aiResponses = initialResponses
+                        aiResponses = initialResponses,
+                        subModelMap = filteredSubModelMap
                     )
                 )
-                aiRepository.fetchAiResponses(newQuery)
+                aiRepository.fetchAiResponses(newQuery, filteredSubModelMap)
                     .onEach { (model, response) ->
                         updateState { old ->
                             val updatedMap = old.aiResponses.toMutableMap()

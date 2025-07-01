@@ -40,9 +40,9 @@ fun FloatingWindowContent(
                 .fillMaxSize()
                 .padding(SizeTokens.Level8)
         ) {
-            FloatingController(uiState.value.isSearching,onClose)
+            FloatingController(uiState.value.isSearching, onClose)
             LazyColumn {
-                items(AIModel.entries) { model ->
+                items(uiState.value.aiResponses.keys.toList()) { model ->
                     val responseState = uiState.value.aiResponses[model]
                     val isSearching = responseState?.status == ResponseStatus.Loading
                     AIResponseCard(

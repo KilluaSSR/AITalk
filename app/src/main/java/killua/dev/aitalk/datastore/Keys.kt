@@ -13,3 +13,5 @@ val SAVE_DIR_KEY = stringPreferencesKey("save_dir")
 fun apiKeyKeyForModel(model: AIModel): Preferences.Key<String> =
     stringPreferencesKey("api_key_${model.name.lowercase()}_${model.name.lowercase()}")
 
+fun defaultSubModelKeyForModel(model: AIModel): Preferences.Key<String> =
+    stringPreferencesKey("default_submodel_${model.name.lowercase()}")

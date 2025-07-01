@@ -4,6 +4,7 @@ import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import killua.dev.aitalk.api.GeminiApiService
 import killua.dev.aitalk.repository.AiNetworkRepository
 import killua.dev.aitalk.repository.impl.AiNetworkRepositoryImpl
 import killua.dev.aitalk.repository.AiRepository
