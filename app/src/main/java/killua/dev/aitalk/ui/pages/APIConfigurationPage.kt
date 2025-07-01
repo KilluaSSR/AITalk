@@ -37,6 +37,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -45,6 +46,7 @@ import killua.dev.aitalk.R
 import killua.dev.aitalk.models.AIModel
 import killua.dev.aitalk.models.SubModel
 import killua.dev.aitalk.models.stringRes
+import killua.dev.aitalk.ui.components.BaseTextField
 import killua.dev.aitalk.ui.components.ConfigurationsScaffold
 import killua.dev.aitalk.ui.tokens.SizeTokens
 import killua.dev.aitalk.ui.viewmodels.ApiConfigUIIntent
@@ -64,7 +66,7 @@ fun PageConfigurations(
     val uiState = viewModel.uiState.collectAsStateWithLifecycle()
     val navController = LocalNavHostController.current!!
     val scope = rememberCoroutineScope()
-
+    val context = LocalContext.current
     val subModels = remember(parentModel) { SubModel.entries.filter { it.parent == parentModel } }
     var selectedSubModel by remember { mutableStateOf(subModels.firstOrNull()) }
 
@@ -105,7 +107,9 @@ fun PageConfigurations(
                     CircularProgressIndicator()
                 }
             } else {
-                Column(modifier = Modifier.fillMaxSize().padding(SizeTokens.Level16),) {
+                Column(modifier = Modifier
+                    .fillMaxSize()
+                    .padding(SizeTokens.Level16),) {
                     var enabled by remember { mutableStateOf(true) }
                     SingleChoiceSegmentedButtonRow(
                         modifier = Modifier
@@ -133,6 +137,28 @@ fun PageConfigurations(
                                     overflow = TextOverflow.Ellipsis
                                 )
                             }
+                        }
+                    }
+
+                    val selectedSubModel = uiState.value.subModels.getOrNull(uiState.value.optionIndex)
+                    if (selectedSubModel != null) {
+                        AnimatedContent(
+                            targetState = selectedSubModel,
+                            modifier = Modifier
+                                .padding(SizeTokens.Level16)
+                        ) { submodel ->
+                            BaseTextField(
+                                value = uiState.value.apiKeys[submodel] ?: "",
+                                onValueChange = { newValue ->
+                                    scope.launch {
+                                        viewModel.emitIntent(ApiConfigUIIntent.UpdateApiKey(submodel, newValue))
+                                    }
+                                },
+                                label = { Text("${submodel.displayName} ${context.getString(R.string.api_key)}") },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = SizeTokens.Level8)
+                            )
                         }
                     }
 

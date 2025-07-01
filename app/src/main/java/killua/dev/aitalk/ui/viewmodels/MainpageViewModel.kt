@@ -22,11 +22,11 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
+import kotlin.Boolean
 
 sealed interface MainpageUIIntent : UIIntent {
     data class UpdateSearchQuery(val query: String) : MainpageUIIntent
     data object ClearInput : MainpageUIIntent
-    data object RevokeAll : MainpageUIIntent
     data object RegenerateAll : MainpageUIIntent
     data class RegenerateSpecificModel(val model: AIModel) : MainpageUIIntent
     data class CopyResponse(val model: AIModel) : MainpageUIIntent
@@ -44,8 +44,7 @@ data class MainpageUIState(
     val searchStartTime: Long? = null,
     val completedCount: Int = 0,
     val totalCount: Int = 0,
-    val showResults: Boolean = false,
-    val searchHistory: List<String> = emptyList(),
+    val showResults: Boolean = false
 ) : UIState{
     val isSearching: Boolean
         get() = aiResponses.values.any { it.status == ResponseStatus.Loading }
@@ -85,7 +84,7 @@ class MainpageViewModel @Inject constructor(
                         }
                     }
                     .onCompletion {
-                        val latestResponses = uiState.value.aiResponses
+                        val latestResponses = uiState.value.aiResponses.filter { it.value.status == ResponseStatus.Success }
                         historyRepository.insertHistoryRecord(
                             prompt = newQuery,
                             modelResponses = latestResponses
@@ -112,7 +111,6 @@ class MainpageViewModel @Inject constructor(
             }
             MainpageUIIntent.RegenerateAll -> TODO()
             is MainpageUIIntent.RegenerateSpecificModel -> TODO()
-            MainpageUIIntent.RevokeAll -> TODO()
             MainpageUIIntent.SaveAll -> {
                 val allSuccess = state.aiResponses.values.all { it.status == ResponseStatus.Success && !it.content.isNullOrBlank() }
                 if (allSuccess) {

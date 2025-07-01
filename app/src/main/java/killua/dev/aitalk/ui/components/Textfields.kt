@@ -2,6 +2,7 @@ package killua.dev.aitalk.ui.components
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.Stop
@@ -16,6 +17,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalContext
 import killua.dev.aitalk.R
 import killua.dev.aitalk.ui.tokens.SizeTokens
@@ -50,7 +52,7 @@ fun MainpageTextfield(
     val showStopButton = uiState.isSearching
 
     val radiusCorner = SizeTokens.Level16
-
+    val shape: Shape = RoundedCornerShape(radiusCorner)
     Box(
         modifier = modifier
             .fillMaxWidth(),
@@ -76,8 +78,8 @@ fun MainpageTextfield(
                     }
                 }
             },
-            radiusCorner = radiusCorner,
-            modifier = modifier
+            modifier = modifier,
+            shape = shape
         )
     }
 }

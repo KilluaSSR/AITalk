@@ -72,7 +72,7 @@ class FloatingWindowViewModel @Inject constructor(
                         }
                     }
                     .onCompletion {
-                        val latestResponses = uiState.value.aiResponses
+                        val latestResponses = uiState.value.aiResponses.filter { it.value.status == ResponseStatus.Success }
                         historyRepository.insertHistoryRecord(
                             prompt = intent.query,
                             modelResponses = latestResponses

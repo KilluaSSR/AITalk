@@ -20,7 +20,6 @@ import killua.dev.aitalk.ui.tokens.SizeTokens
 fun BaseResponseCardContainer(
     onRegenerateAllClicked: () -> Unit,
     onSaveAllClicked: () -> Unit,
-    onRevokeAllClicked: () -> Unit,
     content: @Composable () -> Unit
 ){
     val context = LocalContext.current
@@ -57,12 +56,6 @@ fun BaseResponseCardContainer(
                 TextButton(onClick = onRegenerateAllClicked) {
                     Text(
                         text = context.getString(R.string.onRegenerateAllButton),
-                        color = MaterialTheme.colorScheme.onSurface)
-                }
-
-                TextButton(onClick = onRevokeAllClicked) {
-                    Text(
-                        text = context.getString(R.string.onRevokeAllButton),
                         color = MaterialTheme.colorScheme.onSurface)
                 }
             }

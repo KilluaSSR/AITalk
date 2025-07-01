@@ -99,8 +99,6 @@ fun Mainpage() {
                         scope.launch { viewModel.emitIntent(MainpageUIIntent.RegenerateAll) }
                     }, {
                         scope.launch { viewModel.emitIntent(MainpageUIIntent.SaveAll) }
-                    }, {
-                        scope.launch { viewModel.emitIntent(MainpageUIIntent.RevokeAll) }
                     }) {
                         LazyColumn {
                             items(AIModel.entries) { model ->
