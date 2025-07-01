@@ -6,8 +6,12 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import killua.dev.aitalk.datastore.apiKeyKeyForModel
 import killua.dev.aitalk.datastore.readApiKeyForModel
 import killua.dev.aitalk.datastore.readDefaultSubModelForModel
+import killua.dev.aitalk.datastore.readGrokSystemMessage
+import killua.dev.aitalk.datastore.readGrokTemperature
 import killua.dev.aitalk.datastore.writeApiKeyForModel
 import killua.dev.aitalk.datastore.writeDefaultSubModelForModel
+import killua.dev.aitalk.datastore.writeGrokSystemMessage
+import killua.dev.aitalk.datastore.writeGrokTemperature
 import killua.dev.aitalk.models.AIModel
 import killua.dev.aitalk.models.SubModel
 import killua.dev.aitalk.repository.ApiConfigRepository
@@ -35,5 +39,23 @@ class ApiConfigRepositoryImpl @Inject constructor(
 
     override suspend fun setDefaultSubModelForModel(model: AIModel, subModel: SubModel) {
         context.writeDefaultSubModelForModel(model, subModel)
+    }
+
+
+    //Grok
+    override fun getGrokSystemMessage(): Flow<String> {
+        return context.readGrokSystemMessage()
+    }
+
+    override fun getGrokTemperature(): Flow<Double> {
+        return context.readGrokTemperature()
+    }
+
+    override suspend fun saveGrokSystemMessage(message: String) {
+        context.writeGrokSystemMessage(message)
+    }
+
+    override suspend fun saveGrokTemperature(temperature: Double) {
+        context.writeGrokTemperature(temperature)
     }
 }

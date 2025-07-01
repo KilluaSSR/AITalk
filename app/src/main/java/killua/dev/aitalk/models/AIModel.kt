@@ -27,7 +27,9 @@ enum class SubModel(val parent: AIModel, val displayName: String) {
     DeepSeek_Chat(AIModel.DeepSeek, "DeepSeek Chat"),
     DeepSeek_Reasoner(AIModel.DeepSeek, "DeepSeek Reasoner"),
     // Grok
-    Grok_3(AIModel.Grok, "Grok 3"),
+    Grok_3(AIModel.Grok, "Grok-3"),
+    Grok_3_Mini(AIModel.Grok, "Grok-3-Mini"),
+    Grok_3_mini_fast(AIModel.Grok, "Grok-3-mini-fast"),
 }
 
 fun getSubModelsForModel(model: AIModel): List<SubModel> =

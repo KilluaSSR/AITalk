@@ -64,6 +64,20 @@
     <string name="gemini_error_unknown">Gemini 发生未知错误: %s</string>
     <string name="gemini_api_key_not_configured">Gemini API Key 未配置。请前往设置页面填写您的 API 密钥。</string>
 
+    <string name="grok_api_key_not_configured">Grok API Key 未配置。请前往设置页面填写您的 API 密钥。</string>
+    <string name="grok_error_400">Grok 请求格式有误（400）。请检查请求正文或 URL，或 API 密钥是否正确。</string>
+    <string name="grok_error_401">Grok 未授权（401）。未提供授权头或授权令牌无效。请在 xAI Console 获取新的 API 密钥。</string>
+    <string name="grok_error_403">Grok 访问被禁止（403）。您的 API 密钥/团队没有执行操作的权限，或已被阻止。请联系团队管理员。</string>
+    <string name="grok_error_404">Grok 未找到（404）。请求的模型或端点 URL 不存在。请检查请求模型和 URL 是否正确。</string>
+    <string name="grok_error_405">Grok 方法不被允许（405）。请求方法不正确。请检查 API 参考文档。</string>
+    <string name="grok_error_415">Grok 不支持的媒体类型（415）。POST 请求体为空或未指定 Content-Type: application/json。请添加有效的请求体并确保 Content-Type 头存在。</string>
+    <string name="grok_error_422">Grok 无法处理的实体（422）。POST 请求体中某个字段格式无效。请检查请求体格式。</string>
+    <string name="grok_error_429">Grok 请求过多（429）。您发送请求过于频繁，已达到速率限制。请降低请求频率或申请增加配额。</string>
+    <string name="grok_error_202">Grok 请求已接受（202），但响应尚未可用。请等待请求处理。</string>
+    <string name="grok_error_http_unknown">Grok 网络或服务器错误: HTTP %d - %s</string>
+    <string name="grok_error_unknown">Grok 发生未知错误: %s</string>
+
+
     <string name="error_network_connection_failed">网络连接失败，请检查您的网络设置。</string>
     <string name="error_fetching_api_key">获取 API Key 失败或发生其他内部错误: %s</string>
     <string name="error_model_network_issue">模型 %s 网络或服务器错误: %s</string>

@@ -26,3 +26,16 @@ suspend fun Context.writeApiKeyForModel(model: AIModel, apiKey: String) =
     saveStoreString(apiKeyKeyForModel(model), apiKey)
 suspend fun Context.writeSaveDir(dir: String) =
     saveStoreString(SAVE_DIR_KEY, dir)
+
+//Grok
+fun Context.readGrokSystemMessage(defValue: String = "You are Grok, a chatbot inspired by the Hitchhikers Guide to the Galaxy.") =
+    readStoreString(GROK_SYSTEM_MESSAGE_KEY, defValue)
+
+fun Context.readGrokTemperature(defValue: Double = 0.0) =
+    readStoreDouble(GROK_TEMPERATURE_KEY, defValue)
+
+suspend fun Context.writeGrokSystemMessage(message: String) =
+    saveStoreString(GROK_SYSTEM_MESSAGE_KEY, message)
+
+suspend fun Context.writeGrokTemperature(temperature: Double) =
+    saveStoreDouble(GROK_TEMPERATURE_KEY, temperature)

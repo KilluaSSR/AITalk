@@ -34,6 +34,30 @@ fun Context.mapGeminiErrorToUserFriendlyMessage(e: Throwable): String {
     }
 }
 
+fun Context.mapGrokErrorToUserFriendlyMessage(e: Throwable): String {
+    return when {
+        e is IOException && e.message?.contains("HTTP Error", ignoreCase = true) == true -> {
+            val httpStatusCode = e.message?.substringAfter("HTTP Error ")?.substringBefore(":")?.trim()?.toIntOrNull()
+            when (httpStatusCode) {
+                400 -> getString(R.string.grok_error_400)
+                401 -> getString(R.string.grok_error_401)
+                403 -> getString(R.string.grok_error_403)
+                404 -> getString(R.string.grok_error_404)
+                405 -> getString(R.string.grok_error_405)
+                415 -> getString(R.string.grok_error_415)
+                422 -> getString(R.string.grok_error_422)
+                429 -> getString(R.string.grok_error_429)
+                202 -> getString(R.string.grok_error_202) // 尽管是 2XX，但文档中列为“错误代码”
+                else -> getString(R.string.grok_error_http_unknown, httpStatusCode ?: -1, e.message ?: "未知错误")
+            }
+        }
+        e is IOException && (e.message?.contains("Unable to resolve host", ignoreCase = true) == true ||
+                e.message?.contains("Failed to connect", ignoreCase = true) == true) ->
+            getString(R.string.error_network_connection_failed)
+        else -> getString(R.string.grok_error_unknown, e.message ?: "未知错误")
+    }
+}
+
 fun Context.mapCommonNetworkErrorToUserFriendlyMessage(modelName: String, e: Throwable): String {
     return when {
         e is IOException && (e.message?.contains("Unable to resolve host", ignoreCase = true) == true ||

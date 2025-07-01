@@ -10,4 +10,11 @@ interface ApiConfigRepository {
 
     fun getDefaultSubModelForModel(model: AIModel): Flow<SubModel?>
     suspend fun setDefaultSubModelForModel(model: AIModel, subModel: SubModel)
+
+    //Grok
+    fun getGrokSystemMessage(): Flow<String>
+    suspend fun saveGrokSystemMessage(message: String)
+
+    fun getGrokTemperature(): Flow<Double>
+    suspend fun saveGrokTemperature(temperature: Double)
 }
