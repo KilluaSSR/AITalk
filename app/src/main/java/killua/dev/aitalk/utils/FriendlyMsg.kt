@@ -37,7 +37,7 @@ fun Context.mapGeminiErrorToUserFriendlyMessage(e: Throwable): String {
 fun Context.mapCommonNetworkErrorToUserFriendlyMessage(modelName: String, e: Throwable): String {
     return when {
         e is IOException && (e.message?.contains("Unable to resolve host", ignoreCase = true) == true ||
-                e.message?.contains("Failed to connect", ignoreCase = true) == true) ->
+                e.message?.contains("connect", ignoreCase = true) == true) ->
             getString(R.string.error_network_connection_failed)
         e is IOException -> getString(R.string.error_model_network_issue, modelName, e.message ?: "未知网络问题")
         else -> getString(R.string.error_model_unknown_issue, modelName, e.message ?: "未知错误")

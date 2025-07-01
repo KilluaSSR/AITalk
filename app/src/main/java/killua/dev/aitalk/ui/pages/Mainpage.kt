@@ -104,9 +104,8 @@ fun Mainpage() {
                                 val responseState = uiState.value.aiResponses[model]
                                 val isSearching = responseState?.status == ResponseStatus.Loading
                                 AIResponseCard(
-                                    isSearching = isSearching,
+                                    responseState = responseState!!,
                                     modelName = model.name,
-                                    content = responseState?.content.orEmpty(),
                                     onCopyClicked = { scope.launch { viewModel.emitIntent(MainpageUIIntent.CopyResponse(model)) } },
                                     onSaveClicked = { scope.launch { viewModel.emitIntent(MainpageUIIntent.SaveSpecificModel(model)) } },
                                     onRegenerateClicked = { scope.launch { viewModel.emitIntent(MainpageUIIntent.RegenerateSpecificModel(model)) } },

@@ -44,9 +44,8 @@ fun FloatingWindowContent(
                     val responseState = uiState.value.aiResponses[model]
                     val isSearching = responseState?.status == ResponseStatus.Loading
                     AIResponseCard(
-                        isSearching = isSearching,
+                        responseState = responseState!!,
                         modelName = model.name,
-                        content = responseState?.content.orEmpty(),
                         onCopyClicked = { scope.launch { viewModel.emitIntent(FloatingWindowUIIntent.CopyResponse(model)) } },
                         onSaveClicked = { scope.launch { viewModel.emitIntent(FloatingWindowUIIntent.SaveSpecificModel(model)) } },
                         onRegenerateClicked = { scope.launch { viewModel.emitIntent(FloatingWindowUIIntent.RegenerateSpecificModel(model)) } },
