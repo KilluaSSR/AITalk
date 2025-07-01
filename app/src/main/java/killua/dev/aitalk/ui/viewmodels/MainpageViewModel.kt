@@ -41,13 +41,15 @@ data class MainpageUIState(
     val showGreetings: Boolean = true,
     val searchQuery: String = "",
     val aiResponses: Map<AIModel, AIResponseState> = emptyMap(),
-    val isSearching: Boolean = false,
     val searchStartTime: Long? = null,
     val completedCount: Int = 0,
     val totalCount: Int = 0,
     val showResults: Boolean = false,
     val searchHistory: List<String> = emptyList(),
-) : UIState
+) : UIState{
+    val isSearching: Boolean
+        get() = aiResponses.values.any { it.status == ResponseStatus.Loading }
+}
 
 @HiltViewModel
 class MainpageViewModel @Inject constructor(
@@ -69,7 +71,6 @@ class MainpageViewModel @Inject constructor(
                 emitState(
                     state.copy(
                         showGreetings = false,
-                        isSearching = true,
                         searchStartTime = System.currentTimeMillis(),
                         searchQuery = newQuery,
                         aiResponses = initialResponses
@@ -90,7 +91,7 @@ class MainpageViewModel @Inject constructor(
                             modelResponses = latestResponses
                         )
                         updateState { old ->
-                            old.copy(isSearching = false, showResults = true)
+                            old.copy(showResults = true)
                         }
                     }
                     .launchIn(viewModelScope)

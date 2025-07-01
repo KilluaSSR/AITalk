@@ -19,6 +19,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import killua.dev.aitalk.datastore.readSecureHistory
 import killua.dev.aitalk.models.AIModel
+import killua.dev.aitalk.states.ResponseStatus
 import killua.dev.aitalk.ui.Routes
 import killua.dev.aitalk.ui.components.AIResponseCard
 import killua.dev.aitalk.ui.components.BaseResponseCardContainer
@@ -104,7 +105,9 @@ fun Mainpage() {
                         LazyColumn {
                             items(AIModel.entries) { model ->
                                 val responseState = uiState.value.aiResponses[model]
+                                val isSearching = responseState?.status == ResponseStatus.Loading
                                 AIResponseCard(
+                                    isSearching = isSearching,
                                     modelName = model.name,
                                     content = responseState?.content.orEmpty(),
                                     onCopyClicked = { scope.launch { viewModel.emitIntent(MainpageUIIntent.CopyResponse(model)) } },

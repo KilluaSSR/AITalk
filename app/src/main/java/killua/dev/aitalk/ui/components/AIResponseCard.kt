@@ -1,5 +1,6 @@
 package killua.dev.aitalk.ui.components
 
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -30,8 +31,10 @@ import killua.dev.aitalk.R
 import killua.dev.aitalk.ui.effects.shimmerEffect
 import killua.dev.aitalk.ui.tokens.SizeTokens
 
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun AIResponseCard(
+    isSearching: Boolean = true,
     modelName: String,
     content: String,
     onCopyClicked: (() -> Unit),
@@ -44,6 +47,15 @@ fun AIResponseCard(
         containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
         contentColor = MaterialTheme.colorScheme.onSurface,
     )
+    val modifierShimmer: Modifier =
+        if (isSearching) {
+            Modifier
+                .fillMaxWidth()
+                .shimmerEffect()
+        } else {
+            Modifier
+                .fillMaxWidth()
+        }
     var expanded by remember { mutableStateOf(false) }
     ElevatedCard (
         shape = shape,
@@ -54,9 +66,7 @@ fun AIResponseCard(
 
     ){
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .shimmerEffect()
+            modifier = modifierShimmer
         ) {
             Column(
                 modifier = Modifier.padding(SizeTokens.Level16)
@@ -69,14 +79,18 @@ fun AIResponseCard(
                     color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.padding(bottom = SizeTokens.Level8)
                 )
+                AnimatedTextContainer(
+                    targetState = content
+                ) { text ->
+                    Text(
+                        text = text,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = if (expanded) Int.MAX_VALUE else 3,
+                        modifier = Modifier.animateContentSize()
+                    )
+                }
 
-                Text(
-                    text = content,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = if (expanded) Int.MAX_VALUE else 3,
-                    modifier = Modifier.animateContentSize()
-                )
             }
 
             Row(
@@ -123,6 +137,7 @@ fun AIResponseCard(
 @Composable
 fun AIResponseCardPreview(){
     AIResponseCard(
+        true,
         "Gemini",
         content = "This is AI Generated",
         onCopyClicked = {},
