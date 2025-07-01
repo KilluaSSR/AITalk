@@ -28,7 +28,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import killua.dev.aitalk.R
-import killua.dev.aitalk.ui.effects.shimmerEffect
 import killua.dev.aitalk.ui.tokens.SizeTokens
 
 @Composable

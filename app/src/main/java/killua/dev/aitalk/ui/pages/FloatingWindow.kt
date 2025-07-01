@@ -13,14 +13,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import killua.dev.aitalk.models.AIModel
 import killua.dev.aitalk.states.ResponseStatus
 import killua.dev.aitalk.ui.components.AIResponseCard
 import killua.dev.aitalk.ui.components.FloatingController
 import killua.dev.aitalk.ui.tokens.SizeTokens
 import killua.dev.aitalk.ui.viewmodels.FloatingWindowUIIntent
 import killua.dev.aitalk.ui.viewmodels.FloatingWindowViewModel
-import killua.dev.aitalk.ui.viewmodels.MainpageUIIntent
 import kotlinx.coroutines.launch
 
 @Composable

@@ -1,10 +1,7 @@
 package killua.dev.aitalk.repository.impl
 
 import android.content.Context
-import android.database.Cursor
 import android.net.Uri
-import android.provider.DocumentsContract
-import android.provider.OpenableColumns
 import androidx.documentfile.provider.DocumentFile
 import dagger.hilt.android.qualifiers.ApplicationContext
 import killua.dev.aitalk.models.AIModel
@@ -13,8 +10,8 @@ import killua.dev.aitalk.states.AIResponseState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
-import javax.inject.Inject
 import java.io.IOException
+import javax.inject.Inject
 
 class FileRepositoryImpl @Inject constructor(
     @ApplicationContext private val context: Context

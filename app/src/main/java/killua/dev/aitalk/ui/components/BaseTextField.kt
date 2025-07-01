@@ -1,12 +1,10 @@
 package killua.dev.aitalk.ui.components
 
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.unit.Dp
 
 @Composable
 fun BaseTextField(

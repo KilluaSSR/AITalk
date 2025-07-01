@@ -1,5 +1,6 @@
 package killua.dev.aitalk.ui.viewmodels
 
+import android.util.Log
 import dagger.hilt.android.lifecycle.HiltViewModel
 import killua.dev.aitalk.models.AIModel
 import killua.dev.aitalk.models.SubModel
@@ -39,6 +40,7 @@ class ApiConfigViewModel @Inject constructor(
         when (intent) {
             is ApiConfigUIIntent.LoadAll -> {
                 emitState(state.copy(isLoading = true, parentModel = intent.parentModel))
+                Log.d("ApiConfigViewModel", "Loading all for ${intent.parentModel}")
                 val subModels = SubModel.entries.filter { it.parent == intent.parentModel }
                 val apiKey = repository.getApiKeyForModel(intent.parentModel).firstOrNull().orEmpty()
                 emitState(
@@ -55,7 +57,7 @@ class ApiConfigViewModel @Inject constructor(
                 }
             }
             is ApiConfigUIIntent.SaveApiKey -> {
-                repository.setApiKeyForModel(state.parentModel, state.apiKey)
+                repository.setApiKeyForModel(intent.model, state.apiKey)
             }
             ApiConfigUIIntent.ClearError -> {
                 updateState { it.copy(errorMessage = null) }

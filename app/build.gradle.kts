@@ -99,7 +99,7 @@ dependencies {
     // Network
     implementation(libs.okhttp)
     implementation(libs.gson)
-
+    implementation(libs.logging.interceptor)
     // DataStore
     implementation(libs.androidx.datastore.preferences)
 

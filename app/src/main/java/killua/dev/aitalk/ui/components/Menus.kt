@@ -7,7 +7,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import killua.dev.aitalk.models.FloatingWindowQuestionMode
-import killua.dev.aitalk.models.HistoryPageMenuItems
 import killua.dev.aitalk.models.MainpageMenuItems
 import killua.dev.aitalk.models.floatingWindowQuestionModeItemsItems
 import killua.dev.aitalk.models.historyPageMenuItems

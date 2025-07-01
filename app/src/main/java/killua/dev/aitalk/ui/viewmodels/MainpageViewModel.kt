@@ -14,7 +14,7 @@ import killua.dev.aitalk.repository.SettingsRepository
 import killua.dev.aitalk.states.AIResponseState
 import killua.dev.aitalk.states.ResponseStatus
 import killua.dev.aitalk.ui.SnackbarUIEffect
-import killua.dev.aitalk.ui.SnackbarUIEffect.*
+import killua.dev.aitalk.ui.SnackbarUIEffect.ShowSnackbar
 import killua.dev.aitalk.ui.viewmodels.base.BaseViewModel
 import killua.dev.aitalk.ui.viewmodels.base.UIIntent
 import killua.dev.aitalk.ui.viewmodels.base.UIState
@@ -24,7 +24,6 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
-import kotlin.Boolean
 
 sealed interface MainpageUIIntent : UIIntent {
     data class UpdateSearchQuery(val query: String) : MainpageUIIntent

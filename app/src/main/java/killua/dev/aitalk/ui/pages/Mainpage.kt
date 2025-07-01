@@ -18,7 +18,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import killua.dev.aitalk.datastore.readSecureHistory
-import killua.dev.aitalk.models.AIModel
 import killua.dev.aitalk.states.ResponseStatus
 import killua.dev.aitalk.ui.Routes
 import killua.dev.aitalk.ui.components.AIResponseCard

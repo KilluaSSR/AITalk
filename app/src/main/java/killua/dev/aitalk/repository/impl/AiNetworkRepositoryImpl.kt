@@ -1,11 +1,11 @@
 package killua.dev.aitalk.repository.impl
 
+import android.util.Log
 import killua.dev.aitalk.api.GeminiApiService
 import killua.dev.aitalk.models.AIModel
 import killua.dev.aitalk.models.SubModel
 import killua.dev.aitalk.repository.AiNetworkRepository
 import killua.dev.aitalk.repository.ApiConfigRepository
-import killua.dev.aitalk.repository.SettingsRepository
 import killua.dev.aitalk.states.AIResponseState
 import killua.dev.aitalk.states.ResponseStatus
 import kotlinx.coroutines.flow.first
@@ -22,6 +22,8 @@ class AiNetworkRepositoryImpl @Inject constructor(
     override suspend fun fetchResponse(query: String, subModel: SubModel): AIResponseState {
         return when (subModel.parent) {
             AIModel.Gemini -> {
+                Log.d("AI", "Fetching response from Gemini API")
+                Log.d("AI", "Query: $query, model: $subModel")
                 val result = geminiApiService.generateContent(
                     model = subModel,
                     prompt = query,

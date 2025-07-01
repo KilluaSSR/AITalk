@@ -11,7 +11,7 @@ val SECURE_HISTORY = booleanPreferencesKey("secure_history")
 val FLOATING_WINDOW_QUESTION_MODE = stringPreferencesKey("floating_window_question_mode")
 val SAVE_DIR_KEY = stringPreferencesKey("save_dir")
 fun apiKeyKeyForModel(model: AIModel): Preferences.Key<String> =
-    stringPreferencesKey("api_key_${model.name.lowercase()}_${model.name.lowercase()}")
+    stringPreferencesKey("api_key_${model.name.lowercase()}")
 
 fun defaultSubModelKeyForModel(model: AIModel): Preferences.Key<String> =
-    stringPreferencesKey("default_submodel_${model.name.lowercase()}")
+    stringPreferencesKey("default_sub_model_${model.name.lowercase()}")

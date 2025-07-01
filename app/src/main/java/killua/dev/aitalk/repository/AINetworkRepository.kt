@@ -1,6 +1,5 @@
 package killua.dev.aitalk.repository
 
-import killua.dev.aitalk.models.AIModel
 import killua.dev.aitalk.models.SubModel
 import killua.dev.aitalk.states.AIResponseState
 
