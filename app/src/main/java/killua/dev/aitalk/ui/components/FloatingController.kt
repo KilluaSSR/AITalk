@@ -1,5 +1,7 @@
 package killua.dev.aitalk.ui.components
 
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -22,10 +24,13 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import killua.dev.aitalk.R
 import killua.dev.aitalk.ui.tokens.SizeTokens
 
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun FloatingController(
+    isSearching: Boolean = true,
     onCloseClicked: () -> Unit,
 ){
     val context = LocalContext.current
@@ -53,13 +58,17 @@ fun FloatingController(
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = "Finding out...",
-                    style = MaterialTheme.typography.headlineSmall.copy(
-                        fontWeight = FontWeight.Bold
-                    ),
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
+                AnimatedTextContainer(
+                    targetState = if (isSearching) context.getString(R.string.finding_out) else context.getString(R.string.findout_completed)
+                ) { text ->
+                    Text(
+                        text = text,
+                        style = MaterialTheme.typography.headlineSmall.copy(
+                            fontWeight = FontWeight.Bold
+                        ),
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+                }
                 Spacer(modifier = Modifier.weight(1f))
                 IconButton(
                     onClick = onCloseClicked
@@ -71,9 +80,11 @@ fun FloatingController(
                 }
 
             }
-            LinearProgressIndicator(
-                modifier = Modifier.fillMaxWidth()
-            )
+            if(isSearching){
+                LinearProgressIndicator(
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
         }
 
     }
@@ -83,5 +94,5 @@ fun FloatingController(
 @Composable
 @Preview
 fun FloatingControllerPreview(){
-    FloatingController({})
+    FloatingController(true,{})
 }

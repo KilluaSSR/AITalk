@@ -12,9 +12,11 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.ui.Modifier
 import androidx.core.net.toUri
+import dagger.hilt.android.AndroidEntryPoint
 import killua.dev.aitalk.ui.pages.FloatingWindowContent
 import killua.dev.aitalk.ui.theme.AITalkTheme
 
+@AndroidEntryPoint
 class FloatingActivity : ComponentActivity() {
     private lateinit var overlayPermissionLauncher: ActivityResultLauncher<Intent>
 
@@ -53,11 +55,6 @@ class FloatingActivity : ComponentActivity() {
                     FloatingWindowContent(
                         selectedText = selectedText,
                         onClose = { finish() },
-                        onSearch = { query ->
-                            val searchUri = Uri.parse("https://www.google.com/search?q=$query")
-                            val intent = Intent(Intent.ACTION_VIEW, searchUri)
-                            startActivity(intent)
-                        }
                     )
                 }
             }

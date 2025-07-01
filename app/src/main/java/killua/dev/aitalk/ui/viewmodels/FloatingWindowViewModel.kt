@@ -12,7 +12,7 @@ import killua.dev.aitalk.repository.SettingsRepository
 import killua.dev.aitalk.states.AIResponseState
 import killua.dev.aitalk.states.ResponseStatus
 import killua.dev.aitalk.ui.SnackbarUIEffect
-import killua.dev.aitalk.ui.SnackbarUIEffect.*
+import killua.dev.aitalk.ui.SnackbarUIEffect.ShowSnackbar
 import killua.dev.aitalk.ui.viewmodels.base.BaseViewModel
 import killua.dev.aitalk.ui.viewmodels.base.UIIntent
 import killua.dev.aitalk.ui.viewmodels.base.UIState
@@ -23,59 +23,46 @@ import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
 
-sealed interface MainpageUIIntent : UIIntent {
-    data class UpdateSearchQuery(val query: String) : MainpageUIIntent
-    data object ClearInput : MainpageUIIntent
-    data object RevokeAll : MainpageUIIntent
-    data object RegenerateAll : MainpageUIIntent
-    data class RegenerateSpecificModel(val model: AIModel) : MainpageUIIntent
-    data class CopyResponse(val model: AIModel) : MainpageUIIntent
-    data class ShareResponse(val model: AIModel) : MainpageUIIntent
-    data class SaveSpecificModel(val model: AIModel) : MainpageUIIntent
-    data object SaveAll: MainpageUIIntent
-    data class OnSendButtonClick(val query: String) : MainpageUIIntent
-    data object OnStopButtonClick : MainpageUIIntent
+sealed interface FloatingWindowUIIntent: UIIntent{
+    data class StartSearch(val query: String) : FloatingWindowUIIntent
+    data class CopyResponse(val model: AIModel) : FloatingWindowUIIntent
+    data class RegenerateSpecificModel(val model: AIModel) : FloatingWindowUIIntent
+    data class SaveSpecificModel(val model: AIModel) : FloatingWindowUIIntent
 }
 
-data class MainpageUIState(
-    val showGreetings: Boolean = true,
+data class FloatingWindowUIState(
     val searchQuery: String = "",
     val aiResponses: Map<AIModel, AIResponseState> = emptyMap(),
-    val isSearching: Boolean = false,
+    val isSearching: Boolean = true,
     val searchStartTime: Long? = null,
     val completedCount: Int = 0,
     val totalCount: Int = 0,
     val showResults: Boolean = false,
-    val searchHistory: List<String> = emptyList(),
-) : UIState
+): UIState
 
 @HiltViewModel
-class MainpageViewModel @Inject constructor(
+class FloatingWindowViewModel @Inject constructor(
     private val aiRepository: AiRepository,
     private val historyRepository: HistoryRepository,
     private val settingsRepository: SettingsRepository,
     private val clipboardHelper: ClipboardHelper,
     private val fileRepository: FileRepository,
-    ): BaseViewModel<MainpageUIIntent, MainpageUIState, SnackbarUIEffect>(
-    MainpageUIState()
-){
-    override suspend fun onEvent(state: MainpageUIState, intent: MainpageUIIntent) {
+): BaseViewModel<FloatingWindowUIIntent, FloatingWindowUIState, SnackbarUIEffect>(
+    FloatingWindowUIState()
+) {
+    override suspend fun onEvent(state: FloatingWindowUIState, intent: FloatingWindowUIIntent) {
         when(intent){
-            is MainpageUIIntent.OnSendButtonClick -> {
-                val newQuery = intent.query
+            is FloatingWindowUIIntent.StartSearch -> {
                 val initialResponses = AIModel.entries.associateWith {
                     AIResponseState(status = ResponseStatus.Loading)
                 }
-                emitState(
-                    state.copy(
-                        showGreetings = false,
-                        isSearching = true,
-                        searchStartTime = System.currentTimeMillis(),
-                        searchQuery = newQuery,
-                        aiResponses = initialResponses
-                    )
-                )
-                aiRepository.fetchAiResponses(newQuery)
+                emitState(uiState.value.copy(
+                    isSearching = true,
+                    searchStartTime = System.currentTimeMillis(),
+                    searchQuery = intent.query,
+                    aiResponses = initialResponses
+                ))
+                aiRepository.fetchAiResponses(intent.query)
                     .onEach { (model, response) ->
                         updateState { old ->
                             val updatedMap = old.aiResponses.toMutableMap()
@@ -86,7 +73,7 @@ class MainpageViewModel @Inject constructor(
                     .onCompletion {
                         val latestResponses = uiState.value.aiResponses
                         historyRepository.insertHistoryRecord(
-                            prompt = newQuery,
+                            prompt = intent.query,
                             modelResponses = latestResponses
                         )
                         updateState { old ->
@@ -95,39 +82,18 @@ class MainpageViewModel @Inject constructor(
                     }
                     .launchIn(viewModelScope)
             }
-
-            MainpageUIIntent.OnStopButtonClick -> {
-
-            }
-            is MainpageUIIntent.UpdateSearchQuery -> {
-
-            }
-            MainpageUIIntent.ClearInput -> TODO()
-            is MainpageUIIntent.CopyResponse -> {
+            is FloatingWindowUIIntent.CopyResponse ->{
                 val response = state.aiResponses[intent.model]?.content.orEmpty()
                 if (response.isNotEmpty()) {
                     clipboardHelper.copy(response)
                 }
             }
-            MainpageUIIntent.RegenerateAll -> TODO()
-            is MainpageUIIntent.RegenerateSpecificModel -> TODO()
-            MainpageUIIntent.RevokeAll -> TODO()
-            MainpageUIIntent.SaveAll -> {
-                val allSuccess = state.aiResponses.values.all { it.status == ResponseStatus.Success && !it.content.isNullOrBlank() }
-                if (allSuccess) {
-                    val saveDir = settingsRepository.getSaveDir().firstOrNull().orEmpty()
-                    val directoryUri = if (saveDir.isNotBlank() && saveDir != DEFAULT_SAVE_DIR) saveDir.toUri() else null
-                    fileRepository.saveAllResponsesToFile(
-                        prompt = state.searchQuery,
-                        responses = state.aiResponses,
-                        directoryUri = directoryUri
-                    )
-                    emitEffect(ShowSnackbar("全部保存成功"))
-                } else {
-                    emitEffect(ShowSnackbar("请等待所有模型回复完成后再保存"))
-                }
+
+            is FloatingWindowUIIntent.RegenerateSpecificModel -> {
+
             }
-            is MainpageUIIntent.SaveSpecificModel -> {
+
+            is FloatingWindowUIIntent.SaveSpecificModel -> {
                 val responseState = state.aiResponses[intent.model]
                 if (responseState?.status == ResponseStatus.Success && !responseState.content.isNullOrBlank()) {
                     val saveDir = settingsRepository.getSaveDir().firstOrNull().orEmpty()
@@ -143,7 +109,6 @@ class MainpageViewModel @Inject constructor(
                     emitEffect(ShowSnackbar("该模型回复未完成，无法保存"))
                 }
             }
-            is MainpageUIIntent.ShareResponse -> TODO()
         }
     }
 }

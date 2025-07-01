@@ -4,35 +4,51 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import killua.dev.aitalk.models.AIModel
 import killua.dev.aitalk.ui.components.AIResponseCard
 import killua.dev.aitalk.ui.components.FloatingController
 import killua.dev.aitalk.ui.tokens.SizeTokens
+import killua.dev.aitalk.ui.viewmodels.FloatingWindowUIIntent
+import killua.dev.aitalk.ui.viewmodels.FloatingWindowViewModel
+import killua.dev.aitalk.ui.viewmodels.MainpageUIIntent
+import kotlinx.coroutines.launch
 
 @Composable
 fun FloatingWindowContent(
     selectedText: String,
     onClose: () -> Unit,
-    onSearch: (String) -> Unit
 ) {
+    val viewModel: FloatingWindowViewModel = hiltViewModel()
+    val scope = rememberCoroutineScope()
+    val uiState = viewModel.uiState.collectAsStateWithLifecycle()
     MaterialTheme {
+        LaunchedEffect(Unit) {
+            scope.launch { viewModel.emitIntent(FloatingWindowUIIntent.StartSearch(selectedText)) }
+        }
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(SizeTokens.Level8)
         ) {
-            FloatingController(onClose)
+            FloatingController(uiState.value.isSearching,onClose)
             LazyColumn {
-                items(5) {
+                items(AIModel.entries) { model ->
+                    val responseState = uiState.value.aiResponses[model]
                     AIResponseCard(
-                        "Gemini",
-                        content = "This is AI Generated",
-                        onCopyClicked = {},
-                        onSaveClicked = {},
-                        onRegenerateClicked = {},
+                        modelName = model.name,
+                        content = responseState?.content.orEmpty(),
+                        onCopyClicked = { scope.launch { viewModel.emitIntent(FloatingWindowUIIntent.CopyResponse(model)) } },
+                        onSaveClicked = { scope.launch { viewModel.emitIntent(FloatingWindowUIIntent.SaveSpecificModel(model)) } },
+                        onRegenerateClicked = { scope.launch { viewModel.emitIntent(FloatingWindowUIIntent.RegenerateSpecificModel(model)) } },
                     )
                 }
             }
@@ -46,6 +62,5 @@ fun FloatingWindowPreview() {
     FloatingWindowContent(
         selectedText = "This is a preview of the selected text.",
         onClose = { /* Implement close logic for preview if needed */ },
-        onSearch = { /* Implement search logic for preview if needed */ }
     )
 }

@@ -46,4 +46,6 @@
     <string name="save_dir">文件保存目录</string>
     <string name="history_clear_all">清空历史记录</string>
     <string name="onDeleteButton">删除</string>
+    <string name="finding_out">正在查询</string>
+    <string name="findout_completed">查询完成</string>
 </resources>
