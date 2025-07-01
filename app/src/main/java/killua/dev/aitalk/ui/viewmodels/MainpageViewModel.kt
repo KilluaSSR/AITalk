@@ -97,6 +97,9 @@ class MainpageViewModel @Inject constructor(
                             updatedMap[model] = response
                             old.copy(aiResponses = updatedMap)
                         }
+                        if (response.status == ResponseStatus.Error && !response.errorMessage.isNullOrBlank()) {
+                            emitEffect(ShowSnackbar("${model.name} 错误: ${response.errorMessage}"))
+                        }
                     }
                     .onCompletion {
                         val latestResponses = uiState.value.aiResponses.filter { it.value.status == ResponseStatus.Success }

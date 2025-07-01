@@ -49,4 +49,25 @@
     <string name="finding_out">正在查询</string>
     <string name="findout_completed">查询完成</string>
     <string name="api_key">API 密钥</string>
+
+    <string name="gemini_error_400_invalid_argument">请求正文格式有误或缺少必填字段。请检查您的提问内容，确保符合要求。</string>
+    <string name="gemini_error_400_failed_precondition">Gemini API 免费层级在您所在国家/地区（中国）尚未推出，或您尚未在 Google AI Studio 中为项目启用结算功能。请前往 Google AI Studio 设置付费方案。</string>
+    <string name="gemini_error_400_general">Gemini API 请求错误（%d），请求内容可能存在问题。</string>
+    <string name="gemini_error_400_invalid_api">Gemini API 无效。</string>
+    <string name="gemini_error_403">您的 Gemini API 密钥没有所需权限。请检查密钥设置或确保已完成适当身份验证。</string>
+    <string name="gemini_error_404">Gemini API 找不到所请求的资源。请检查请求参数或 API 版本是否有效。</string>
+    <string name="gemini_error_429">Gemini API 已超出速率限制。您每分钟发送的请求过多，请稍后再试或申请增加配额。</string>
+    <string name="gemini_error_500">Gemini 后端出现意外错误。您的输入上下文可能过长，请尝试缩短内容或稍后重试。</string>
+    <string name="gemini_error_503">Gemini 服务暂时不可用或过载。请稍后再试。</string>
+    <string name="gemini_error_504">Gemini 服务无法在截止时间内完成处理。您的问题可能过大，请尝试缩短内容或设置更长的超时时间（如果支持）。</string>
+    <string name="gemini_error_http_unknown">Gemini 网络或服务器错误: HTTP %d - %s</string>
+    <string name="gemini_error_unknown">Gemini 发生未知错误: %s</string>
+    <string name="gemini_api_key_not_configured">Gemini API Key 未配置。请前往设置页面填写您的 API 密钥。</string>
+
+    <string name="error_network_connection_failed">网络连接失败，请检查您的网络设置。</string>
+    <string name="error_fetching_api_key">获取 API Key 失败或发生其他内部错误: %s</string>
+    <string name="error_model_network_issue">模型 %s 网络或服务器错误: %s</string>
+    <string name="error_model_unknown_issue">模型 %s 发生未知错误: %s</string>
+    <string name="error_model_http_response">模型 %s 返回错误: HTTP %d - %s</string>
+
 </resources>

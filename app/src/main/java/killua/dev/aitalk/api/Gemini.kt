@@ -25,11 +25,6 @@ interface GeminiApiService {
 class GeminiApiServiceImpl @Inject constructor(
     private val httpClient: OkHttpClient
 ) : GeminiApiService {
-    private val configuredHttpClient: OkHttpClient = httpClient.newBuilder()
-        .addInterceptor(HttpLoggingInterceptor().apply {
-            level = HttpLoggingInterceptor.Level.BODY
-        })
-        .build()
     override suspend fun generateContent(
         model: SubModel,
         prompt: String,
@@ -54,7 +49,7 @@ class GeminiApiServiceImpl @Inject constructor(
                 .url(url)
                 .post(requestBodyJson.toRequestBody("application/json".toMediaTypeOrNull()))
                 .build()
-            configuredHttpClient.newCall(request).execute().use { response ->
+            httpClient.newCall(request).execute().use { response ->
                 Log.d("GeminiAPI", "Response Code: ${response.code}")
 
                 val responseBodyString = response.body?.string().orEmpty()
