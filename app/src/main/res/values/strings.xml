@@ -83,5 +83,6 @@
     <string name="error_model_network_issue">模型 %s 网络或服务器错误: %s</string>
     <string name="error_model_unknown_issue">模型 %s 发生未知错误: %s</string>
     <string name="error_model_http_response">模型 %s 返回错误: HTTP %d - %s</string>
+    <string name="no_history">暂无历史记录~</string>
 
 </resources>

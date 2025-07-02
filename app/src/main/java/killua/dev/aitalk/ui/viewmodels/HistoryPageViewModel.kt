@@ -2,6 +2,8 @@ package killua.dev.aitalk.ui.viewmodels
 
 import androidx.core.net.toUri
 import androidx.lifecycle.viewModelScope
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import dagger.hilt.android.lifecycle.HiltViewModel
 import killua.dev.aitalk.consts.DEFAULT_SAVE_DIR
 import killua.dev.aitalk.db.SearchHistoryEntity
@@ -14,6 +16,7 @@ import killua.dev.aitalk.ui.viewmodels.base.UIIntent
 import killua.dev.aitalk.ui.viewmodels.base.UIState
 import killua.dev.aitalk.utils.ClipboardHelper
 import killua.dev.aitalk.utils.toSavable
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -27,7 +30,6 @@ sealed interface HistoryPageUIIntent : UIIntent {
 }
 
 data class HistoryPageUIState(
-    val historyList: List<SearchHistoryEntity> = emptyList(),
     val isLoading: Boolean = false
 ) : UIState
 
@@ -40,15 +42,8 @@ class HistoryPageViewModel @Inject constructor(
 ): BaseViewModel<HistoryPageUIIntent, HistoryPageUIState, SnackbarUIEffect>(
     HistoryPageUIState(isLoading = true)
 ) {
-    init {
-        viewModelScope.launch {
-            historyRepository.getAllHistory()
-                .stateInScope(emptyList())
-                .collect { list ->
-                    emitState(uiState.value.copy(historyList = list, isLoading = false))
-                }
-        }
-    }
+    val pagedHistory: Flow<PagingData<SearchHistoryEntity>> =
+        historyRepository.getPagedHistory().cachedIn(viewModelScope)
 
     override suspend fun onEvent(state: HistoryPageUIState, intent: HistoryPageUIIntent) {
         when (intent) {
