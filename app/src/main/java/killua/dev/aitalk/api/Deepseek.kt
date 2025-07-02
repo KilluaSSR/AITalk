@@ -47,7 +47,7 @@ class DeepSeekApiServiceImpl @Inject constructor(
             }
 
             val requestBodyJson = JSONObject().apply {
-                put("model", model.displayName)
+                put("model", model.displayName.lowercase())
                 put("messages", messages)
                 put("stream", false)
                 put("temperature", deepSeekConfig.temperature)

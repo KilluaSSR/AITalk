@@ -24,8 +24,8 @@ enum class SubModel(val parent: AIModel, val displayName: String) {
     Gemini_2_5_Flash(AIModel.Gemini, "Gemini-2.5-Flash"),
     Gemini_2_5_Pro(AIModel.Gemini, "Gemini-2.5-Pro"),
     // DeepSeek
-    DeepSeek_Chat(AIModel.DeepSeek, "DeepSeek Chat"),
-    DeepSeek_Reasoner(AIModel.DeepSeek, "DeepSeek Reasoner"),
+    DeepSeek_Chat(AIModel.DeepSeek, "DeepSeek-Chat"),
+    DeepSeek_Reasoner(AIModel.DeepSeek, "DeepSeek-Reasoner"),
     // Grok
     Grok_3(AIModel.Grok, "Grok-3"),
     Grok_3_Mini(AIModel.Grok, "Grok-3-Mini"),
