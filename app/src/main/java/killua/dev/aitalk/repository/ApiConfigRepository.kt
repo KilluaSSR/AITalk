@@ -1,5 +1,7 @@
 package killua.dev.aitalk.repository
 
+import killua.dev.aitalk.api.configuration.GeminiConfig
+import killua.dev.aitalk.api.configuration.GrokConfig
 import killua.dev.aitalk.models.AIModel
 import killua.dev.aitalk.models.SubModel
 import kotlinx.coroutines.flow.Flow
@@ -12,9 +14,16 @@ interface ApiConfigRepository {
     suspend fun setDefaultSubModelForModel(model: AIModel, subModel: SubModel)
 
     //Grok
-    fun getGrokSystemMessage(): Flow<String>
-    suspend fun saveGrokSystemMessage(message: String)
+    fun getGrokConfig(): Flow<GrokConfig>
+    suspend fun saveGrokSystemInstruction(message: String)
 
-    fun getGrokTemperature(): Flow<Double>
     suspend fun saveGrokTemperature(temperature: Double)
+
+    //Gemini
+    fun getGeminiConfig(): Flow<GeminiConfig>
+    suspend fun setGeminiTemperature(temperature: Double)
+    suspend fun setGeminiTopP(topP: Double)
+    suspend fun setGeminiTopK(topK: Int)
+    suspend fun setGeminiResponseMimeType(mimeType: String)
+    suspend fun setGeminiSystemInstruction(instruction: String)
 }

@@ -3,19 +3,32 @@ package killua.dev.aitalk.repository.impl
 import android.content.Context
 import android.util.Log
 import dagger.hilt.android.qualifiers.ApplicationContext
+import killua.dev.aitalk.api.configuration.GeminiConfig
+import killua.dev.aitalk.api.configuration.GrokConfig
 import killua.dev.aitalk.datastore.apiKeyKeyForModel
 import killua.dev.aitalk.datastore.readApiKeyForModel
 import killua.dev.aitalk.datastore.readDefaultSubModelForModel
+import killua.dev.aitalk.datastore.readGeminiResponseMimeType
+import killua.dev.aitalk.datastore.readGeminiSystemInstruction
+import killua.dev.aitalk.datastore.readGeminiTemperature
+import killua.dev.aitalk.datastore.readGeminiTopK
+import killua.dev.aitalk.datastore.readGeminiTopP
 import killua.dev.aitalk.datastore.readGrokSystemMessage
 import killua.dev.aitalk.datastore.readGrokTemperature
 import killua.dev.aitalk.datastore.writeApiKeyForModel
 import killua.dev.aitalk.datastore.writeDefaultSubModelForModel
+import killua.dev.aitalk.datastore.writeGeminiResponseMimeType
+import killua.dev.aitalk.datastore.writeGeminiSystemInstruction
+import killua.dev.aitalk.datastore.writeGeminiTemperature
+import killua.dev.aitalk.datastore.writeGeminiTopK
+import killua.dev.aitalk.datastore.writeGeminiTopP
 import killua.dev.aitalk.datastore.writeGrokSystemMessage
 import killua.dev.aitalk.datastore.writeGrokTemperature
 import killua.dev.aitalk.models.AIModel
 import killua.dev.aitalk.models.SubModel
 import killua.dev.aitalk.repository.ApiConfigRepository
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
@@ -43,19 +56,54 @@ class ApiConfigRepositoryImpl @Inject constructor(
 
 
     //Grok
-    override fun getGrokSystemMessage(): Flow<String> {
-        return context.readGrokSystemMessage()
+    override fun getGrokConfig(): Flow<GrokConfig> {
+        return combine(
+            context.readGrokTemperature(),
+            context.readGrokSystemMessage()
+        ) { temperature, systemInstruction ->
+            GrokConfig(temperature, systemInstruction)
+        }
     }
 
-    override fun getGrokTemperature(): Flow<Double> {
-        return context.readGrokTemperature()
-    }
-
-    override suspend fun saveGrokSystemMessage(message: String) {
+    override suspend fun saveGrokSystemInstruction(message: String) {
         context.writeGrokSystemMessage(message)
     }
 
     override suspend fun saveGrokTemperature(temperature: Double) {
         context.writeGrokTemperature(temperature)
+    }
+
+    //Gemini
+
+    override fun getGeminiConfig(): Flow<GeminiConfig> {
+        return combine(
+            context.readGeminiTemperature(),
+            context.readGeminiTopP(),
+            context.readGeminiTopK(),
+            context.readGeminiResponseMimeType(),
+            context.readGeminiSystemInstruction()
+        ) { temperature, topP, topK, responseMimeType, systemInstruction ->
+            GeminiConfig(temperature, topP, topK, responseMimeType, systemInstruction)
+        }
+    }
+
+    override suspend fun setGeminiTemperature(temperature: Double) {
+        context.writeGeminiTemperature(temperature)
+    }
+
+    override suspend fun setGeminiTopP(topP: Double) {
+        context.writeGeminiTopP(topP)
+    }
+
+    override suspend fun setGeminiTopK(topK: Int) {
+        context.writeGeminiTopK(topK)
+    }
+
+    override suspend fun setGeminiResponseMimeType(mimeType: String) {
+        context.writeGeminiResponseMimeType(mimeType)
+    }
+
+    override suspend fun setGeminiSystemInstruction(instruction: String) {
+        context.writeGeminiSystemInstruction(instruction)
     }
 }

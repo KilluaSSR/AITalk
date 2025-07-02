@@ -1,7 +1,6 @@
 package killua.dev.aitalk.repository.impl
 
 import android.content.Context
-import android.util.Log
 import dagger.hilt.android.qualifiers.ApplicationContext
 import killua.dev.aitalk.api.GeminiApiService
 import killua.dev.aitalk.api.GrokApiService
@@ -15,11 +14,9 @@ import killua.dev.aitalk.utils.mapCommonNetworkErrorToUserFriendlyMessage
 import killua.dev.aitalk.utils.mapGeminiErrorToUserFriendlyMessage
 import killua.dev.aitalk.utils.mapGrokErrorToUserFriendlyMessage
 import kotlinx.coroutines.flow.first
-import okhttp3.OkHttpClient
 import javax.inject.Inject
 
 class AiNetworkRepositoryImpl @Inject constructor(
-    private val httpClient: OkHttpClient,
     private val geminiApiService: GeminiApiService,
     private val grokApiService: GrokApiService,
     private val apiConfigRepository: ApiConfigRepository,
@@ -30,10 +27,12 @@ class AiNetworkRepositoryImpl @Inject constructor(
         return try {
             when (subModel.parent) {
                 AIModel.Gemini -> {
+                    val geminiConfig = apiConfigRepository.getGeminiConfig().first()
                     geminiApiService.generateContent(
                         model = subModel,
                         prompt = query,
-                        apiKey = apiKey
+                        apiKey = apiKey,
+                        geminiConfig = geminiConfig
                     ).fold(
                         onSuccess = { content ->
                             AIResponseState(
@@ -51,15 +50,12 @@ class AiNetworkRepositoryImpl @Inject constructor(
                     )
                 }
                 AIModel.Grok -> {
-                    val systemMessage = apiConfigRepository.getGrokSystemMessage().first()
-                    val temperature = apiConfigRepository.getGrokTemperature().first()
-
+                    val grokConfig = apiConfigRepository.getGrokConfig().first()
                     grokApiService.generateContent(
                         model = subModel,
                         prompt = query,
                         apiKey = apiKey,
-                        systemMessage = systemMessage,
-                        temperature = temperature
+                        grokConfig = grokConfig
                     ).fold(
                         onSuccess = { content ->
                             AIResponseState(
@@ -77,16 +73,12 @@ class AiNetworkRepositoryImpl @Inject constructor(
                     )
                 }
                 else -> {
-                    //占位
-                    val systemMessage = apiConfigRepository.getGrokSystemMessage().first()
-                    val temperature = apiConfigRepository.getGrokTemperature().first()
-
+                    val grokConfig = apiConfigRepository.getGrokConfig().first()
                     grokApiService.generateContent(
                         model = subModel,
                         prompt = query,
                         apiKey = apiKey,
-                        systemMessage = systemMessage,
-                        temperature = temperature
+                        grokConfig = grokConfig
                     ).fold(
                         onSuccess = { content ->
                             AIResponseState(

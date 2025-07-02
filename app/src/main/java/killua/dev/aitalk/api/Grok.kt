@@ -1,6 +1,7 @@
 package killua.dev.aitalk.api
 
 import android.util.Log
+import killua.dev.aitalk.api.configuration.GrokConfig
 import killua.dev.aitalk.models.SubModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -18,8 +19,7 @@ interface GrokApiService {
         model: SubModel,
         prompt: String,
         apiKey: String,
-        systemMessage: String,
-        temperature: Double,
+        grokConfig: GrokConfig
     ): Result<String>
 }
 
@@ -30,8 +30,7 @@ class GrokApiServiceImpl @Inject constructor(
         model: SubModel,
         prompt: String,
         apiKey: String,
-        systemMessage: String,
-        temperature: Double
+        grokConfig: GrokConfig
     ): Result<String> = withContext(Dispatchers.IO) {
         try {
             val url = "https://api.x.ai/v1/chat/completions"
@@ -40,7 +39,7 @@ class GrokApiServiceImpl @Inject constructor(
             val messages = JSONArray().apply {
                 put(JSONObject().apply {
                     put("role", "system")
-                    put("content", systemMessage.trim())
+                    put("content", grokConfig.systemInstruction.trim())
                 })
                 put(JSONObject().apply {
                     put("role", "user")
@@ -52,7 +51,7 @@ class GrokApiServiceImpl @Inject constructor(
                 put("messages", messages)
                 put("model", model.displayName)
                 put("stream", false)
-                put("temperature", temperature)
+                put("temperature", grokConfig.temperature)
             }.toString()
 
             Log.d("GrokAPI", "请求 JSON Payload: $requestBodyJson")

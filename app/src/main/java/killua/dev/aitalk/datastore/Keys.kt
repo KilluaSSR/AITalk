@@ -3,6 +3,7 @@ package killua.dev.aitalk.datastore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.doublePreferencesKey
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import killua.dev.aitalk.models.AIModel
 
@@ -21,3 +22,11 @@ fun defaultSubModelKeyForModel(model: AIModel): Preferences.Key<String> =
 
 val GROK_SYSTEM_MESSAGE_KEY = stringPreferencesKey("grok_system_message")
 val GROK_TEMPERATURE_KEY = doublePreferencesKey("grok_temperature")
+
+//Gemini
+
+val GEMINI_TEMPERATURE_KEY = doublePreferencesKey("gemini_temperature")
+val GEMINI_TOP_P_KEY = doublePreferencesKey("gemini_top_p")
+val GEMINI_TOP_K_KEY = intPreferencesKey("gemini_top_k")
+val GEMINI_RESPONSE_MIME_TYPE_KEY = stringPreferencesKey("gemini_response_mime_type")
+val GEMINI_SYSTEM_INSTRUCTION_KEY = stringPreferencesKey("gemini_system_instruction")

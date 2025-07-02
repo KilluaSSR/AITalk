@@ -39,3 +39,33 @@ suspend fun Context.writeGrokSystemMessage(message: String) =
 
 suspend fun Context.writeGrokTemperature(temperature: Double) =
     saveStoreDouble(GROK_TEMPERATURE_KEY, temperature)
+
+//Gemini
+fun Context.readGeminiTemperature(defValue: Double = 1.0) =
+    readStoreDouble(GEMINI_TEMPERATURE_KEY, defValue)
+
+fun Context.readGeminiTopP(defValue: Double = 0.95) =
+    readStoreDouble(GEMINI_TOP_P_KEY, defValue)
+
+fun Context.readGeminiTopK(defValue: Int = 40) =
+    readStoreInt(GEMINI_TOP_K_KEY, defValue)
+
+fun Context.readGeminiResponseMimeType(defValue: String = "text/plain") =
+    readStoreString(GEMINI_RESPONSE_MIME_TYPE_KEY, defValue)
+
+fun Context.readGeminiSystemInstruction(defValue: String = "You are a helpful assistant.") = // 默认值，如果 curl 示例中是 "You are a cat. Your name is Neko."，则改为那个
+    readStoreString(GEMINI_SYSTEM_INSTRUCTION_KEY, defValue)
+suspend fun Context.writeGeminiTemperature(temperature: Double) =
+    saveStoreDouble(GEMINI_TEMPERATURE_KEY, temperature)
+
+suspend fun Context.writeGeminiTopP(topP: Double) =
+    saveStoreDouble(GEMINI_TOP_P_KEY, topP)
+
+suspend fun Context.writeGeminiTopK(topK: Int) =
+    saveStoreInt(GEMINI_TOP_K_KEY, topK)
+
+suspend fun Context.writeGeminiResponseMimeType(mimeType: String) =
+    saveStoreString(GEMINI_RESPONSE_MIME_TYPE_KEY, mimeType)
+
+suspend fun Context.writeGeminiSystemInstruction(instruction: String) =
+    saveStoreString(GEMINI_SYSTEM_INSTRUCTION_KEY, instruction)

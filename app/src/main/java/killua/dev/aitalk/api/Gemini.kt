@@ -1,6 +1,7 @@
 package killua.dev.aitalk.api
 
 import android.util.Log
+import killua.dev.aitalk.api.configuration.GeminiConfig
 import killua.dev.aitalk.models.SubModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -17,7 +18,8 @@ interface GeminiApiService {
     suspend fun generateContent(
         model: SubModel,
         prompt: String,
-        apiKey: String
+        apiKey: String,
+        geminiConfig: GeminiConfig
     ): Result<String>
 }
 
@@ -27,12 +29,26 @@ class GeminiApiServiceImpl @Inject constructor(
     override suspend fun generateContent(
         model: SubModel,
         prompt: String,
-        apiKey: String
+        apiKey: String,
+        geminiConfig: GeminiConfig
     ): Result<String> = withContext(Dispatchers.IO) {
         try {
             val url = "https://generativelanguage.googleapis.com/v1beta/models/${model.displayName.lowercase()}:generateContent?key=$apiKey"
             Log.d("GeminiURL", url)
             val requestBodyJson = JSONObject().apply {
+                put("generationConfig", JSONObject().apply {
+                    put("temperature", geminiConfig.temperature)
+                    put("topP", geminiConfig.topP)
+                    put("topK", geminiConfig.topK)
+                    put("responseMimeType", geminiConfig.responseMimeType)
+                })
+                put("systemInstruction", JSONObject().apply {
+                    put("parts", JSONArray().apply {
+                        put(JSONObject().apply {
+                            put("text", geminiConfig.systemInstruction.trim())
+                        })
+                    })
+                })
                 put("contents", JSONArray().apply {
                     put(JSONObject().apply {
                         put("parts", JSONArray().apply {

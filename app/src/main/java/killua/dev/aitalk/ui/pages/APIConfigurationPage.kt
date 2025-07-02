@@ -1,6 +1,5 @@
 package killua.dev.aitalk.ui.pages
 
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.tween
@@ -24,11 +23,8 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
@@ -43,6 +39,9 @@ import killua.dev.aitalk.models.SubModel
 import killua.dev.aitalk.models.stringRes
 import killua.dev.aitalk.ui.components.BaseTextField
 import killua.dev.aitalk.ui.components.ConfigurationsScaffold
+import killua.dev.aitalk.ui.components.Slideable
+import killua.dev.aitalk.ui.components.Title
+import killua.dev.aitalk.ui.tokens.PaddingTokens
 import killua.dev.aitalk.ui.tokens.SizeTokens
 import killua.dev.aitalk.ui.viewmodels.ApiConfigUIIntent
 import killua.dev.aitalk.ui.viewmodels.ApiConfigViewModel
@@ -61,9 +60,9 @@ fun PageConfigurations(
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val subModels = remember(parentModel) { SubModel.entries.filter { it.parent == parentModel } }
-    var selectedSubModel by remember { mutableStateOf(subModels.firstOrNull()) }
     val radiusCorner = SizeTokens.Level16
     val shape: Shape = RoundedCornerShape(radiusCorner)
+
     ConfigurationsScaffold(
         scrollBehavior = scrollBehavior,
         snackbarHostState = viewModel.snackbarHostState,
@@ -75,12 +74,9 @@ fun PageConfigurations(
                 Text(text = stringResource(R.string.cancel))
             }
             Button(
-                enabled = selectedSubModel != null,
                 onClick = {
-                    selectedSubModel?.let { subModel ->
-                        scope.launch {
-                            viewModel.emitIntent(ApiConfigUIIntent.SaveApiKey(parentModel))
-                        }
+                    scope.launch {
+                        viewModel.emitIntent(ApiConfigUIIntent.SaveApiSettings(parentModel))
                     }
                     navController.popBackStack()
                 }
@@ -104,67 +100,177 @@ fun PageConfigurations(
             } else {
                 Column(modifier = Modifier
                     .fillMaxSize()
-                    .padding(horizontal = SizeTokens.Level16)
-                    .padding(top = SizeTokens.Level4)
+                    .padding(horizontal = PaddingTokens.Level4)
+                    .padding(top = PaddingTokens.Level1) 
                 ) {
-                    var enabled by remember { mutableStateOf(true) }
+                    val enabled = true
 
-                    BaseTextField(
-                        value = uiState.value.apiKey,
-                        onValueChange = { newValue ->
-                            scope.launch {
-                                viewModel.emitIntent(ApiConfigUIIntent.UpdateApiKey(parentModel, newValue))
+                    Title(title = stringResource(R.string.default_model)) {
+                        SingleChoiceSegmentedButtonRow(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = PaddingTokens.Level4) 
+                                .padding(bottom = PaddingTokens.Level4) 
+                                .padding(top = PaddingTokens.Level3)
+                        ) {
+                            subModels.forEachIndexed { index, subModel ->
+                                SegmentedButton(
+                                    enabled = enabled,
+                                    onClick = {
+                                        scope.launch {
+                                            viewModel.emitIntent(ApiConfigUIIntent.SelectOption(index))
+                                        }
+                                    },
+                                    shape = SegmentedButtonDefaults.itemShape(
+                                        index = index,
+                                        count = subModels.size
+                                    ),
+                                    selected = (index == uiState.value.optionIndex)
+                                ) {
+                                    Text(
+                                        subModel.displayName,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
                             }
-                        },
-                        label = { Text("${parentModel.name} ${context.getString(R.string.api_key)}") },
-                        shape = shape,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = SizeTokens.Level16)
-                    )
+                        }
+                    }
 
+                    Title(title = stringResource(R.string.api_key_settings)) {
+                        BaseTextField(
+                            value = uiState.value.apiKey,
+                            onValueChange = { newValue ->
+                                scope.launch {
+                                    viewModel.emitIntent(ApiConfigUIIntent.UpdateApiKey(parentModel, newValue))
+                                }
+                            },
+                            label = { Text("${parentModel.name} ${context.getString(R.string.api_key)}") },
+                            shape = shape,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = PaddingTokens.Level4) 
+                                .padding(bottom = PaddingTokens.Level4) 
+                        )
+                    }
 
-                    SingleChoiceSegmentedButtonRow(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = SizeTokens.Level16)
-                            .padding(bottom = SizeTokens.Level16)
-                            .padding(top = SizeTokens.Level12)
-                    ) {
-                        subModels.forEachIndexed { index, subModel ->
-                            SegmentedButton(
-                                enabled = enabled,
-                                onClick = {
-                                    scope.launch {
-                                        viewModel.emitIntent(ApiConfigUIIntent.SelectOption(index))
-                                    }
-                                },
-                                shape = SegmentedButtonDefaults.itemShape(
-                                    index = index,
-                                    count = subModels.size
-                                ),
-                                selected = (index == uiState.value.optionIndex)
+                    when (parentModel) {
+                        AIModel.Grok -> {
+                            Title(
+                                title = stringResource(R.string.system_instruction) 
                             ) {
-                                Text(
-                                    subModel.displayName,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
+                                BaseTextField(
+                                    value = uiState.value.grokConfig.systemInstruction,
+                                    onValueChange = { newValue ->
+                                        scope.launch {
+                                            viewModel.emitIntent(ApiConfigUIIntent.UpdateGrokSystemInstruction(newValue))
+                                        }
+                                    },
+                                    label = { Text(stringResource(R.string.system_instruction)) }, 
+                                    shape = shape,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = PaddingTokens.Level4) 
+                                        .padding(bottom = PaddingTokens.Level4) 
+                                )
+                            }
+
+                            Title(title = stringResource(R.string.parameter_settings)) {
+                                Slideable(
+                                    title = stringResource(R.string.temperature), 
+                                    value = uiState.value.grokConfig.temperature.toFloat(),
+                                    valueRange = 0F .. 1F,
+                                    steps = 100,
+                                    desc = uiState.value.grokConfig.temperature.toString(),
+                                    onValueChange = { newValue ->
+                                        scope.launch {
+                                            viewModel.emitIntent(ApiConfigUIIntent.UpdateGrokTemperature(newValue.toDouble()))
+                                        }
+                                    }
                                 )
                             }
                         }
-                    }
+                        AIModel.Gemini -> {
+                            Title(
+                                title = stringResource(R.string.system_instruction) 
+                            ) {
+                                BaseTextField(
+                                    value = uiState.value.geminiConfig.systemInstruction,
+                                    onValueChange = { newValue ->
+                                        scope.launch {
+                                            viewModel.emitIntent(ApiConfigUIIntent.UpdateGeminiSystemInstruction(newValue))
+                                        }
+                                    },
+                                    label = { Text(stringResource(R.string.system_instruction)) }, 
+                                    shape = shape,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = PaddingTokens.Level4) 
+                                        .padding(bottom = PaddingTokens.Level4) 
+                                )
+                            }
 
-                    val selectedSubModel = uiState.value.subModels.getOrNull(uiState.value.optionIndex)
-                    if (selectedSubModel != null) {
-                        AnimatedContent(
-                            targetState = selectedSubModel,
-                            modifier = Modifier
-                                .padding(SizeTokens.Level16)
-                        ) { submodel ->
-                            Text(submodel.name)
+                            Title(title = stringResource(R.string.parameter_settings)) {
+                                Slideable(
+                                    title = stringResource(R.string.temperature), 
+                                    value = uiState.value.geminiConfig.temperature.toFloat(),
+                                    valueRange = 0F .. 2F,
+                                    steps = 0,
+                                    desc = uiState.value.geminiConfig.temperature.toString(),
+                                    onValueChange = { newValue ->
+                                        scope.launch {
+                                            viewModel.emitIntent(ApiConfigUIIntent.UpdateGeminiTemperature(newValue.toDouble()))
+                                        }
+                                    },
+                                )
+                                Slideable(
+                                    title = stringResource(R.string.top_p), 
+                                    value = uiState.value.geminiConfig.topP.toFloat(),
+                                    valueRange = 0F .. 1F,
+                                    steps = 0,
+                                    desc = uiState.value.geminiConfig.topP.toString(),
+                                    onValueChange = { newValue ->
+                                        scope.launch {
+                                            viewModel.emitIntent(ApiConfigUIIntent.UpdateGeminiTopP(newValue.toDouble()))
+                                        }
+                                    },
+                                )
+                                BaseTextField(
+                                    value = uiState.value.geminiConfig.topK.toString(),
+                                    onValueChange = { newValue ->
+                                        val intValue = newValue.toIntOrNull() ?: 0
+                                        scope.launch {
+                                            viewModel.emitIntent(ApiConfigUIIntent.UpdateGeminiTopK(intValue))
+                                        }
+                                    },
+                                    label = { Text(stringResource(R.string.top_k)) }, 
+                                    shape = shape,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = PaddingTokens.Level4) 
+                                        .padding(bottom = PaddingTokens.Level6)
+                                )
+                                BaseTextField(
+                                    value = uiState.value.geminiConfig.responseMimeType,
+                                    onValueChange = { newValue ->
+                                        scope.launch {
+                                            viewModel.emitIntent(ApiConfigUIIntent.UpdateGeminiResponseMimeType(newValue))
+                                        }
+                                    },
+                                    label = { Text(stringResource(R.string.response_mime_type)) }, 
+                                    shape = shape,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = PaddingTokens.Level4) 
+                                        .padding(bottom = PaddingTokens.Level6),
+                                    enabled = false
+                                )
+                            }
+                        }
+                        else -> {
+                            // 对于其他模型，目前没有额外配置，保持原样
                         }
                     }
-
                 }
             }
         }

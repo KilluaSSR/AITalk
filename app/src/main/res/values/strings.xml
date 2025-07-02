@@ -37,6 +37,7 @@
     <string name="flowting_window_settings">悬浮窗搜索设置</string>
     <string name="flowting_window_search_mode">悬浮窗搜索询问模式</string>
     <string name="api_settings">API设置</string>
+    <string name="api_key_settings">API 密钥设置</string>
     <string name="save">保存</string>
     <string name="openai_api_settings">OpenAI API 设置</string>
     <string name="gemini_api_settings">Gemini API 设置</string>
@@ -49,6 +50,12 @@
     <string name="finding_out">正在查询</string>
     <string name="findout_completed">查询完成</string>
     <string name="api_key">API 密钥</string>
+
+    <string name="temperature">温度</string>
+    <string name="top_p">Top P</string>
+    <string name="top_k">Top K</string>
+    <string name="response_mime_type">响应 MIME 类型</string>
+    <string name="system_instruction">系统指令</string>
 
     <string name="gemini_error_400_invalid_argument">请求正文格式有误或缺少必填字段。请检查您的提问内容，确保符合要求。</string>
     <string name="gemini_error_400_failed_precondition">Gemini API 免费层级在您所在国家/地区（中国）尚未推出，或您尚未在 Google AI Studio 中为项目启用结算功能。请前往 Google AI Studio 设置付费方案。</string>
@@ -84,5 +91,7 @@
     <string name="error_model_unknown_issue">模型 %s 发生未知错误: %s</string>
     <string name="error_model_http_response">模型 %s 返回错误: HTTP %d - %s</string>
     <string name="no_history">暂无历史记录~</string>
+    <string name="default_model">默认模型</string>
+    <string name="parameter_settings">参数设置</string>
 
 </resources>
