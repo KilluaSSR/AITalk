@@ -11,12 +11,12 @@ plugins {
 
 android {
     namespace = "killua.dev.aitalk"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "killua.dev.aitalk"
         minSdk = 31
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
 
@@ -49,6 +49,9 @@ android {
 
 dependencies {
 
+    implementation(libs.androidx.paging.runtime)
+    implementation(libs.androidx.paging.compose)
+    implementation(libs.androidx.room.paging)
     //Gemini
     implementation(libs.google.genai)
 
@@ -84,7 +87,6 @@ dependencies {
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
-
     implementation(libs.androidx.biometric)
 
     // Hilt

@@ -46,40 +46,36 @@ fun AIResponseCard(
     val context = LocalContext.current
     val shape: Shape = MaterialTheme.shapes.medium
     val colors = when(responseState.status){
-        ResponseStatus.Error -> {
-            CardDefaults.elevatedCardColors(
-                containerColor = MaterialTheme.colorScheme.errorContainer,
-                contentColor = MaterialTheme.colorScheme.onErrorContainer,
-            )
-        }
-        else ->{
-            CardDefaults.elevatedCardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-                contentColor = MaterialTheme.colorScheme.onSurface,
-            )
-        }
+        ResponseStatus.Error -> CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.errorContainer,
+            contentColor = MaterialTheme.colorScheme.onErrorContainer,
+        )
+        else -> CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+            contentColor = MaterialTheme.colorScheme.onSurface,
+        )
     }
-    val isSearching = !(responseState.status == ResponseStatus.Success || responseState.status == ResponseStatus.Error)
-    val modifierShimmer: Modifier =
-        if (isSearching) {
-            Modifier
-                .fillMaxWidth()
-                .shimmerEffect()
-        } else {
-            Modifier
-                .fillMaxWidth()
-        }
+
+    val isSearching = responseState.status == ResponseStatus.Loading
+    val modifierShimmer: Modifier = if (isSearching) {
+        Modifier.shimmerEffect()
+    } else {
+        Modifier
+    }
+
     var expanded by remember { mutableStateOf(false) }
+
     ElevatedCard (
         shape = shape,
         colors = colors,
         modifier = Modifier
             .fillMaxWidth()
             .padding(SizeTokens.Level8)
-
     ){
         Column(
-            modifier = modifierShimmer
+            modifier = Modifier
+                .fillMaxWidth()
+                .then(modifierShimmer)
         ) {
             Column(
                 modifier = Modifier.padding(SizeTokens.Level16)
@@ -92,27 +88,20 @@ fun AIResponseCard(
                     color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.padding(bottom = SizeTokens.Level8)
                 )
-                AnimatedContent(
-                    targetState = responseState.status
-                ) { status->
-                    if(status == ResponseStatus.Success){
-                        AnimatedTextContainer(
-                            targetState = responseState.content!!
-                        ) { text ->
-                            Text(
-                                text = text,
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                maxLines = if (expanded) Int.MAX_VALUE else 3,
-                                modifier = Modifier.animateContentSize()
-                            )
+
+                AnimatedContent(targetState = responseState.status, label = "StatusAnimation") { status ->
+                    if (status == ResponseStatus.Success || status == ResponseStatus.Error) {
+                        val textToShow = if (status == ResponseStatus.Success) {
+                            responseState.content ?: ""
+                        } else {
+                            responseState.errorMessage ?: "未知错误"
                         }
-                    }else if(status == ResponseStatus.Error){
+
                         AnimatedTextContainer(
-                            targetState = responseState.errorMessage.toString()
-                        ) { text ->
+                            targetState = responseState.content ?: ""
+                        ) {
                             Text(
-                                text = text,
+                                text = textToShow,
                                 style = MaterialTheme.typography.bodyLarge,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 maxLines = if (expanded) Int.MAX_VALUE else 3,
@@ -121,50 +110,38 @@ fun AIResponseCard(
                         }
                     }
                 }
-
             }
 
-            AnimatedContent(
-                targetState = responseState.status,
-            ) { state ->
-                if(state == ResponseStatus.Success){
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                    ) {
+            AnimatedContent(targetState = responseState.status, label = "ActionsAnimation") { status ->
+                if (status == ResponseStatus.Success) {
+                    Row(modifier = Modifier.fillMaxWidth()) {
                         TextButton(onClick = onCopyClicked) {
                             Text(
                                 text = context.getString(R.string.onCopyButton),
                                 color = MaterialTheme.colorScheme.onSurface
                             )
                         }
-
                         TextButton(onClick = onSaveClicked) {
                             Text(
                                 text = context.getString(R.string.onSaveButton),
                                 color = MaterialTheme.colorScheme.onSurface
                             )
                         }
-
                         TextButton(onClick = onRegenerateClicked) {
                             Text(
                                 text = context.getString(R.string.onRegenerateButton),
-                                color = MaterialTheme.colorScheme.onSurface)
-                        }
-                        Spacer(modifier = Modifier.weight(1f))
-                        IconButton(
-                            onClick = {
-                                expanded = !expanded
-                            }
-                        ) {
-                            Icon(
-                                imageVector = if(!expanded) Icons.Rounded.ExpandMore else Icons.Rounded.ExpandLess,
-                                null
+                                color = MaterialTheme.colorScheme.onSurface
                             )
                         }
-
+                        Spacer(modifier = Modifier.weight(1f))
+                        IconButton(onClick = { expanded = !expanded }) {
+                            Icon(
+                                imageVector = if (!expanded) Icons.Rounded.ExpandMore else Icons.Rounded.ExpandLess,
+                                contentDescription = if (expanded) "Collapse" else "Expand"
+                            )
+                        }
                     }
                 }
-
             }
         }
     }
