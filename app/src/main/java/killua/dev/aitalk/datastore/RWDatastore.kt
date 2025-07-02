@@ -1,6 +1,7 @@
 package killua.dev.aitalk.datastore
 
 import android.content.Context
+import android.util.Log
 import killua.dev.aitalk.consts.DEFAULT_SAVE_DIR
 import killua.dev.aitalk.models.AIModel
 import killua.dev.aitalk.models.FloatingWindowQuestionMode
@@ -30,16 +31,16 @@ fun Context.readApiKeyForModel(model: AIModel, defValue: String = "") =
     readStoreString(apiKeyKeyForModel(model), defValue)
 fun Context.readDefaultSubModelForModel(model: AIModel, defValue: String = "") =
     readStoreString(defaultSubModelKeyForModel(model), defValue)
-        .map { displayName ->
-            SubModel.entries.firstOrNull { it.displayName == displayName }?.displayName ?: defValue
-        }
+
 
 suspend fun Context.writeFloatingWindowSystemInstruction(questionMode: FloatingWindowQuestionMode, model: AIModel, instruction: String) =
     saveStoreString(floatingWindowSystemInstructionKey(questionMode, model), instruction)
 
 
-suspend fun Context.writeDefaultSubModelForModel(model: AIModel, subModel: SubModel) =
+suspend fun Context.writeDefaultSubModelForModel(model: AIModel, subModel: SubModel) {
+    Log.d("DataStore", "Setting default sub model for model ${defaultSubModelKeyForModel(model)}. Value: ${subModel.name}")
     saveStoreString(defaultSubModelKeyForModel(model), subModel.name)
+}
 suspend fun Context.writeTheme(theme: String) = saveStoreString(THEME_MODE, theme)
 suspend fun Context.writeSecureMyHistory(set: Boolean) = saveStoreBoolean(SECURE_HISTORY, set)
 

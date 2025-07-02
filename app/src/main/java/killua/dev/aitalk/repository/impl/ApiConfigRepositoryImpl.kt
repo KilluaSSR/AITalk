@@ -61,6 +61,7 @@ class ApiConfigRepositoryImpl @Inject constructor(
             .map { name -> SubModel.entries.find { it.name == name } }
 
     override suspend fun setDefaultSubModelForModel(model: AIModel, subModel: SubModel) {
+        Log.d("ApiConfigRepo", "Setting default sub model for model ${model.name}. Value: ${subModel.name}")
         context.writeDefaultSubModelForModel(model, subModel)
     }
     override fun getFloatingWindowSystemInstruction(model: AIModel, questionMode: FloatingWindowQuestionMode): Flow<String> {

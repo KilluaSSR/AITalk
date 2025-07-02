@@ -87,7 +87,7 @@ class ApiConfigViewModel @Inject constructor(
 
                 val defaultSubModelFlow = repository.getDefaultSubModelForModel(intent.parentModel)
                 val defaultSubModel = defaultSubModelFlow.firstOrNull()
-
+                Log.d("ApiConfigViewModel", "Loaded all for ${intent.parentModel}. Default sub model: $defaultSubModel")
                 val optionIndex = if (defaultSubModel != null) {
                     subModels.indexOf(defaultSubModel).coerceAtLeast(0)
                 } else {
@@ -96,8 +96,7 @@ class ApiConfigViewModel @Inject constructor(
                 val currentQuestionMode = state.currentFloatingWindowQuestionMode
                 val floatingWindowSystemInstruction = repository.getFloatingWindowSystemInstruction(intent.parentModel, currentQuestionMode).firstOrNull().orEmpty()
 
-                // 加载 Grok 或 Gemini 特定的配置
-                when (intent.parentModel) {
+                    when (intent.parentModel) {
                     AIModel.Grok -> {
                         repository.getGrokConfig().collectLatest { grokConfig ->
                             emitState(
@@ -168,6 +167,7 @@ class ApiConfigViewModel @Inject constructor(
                 repository.setApiKeyForModel(intent.model, state.apiKey)
                 val selectedSubModel = state.subModels.getOrNull(state.optionIndex)
                 selectedSubModel?.let {
+                    Log.d("ApiConfigViewModel", "Setting default sub model for ${intent.model} to $it")
                     repository.setDefaultSubModelForModel(intent.model, it)
                 }
                 repository.setFloatingWindowSystemInstruction(
