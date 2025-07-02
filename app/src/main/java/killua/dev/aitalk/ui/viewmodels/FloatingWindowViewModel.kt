@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import killua.dev.aitalk.consts.DEFAULT_SAVE_DIR
 import killua.dev.aitalk.models.AIModel
+import killua.dev.aitalk.models.FloatingWindowQuestionMode
 import killua.dev.aitalk.models.SubModel
 import killua.dev.aitalk.repository.AiRepository
 import killua.dev.aitalk.repository.ApiConfigRepository
@@ -59,24 +60,27 @@ class FloatingWindowViewModel @Inject constructor(
         when(intent){
             is FloatingWindowUIIntent.StartSearch -> {
                 val query = intent.query
-
-                // 1. 获取每个模型的SubModel（优先DataStore，没有则默认）
                 val subModelMap: Map<AIModel, SubModel> = AIModel.entries.associateWith { model ->
                     apiConfigRepository.getDefaultSubModelForModel(model).firstOrNull()
                         ?: SubModel.entries.first { it.parent == model }
                 }
 
-                // 2. 获取每个模型的API Key
                 val apiKeyMap: Map<AIModel, String> = AIModel.entries.associateWith { model ->
                     apiConfigRepository.getApiKeyForModel(model).firstOrNull().orEmpty()
                 }
 
-                // 3. 只保留有API Key的模型
                 val filteredSubModelMap: Map<AIModel, SubModel> = subModelMap.filter { (model, _) ->
                     apiKeyMap[model]?.isNotBlank() == true
                 }
+                val currentFloatingWindowQuestionMode = settingsRepository.getFloatingWindowQuestionMode().firstOrNull()
+                    ?: FloatingWindowQuestionMode.isThatTrueWithExplain
 
-                // 4. 初始化responses
+                val floatingWindowSystemInstructions: MutableMap<AIModel, String?> = mutableMapOf()
+                for (model in filteredSubModelMap.keys) {
+                    val instruction = apiConfigRepository.getFloatingWindowSystemInstruction(model, currentFloatingWindowQuestionMode).firstOrNull()
+                    floatingWindowSystemInstructions[model] = instruction
+                }
+
                 val initialResponses: Map<AIModel, AIResponseState> = filteredSubModelMap.keys.associateWith {
                     AIResponseState(status = ResponseStatus.Loading)
                 }
@@ -89,8 +93,7 @@ class FloatingWindowViewModel @Inject constructor(
                     )
                 )
 
-                // 5. 只对有Key的模型发起请求
-                aiRepository.fetchAiResponses(query, filteredSubModelMap)
+                aiRepository.fetchAiResponses(query, filteredSubModelMap, floatingWindowSystemInstructions)
                     .onEach { (model, response) ->
                         updateState { old ->
                             val updatedMap = old.aiResponses.toMutableMap()

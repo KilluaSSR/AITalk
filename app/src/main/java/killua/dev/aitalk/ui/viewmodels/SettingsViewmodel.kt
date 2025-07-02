@@ -61,7 +61,7 @@ class SettingsViewmodel @Inject constructor(
                     isLoading = false,
                     themeMode = ThemeMode.valueOf(themeName),
                     saveDir = saveDir,
-                    questionMode = FloatingWindowQuestionMode.valueOf(questionMode),
+                    questionMode = questionMode,
                     isBiometricAvailable = repository.isBiometricAvailable(),
                     isHistorySecured = isSecured,
                     canDrawOverlays = repository.canDrawOverlays()
@@ -95,7 +95,7 @@ class SettingsViewmodel @Inject constructor(
             }
 
             is SettingsUIIntent.UpdateQuestionMode -> {
-                repository.setFloatingWindowQuestionMode(intent.mode.name)
+                repository.setFloatingWindowQuestionMode(intent.mode)
                 emitState(state.copy(questionMode = intent.mode))
             }
             is SettingsUIIntent.ChooseSaveDir -> {

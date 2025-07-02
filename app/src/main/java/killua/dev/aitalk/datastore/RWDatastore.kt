@@ -6,22 +6,37 @@ import killua.dev.aitalk.models.AIModel
 import killua.dev.aitalk.models.FloatingWindowQuestionMode
 import killua.dev.aitalk.models.SubModel
 import killua.dev.aitalk.ui.theme.ThemeMode
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 
 fun Context.readTheme() = readStoreString(THEME_MODE, defValue = ThemeMode.SYSTEM.name)
 fun Context.readSecureHistory() = readStoreBoolean(key = SECURE_HISTORY, defValue = false)
-fun Context.readFloatingWindowQuestionMode() = readStoreString(FLOATING_WINDOW_QUESTION_MODE, defValue = FloatingWindowQuestionMode.isThatTrueWithExplain.name)
-fun Context.readSaveDir(defValue: String = DEFAULT_SAVE_DIR) =
+fun Context.readFloatingWindowQuestionMode(): Flow<FloatingWindowQuestionMode> =
+    readStoreString(FLOATING_WINDOW_QUESTION_MODE, defValue = FloatingWindowQuestionMode.isThatTrueWithExplain.name)
+        .map { name ->
+            FloatingWindowQuestionMode.entries.firstOrNull { it.name == name }
+                ?: FloatingWindowQuestionMode.isThatTrueWithExplain
+        }fun Context.readSaveDir(defValue: String = DEFAULT_SAVE_DIR) =
     readStoreString(SAVE_DIR_KEY, defValue)
+fun Context.readFloatingWindowSystemInstruction(questionMode: FloatingWindowQuestionMode, model: AIModel, defValue: String = "") =
+    readStoreString(floatingWindowSystemInstructionKey(questionMode, model), defValue)
+
 fun Context.readApiKeyForModel(model: AIModel, defValue: String = "") =
     readStoreString(apiKeyKeyForModel(model), defValue)
 fun Context.readDefaultSubModelForModel(model: AIModel, defValue: String = "") =
     readStoreString(defaultSubModelKeyForModel(model), defValue)
 
+suspend fun Context.writeFloatingWindowSystemInstruction(questionMode: FloatingWindowQuestionMode, model: AIModel, instruction: String) =
+    saveStoreString(floatingWindowSystemInstructionKey(questionMode, model), instruction)
+
+
 suspend fun Context.writeDefaultSubModelForModel(model: AIModel, subModel: SubModel) =
     saveStoreString(defaultSubModelKeyForModel(model), subModel.name)
 suspend fun Context.writeTheme(theme: String) = saveStoreString(THEME_MODE, theme)
 suspend fun Context.writeSecureMyHistory(set: Boolean) = saveStoreBoolean(SECURE_HISTORY, set)
-suspend fun Context.writeFloatingWindowQuestionMode(mode: String) = saveStoreString(FLOATING_WINDOW_QUESTION_MODE, mode)
+
+suspend fun Context.writeFloatingWindowQuestionMode(mode: FloatingWindowQuestionMode) =
+    saveStoreString(FLOATING_WINDOW_QUESTION_MODE, mode.name)
 suspend fun Context.writeApiKeyForModel(model: AIModel, apiKey: String) =
     saveStoreString(apiKeyKeyForModel(model), apiKey)
 suspend fun Context.writeSaveDir(dir: String) =

@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.doublePreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import killua.dev.aitalk.models.AIModel
+import killua.dev.aitalk.models.FloatingWindowQuestionMode
 
 val THEME_MODE = stringPreferencesKey("theme_mode")
 val LOCALE_MODE = stringPreferencesKey("locale_mode")
@@ -17,6 +18,9 @@ fun apiKeyKeyForModel(model: AIModel): Preferences.Key<String> =
 
 fun defaultSubModelKeyForModel(model: AIModel): Preferences.Key<String> =
     stringPreferencesKey("default_sub_model_${model.name.lowercase()}")
+
+fun floatingWindowSystemInstructionKey(questionMode: FloatingWindowQuestionMode, model: AIModel): Preferences.Key<String> =
+    stringPreferencesKey("floating_window_system_instruction_${questionMode.name.lowercase()}_${model.name.lowercase()}")
 
 //Grok
 

@@ -30,7 +30,7 @@ class GeminiApiServiceImpl @Inject constructor(
         model: SubModel,
         prompt: String,
         apiKey: String,
-        geminiConfig: GeminiConfig
+        geminiConfig: GeminiConfig,
     ): Result<String> = withContext(Dispatchers.IO) {
         try {
             val url = "https://generativelanguage.googleapis.com/v1beta/models/${model.displayName.lowercase()}:generateContent?key=$apiKey"
@@ -45,7 +45,7 @@ class GeminiApiServiceImpl @Inject constructor(
                 put("systemInstruction", JSONObject().apply {
                     put("parts", JSONArray().apply {
                         put(JSONObject().apply {
-                            put("text", geminiConfig.systemInstruction.trim())
+                            put("text", (geminiConfig.floatingWindowSystemInstruction ?: geminiConfig.systemInstruction).trim())
                         })
                     })
                 })

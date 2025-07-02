@@ -11,6 +11,7 @@ import killua.dev.aitalk.datastore.readApiKeyForModel
 import killua.dev.aitalk.datastore.readDeepSeekSystemInstruction
 import killua.dev.aitalk.datastore.readDeepSeekTemperature
 import killua.dev.aitalk.datastore.readDefaultSubModelForModel
+import killua.dev.aitalk.datastore.readFloatingWindowSystemInstruction
 import killua.dev.aitalk.datastore.readGeminiResponseMimeType
 import killua.dev.aitalk.datastore.readGeminiSystemInstruction
 import killua.dev.aitalk.datastore.readGeminiTemperature
@@ -22,6 +23,7 @@ import killua.dev.aitalk.datastore.writeApiKeyForModel
 import killua.dev.aitalk.datastore.writeDeepSeekSystemInstruction
 import killua.dev.aitalk.datastore.writeDeepSeekTemperature
 import killua.dev.aitalk.datastore.writeDefaultSubModelForModel
+import killua.dev.aitalk.datastore.writeFloatingWindowSystemInstruction
 import killua.dev.aitalk.datastore.writeGeminiResponseMimeType
 import killua.dev.aitalk.datastore.writeGeminiSystemInstruction
 import killua.dev.aitalk.datastore.writeGeminiTemperature
@@ -30,6 +32,7 @@ import killua.dev.aitalk.datastore.writeGeminiTopP
 import killua.dev.aitalk.datastore.writeGrokSystemMessage
 import killua.dev.aitalk.datastore.writeGrokTemperature
 import killua.dev.aitalk.models.AIModel
+import killua.dev.aitalk.models.FloatingWindowQuestionMode
 import killua.dev.aitalk.models.SubModel
 import killua.dev.aitalk.repository.ApiConfigRepository
 import kotlinx.coroutines.flow.Flow
@@ -57,6 +60,13 @@ class ApiConfigRepositoryImpl @Inject constructor(
 
     override suspend fun setDefaultSubModelForModel(model: AIModel, subModel: SubModel) {
         context.writeDefaultSubModelForModel(model, subModel)
+    }
+    override fun getFloatingWindowSystemInstruction(model: AIModel, questionMode: FloatingWindowQuestionMode): Flow<String> {
+        return context.readFloatingWindowSystemInstruction(questionMode, model)
+    }
+
+    override suspend fun setFloatingWindowSystemInstruction(model: AIModel, questionMode: FloatingWindowQuestionMode, instruction: String) {
+        context.writeFloatingWindowSystemInstruction(questionMode, model, instruction)
     }
 
 

@@ -50,6 +50,7 @@
     <string name="finding_out">正在查询</string>
     <string name="findout_completed">查询完成</string>
     <string name="api_key">API 密钥</string>
+    <string name="floating_window_system_instruction_title">悬浮窗系统指令</string>
 
     <string name="temperature">温度</string>
     <string name="top_p">Top P</string>

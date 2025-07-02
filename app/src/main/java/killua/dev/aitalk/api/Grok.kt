@@ -39,7 +39,7 @@ class GrokApiServiceImpl @Inject constructor(
             val messages = JSONArray().apply {
                 put(JSONObject().apply {
                     put("role", "system")
-                    put("content", grokConfig.systemInstruction.trim())
+                    put("content", (grokConfig.floatingWindowSystemInstruction ?: grokConfig.systemInstruction).trim())
                 })
                 put(JSONObject().apply {
                     put("role", "user")

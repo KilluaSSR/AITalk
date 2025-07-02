@@ -4,6 +4,7 @@ import killua.dev.aitalk.api.configuration.DeepSeekConfig
 import killua.dev.aitalk.api.configuration.GeminiConfig
 import killua.dev.aitalk.api.configuration.GrokConfig
 import killua.dev.aitalk.models.AIModel
+import killua.dev.aitalk.models.FloatingWindowQuestionMode
 import killua.dev.aitalk.models.SubModel
 import kotlinx.coroutines.flow.Flow
 
@@ -13,6 +14,9 @@ interface ApiConfigRepository {
 
     fun getDefaultSubModelForModel(model: AIModel): Flow<SubModel?>
     suspend fun setDefaultSubModelForModel(model: AIModel, subModel: SubModel)
+
+    fun getFloatingWindowSystemInstruction(model: AIModel, questionMode: FloatingWindowQuestionMode): Flow<String>
+    suspend fun setFloatingWindowSystemInstruction(model: AIModel, questionMode: FloatingWindowQuestionMode, instruction: String)
 
     //Grok
     fun getGrokConfig(): Flow<GrokConfig>

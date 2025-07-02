@@ -5,5 +5,6 @@ data class GeminiConfig(
     val topP: Double = 0.95,
     val topK: Int = 40,
     val responseMimeType: String = "text/plain",
-    val systemInstruction: String = "You are a helpful assistant."
+    val systemInstruction: String = "You are a helpful assistant.",
+    val floatingWindowSystemInstruction: String? = null
 )

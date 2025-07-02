@@ -52,8 +52,7 @@ dependencies {
     implementation(libs.androidx.paging.runtime)
     implementation(libs.androidx.paging.compose)
     implementation(libs.androidx.room.paging)
-    //Gemini
-    implementation(libs.google.genai)
+
 
     implementation (libs.sqlite)
     implementation (libs.jsoup)

@@ -4,5 +4,9 @@ import killua.dev.aitalk.models.SubModel
 import killua.dev.aitalk.states.AIResponseState
 
 interface AiNetworkRepository {
-    suspend fun fetchResponse(query: String, subModel: SubModel): AIResponseState
+    suspend fun fetchResponse(
+        query: String,
+        subModel: SubModel,
+        floatingWindowSystemInstruction: String? = null
+    ): AIResponseState
 }

@@ -6,5 +6,9 @@ import killua.dev.aitalk.states.AIResponseState
 import kotlinx.coroutines.flow.Flow
 
 interface AiRepository {
-    fun fetchAiResponses(query: String, subModelMap: Map<AIModel, SubModel>): Flow<Pair<AIModel, AIResponseState>>
+    fun fetchAiResponses(
+        query: String,
+        subModelMap: Map<AIModel, SubModel>,
+        floatingWindowSystemInstructions: Map<AIModel, String?> = emptyMap()
+    ): Flow<Pair<AIModel, AIResponseState>>
 }

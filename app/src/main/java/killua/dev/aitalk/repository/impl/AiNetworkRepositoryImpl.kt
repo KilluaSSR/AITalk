@@ -25,17 +25,24 @@ class AiNetworkRepositoryImpl @Inject constructor(
     private val apiConfigRepository: ApiConfigRepository,
     @ApplicationContext private val context: Context
 ) : AiNetworkRepository {
-    override suspend fun fetchResponse(query: String, subModel: SubModel): AIResponseState {
+    override suspend fun fetchResponse(
+        query: String,
+        subModel: SubModel,
+        floatingWindowSystemInstruction: String?
+    ): AIResponseState {
         val apiKey = apiConfigRepository.getApiKeyForModel(subModel.parent).first()
         return try {
             when (subModel.parent) {
                 AIModel.Gemini -> {
-                    val geminiConfig = apiConfigRepository.getGeminiConfig().first()
+                    val baseGeminiConfig = apiConfigRepository.getGeminiConfig().first()
+                    val geminiConfigWithFW = baseGeminiConfig.copy(
+                        floatingWindowSystemInstruction = floatingWindowSystemInstruction
+                    )
                     geminiApiService.generateContent(
                         model = subModel,
                         prompt = query,
                         apiKey = apiKey,
-                        geminiConfig = geminiConfig
+                        geminiConfig = geminiConfigWithFW
                     ).fold(
                         onSuccess = { content ->
                             AIResponseState(
@@ -53,12 +60,15 @@ class AiNetworkRepositoryImpl @Inject constructor(
                     )
                 }
                 AIModel.Grok -> {
-                    val grokConfig = apiConfigRepository.getGrokConfig().first()
+                    val baseGrokConfig = apiConfigRepository.getGrokConfig().first()
+                    val grokConfigWithFW = baseGrokConfig.copy(
+                        floatingWindowSystemInstruction = floatingWindowSystemInstruction
+                    )
                     grokApiService.generateContent(
                         model = subModel,
                         prompt = query,
                         apiKey = apiKey,
-                        grokConfig = grokConfig
+                        grokConfig = grokConfigWithFW
                     ).fold(
                         onSuccess = { content ->
                             AIResponseState(
@@ -76,12 +86,15 @@ class AiNetworkRepositoryImpl @Inject constructor(
                     )
                 }
                 AIModel.DeepSeek -> {
-                    val deepSeekConfig = apiConfigRepository.getDeepSeekConfig().first()
+                    val baseDeepSeekConfig = apiConfigRepository.getDeepSeekConfig().first()
+                    val deepSeekConfigWithFW = baseDeepSeekConfig.copy(
+                        floatingWindowSystemInstruction = floatingWindowSystemInstruction
+                    )
                     deepSeekApiService.generateContent(
                         model = subModel,
                         prompt = query,
                         apiKey = apiKey,
-                        deepSeekConfig = deepSeekConfig
+                        deepSeekConfig = deepSeekConfigWithFW
                     ).fold(
                         onSuccess = { content ->
                             AIResponseState(
@@ -93,18 +106,21 @@ class AiNetworkRepositoryImpl @Inject constructor(
                         onFailure = { e ->
                             AIResponseState(
                                 status = ResponseStatus.Error,
-                                errorMessage = context.mapDeepSeekErrorToUserFriendlyMessage(e) // 调用 DeepSeek 专属错误映射
+                                errorMessage = context.mapDeepSeekErrorToUserFriendlyMessage(e)
                             )
                         }
                     )
                 }
                 else -> {
-                    val grokConfig = apiConfigRepository.getGrokConfig().first()
-                    grokApiService.generateContent(
+                    val baseDeepSeekConfig = apiConfigRepository.getDeepSeekConfig().first()
+                    val deepSeekConfigWithFW = baseDeepSeekConfig.copy(
+                        floatingWindowSystemInstruction = floatingWindowSystemInstruction
+                    )
+                    deepSeekApiService.generateContent(
                         model = subModel,
                         prompt = query,
                         apiKey = apiKey,
-                        grokConfig = grokConfig
+                        deepSeekConfig = deepSeekConfigWithFW
                     ).fold(
                         onSuccess = { content ->
                             AIResponseState(
@@ -116,7 +132,7 @@ class AiNetworkRepositoryImpl @Inject constructor(
                         onFailure = { e ->
                             AIResponseState(
                                 status = ResponseStatus.Error,
-                                errorMessage = context.mapGrokErrorToUserFriendlyMessage(e)
+                                errorMessage = context.mapDeepSeekErrorToUserFriendlyMessage(e)
                             )
                         }
                     )

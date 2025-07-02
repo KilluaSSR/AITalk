@@ -1,19 +1,23 @@
 package killua.dev.aitalk.ui.viewmodels
 
 import android.util.Log
+import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import killua.dev.aitalk.api.configuration.DeepSeekConfig
 import killua.dev.aitalk.api.configuration.GeminiConfig
 import killua.dev.aitalk.api.configuration.GrokConfig
 import killua.dev.aitalk.models.AIModel
+import killua.dev.aitalk.models.FloatingWindowQuestionMode
 import killua.dev.aitalk.models.SubModel
 import killua.dev.aitalk.repository.ApiConfigRepository
+import killua.dev.aitalk.repository.SettingsRepository
 import killua.dev.aitalk.ui.SnackbarUIEffect
 import killua.dev.aitalk.ui.viewmodels.base.BaseViewModel
 import killua.dev.aitalk.ui.viewmodels.base.UIIntent
 import killua.dev.aitalk.ui.viewmodels.base.UIState
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class ApiConfigUIState(
@@ -24,6 +28,8 @@ data class ApiConfigUIState(
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
     val isSaved: Boolean = false,
+    val currentFloatingWindowQuestionMode: FloatingWindowQuestionMode = FloatingWindowQuestionMode.isThatTrueWithExplain,
+    val editableFloatingWindowSystemInstruction: String = "",
     val grokConfig: GrokConfig = GrokConfig(),
     val geminiConfig: GeminiConfig = GeminiConfig(),
     val deepSeekConfig: DeepSeekConfig = DeepSeekConfig(),
@@ -35,6 +41,7 @@ sealed interface ApiConfigUIIntent : UIIntent {
     data class SaveApiSettings(val model: AIModel) : ApiConfigUIIntent
     data class SelectOption(val index: Int) : ApiConfigUIIntent
     data object ClearError : ApiConfigUIIntent
+    data class UpdateFloatingWindowSystemInstruction(val instruction: String) : ApiConfigUIIntent
 
     data class UpdateGrokSystemInstruction(val instruction: String) : ApiConfigUIIntent
     data class UpdateGrokTemperature(val temperature: Double) : ApiConfigUIIntent
@@ -50,10 +57,25 @@ sealed interface ApiConfigUIIntent : UIIntent {
 
 @HiltViewModel
 class ApiConfigViewModel @Inject constructor(
-    private val repository: ApiConfigRepository
+    private val repository: ApiConfigRepository,
+    private val settingsRepository: SettingsRepository
 ) : BaseViewModel<ApiConfigUIIntent, ApiConfigUIState, SnackbarUIEffect>(
     ApiConfigUIState(parentModel = AIModel.ChatGPT, subModels = emptyList())
 ) {
+    init {
+        viewModelScope.launch {
+            settingsRepository.getFloatingWindowQuestionMode().collectLatest { mode ->
+                val currentModel = uiState.value.parentModel
+                val instruction = repository.getFloatingWindowSystemInstruction(currentModel, mode).firstOrNull().orEmpty()
+                updateState {
+                    it.copy(
+                        currentFloatingWindowQuestionMode = mode,
+                        editableFloatingWindowSystemInstruction = instruction
+                    )
+                }
+            }
+        }
+    }
     override suspend fun onEvent(state: ApiConfigUIState, intent: ApiConfigUIIntent) {
         when (intent) {
             is ApiConfigUIIntent.LoadAll -> {
@@ -71,6 +93,8 @@ class ApiConfigViewModel @Inject constructor(
                 } else {
                     0
                 }
+                val currentQuestionMode = state.currentFloatingWindowQuestionMode
+                val floatingWindowSystemInstruction = repository.getFloatingWindowSystemInstruction(intent.parentModel, currentQuestionMode).firstOrNull().orEmpty()
 
                 // 加载 Grok 或 Gemini 特定的配置
                 when (intent.parentModel) {
@@ -82,6 +106,7 @@ class ApiConfigViewModel @Inject constructor(
                                     apiKey = apiKey,
                                     grokConfig = grokConfig,
                                     optionIndex = optionIndex,
+                                    editableFloatingWindowSystemInstruction = floatingWindowSystemInstruction,
                                     isLoading = false
                                 )
                             )
@@ -95,6 +120,7 @@ class ApiConfigViewModel @Inject constructor(
                                     apiKey = apiKey,
                                     geminiConfig = geminiConfig,
                                     optionIndex = optionIndex,
+                                    editableFloatingWindowSystemInstruction = floatingWindowSystemInstruction,
                                     isLoading = false
                                 )
                             )
@@ -108,6 +134,7 @@ class ApiConfigViewModel @Inject constructor(
                                     apiKey = apiKey,
                                     deepSeekConfig = deepSeekConfig,
                                     optionIndex = optionIndex,
+                                    editableFloatingWindowSystemInstruction = floatingWindowSystemInstruction,
                                     isLoading = false
                                 )
                             )
@@ -119,6 +146,7 @@ class ApiConfigViewModel @Inject constructor(
                                 subModels = subModels,
                                 apiKey = apiKey,
                                 optionIndex = optionIndex,
+                                editableFloatingWindowSystemInstruction = floatingWindowSystemInstruction,
                                 isLoading = false
                             )
                         )
@@ -138,13 +166,15 @@ class ApiConfigViewModel @Inject constructor(
 
 
                 repository.setApiKeyForModel(intent.model, state.apiKey)
-
-
                 val selectedSubModel = state.subModels.getOrNull(state.optionIndex)
                 selectedSubModel?.let {
                     repository.setDefaultSubModelForModel(intent.model, it)
                 }
-
+                repository.setFloatingWindowSystemInstruction(
+                    intent.model,
+                    state.currentFloatingWindowQuestionMode,
+                    state.editableFloatingWindowSystemInstruction
+                )
 
                 when (intent.model) {
                     AIModel.Grok -> {
@@ -224,6 +254,11 @@ class ApiConfigViewModel @Inject constructor(
             is ApiConfigUIIntent.UpdateDeepSeekSystemInstruction -> {
                 updateState { old ->
                     old.copy(deepSeekConfig = old.deepSeekConfig.copy(systemInstruction = intent.instruction), isSaved = false)
+                }
+            }
+            is ApiConfigUIIntent.UpdateFloatingWindowSystemInstruction -> {
+                updateState { old ->
+                    old.copy(editableFloatingWindowSystemInstruction = intent.instruction, isSaved = false)
                 }
             }
         }

@@ -153,6 +153,25 @@ fun PageConfigurations(
                                 .padding(bottom = PaddingTokens.Level4) 
                         )
                     }
+                    Title(
+                        title = stringResource(R.string.floating_window_system_instruction_title) // 新增标题
+                    ) {
+                        BaseTextField(
+                            value = uiState.value.editableFloatingWindowSystemInstruction, // 绑定到 UIState 中的可编辑字段
+                            onValueChange = { newValue ->
+                                scope.launch {
+                                    viewModel.emitIntent(ApiConfigUIIntent.UpdateFloatingWindowSystemInstruction(newValue))
+                                }
+                            },
+                            // Label 是当前浮动窗口模式的名称
+                            label = { Text(stringResource(uiState.value.currentFloatingWindowQuestionMode.stringRes)) },
+                            shape = shape,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = PaddingTokens.Level4)
+                                .padding(bottom = PaddingTokens.Level4)
+                        )
+                    }
 
                     when (parentModel) {
                         AIModel.Grok -> {

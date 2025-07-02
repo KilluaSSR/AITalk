@@ -38,7 +38,7 @@ class DeepSeekApiServiceImpl @Inject constructor(
             val messages = JSONArray().apply {
                 put(JSONObject().apply {
                     put("role", "system")
-                    put("content", deepSeekConfig.systemInstruction.trim())
+                    put("content", (deepSeekConfig.floatingWindowSystemInstruction ?: deepSeekConfig.systemInstruction).trim())
                 })
                 put(JSONObject().apply {
                     put("role", "user")
