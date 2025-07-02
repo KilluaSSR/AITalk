@@ -1,5 +1,6 @@
 package killua.dev.aitalk.repository
 
+import killua.dev.aitalk.api.configuration.DeepSeekConfig
 import killua.dev.aitalk.api.configuration.GeminiConfig
 import killua.dev.aitalk.api.configuration.GrokConfig
 import killua.dev.aitalk.models.AIModel
@@ -26,4 +27,9 @@ interface ApiConfigRepository {
     suspend fun setGeminiTopK(topK: Int)
     suspend fun setGeminiResponseMimeType(mimeType: String)
     suspend fun setGeminiSystemInstruction(instruction: String)
+
+    //Deepseek
+    fun getDeepSeekConfig(): Flow<DeepSeekConfig>
+    suspend fun setDeepSeekTemperature(temperature: Double)
+    suspend fun setDeepSeekSystemInstruction(instruction: String)
 }

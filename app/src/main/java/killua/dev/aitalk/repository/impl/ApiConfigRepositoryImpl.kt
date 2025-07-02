@@ -3,10 +3,13 @@ package killua.dev.aitalk.repository.impl
 import android.content.Context
 import android.util.Log
 import dagger.hilt.android.qualifiers.ApplicationContext
+import killua.dev.aitalk.api.configuration.DeepSeekConfig
 import killua.dev.aitalk.api.configuration.GeminiConfig
 import killua.dev.aitalk.api.configuration.GrokConfig
 import killua.dev.aitalk.datastore.apiKeyKeyForModel
 import killua.dev.aitalk.datastore.readApiKeyForModel
+import killua.dev.aitalk.datastore.readDeepSeekSystemInstruction
+import killua.dev.aitalk.datastore.readDeepSeekTemperature
 import killua.dev.aitalk.datastore.readDefaultSubModelForModel
 import killua.dev.aitalk.datastore.readGeminiResponseMimeType
 import killua.dev.aitalk.datastore.readGeminiSystemInstruction
@@ -16,6 +19,8 @@ import killua.dev.aitalk.datastore.readGeminiTopP
 import killua.dev.aitalk.datastore.readGrokSystemMessage
 import killua.dev.aitalk.datastore.readGrokTemperature
 import killua.dev.aitalk.datastore.writeApiKeyForModel
+import killua.dev.aitalk.datastore.writeDeepSeekSystemInstruction
+import killua.dev.aitalk.datastore.writeDeepSeekTemperature
 import killua.dev.aitalk.datastore.writeDefaultSubModelForModel
 import killua.dev.aitalk.datastore.writeGeminiResponseMimeType
 import killua.dev.aitalk.datastore.writeGeminiSystemInstruction
@@ -105,5 +110,23 @@ class ApiConfigRepositoryImpl @Inject constructor(
 
     override suspend fun setGeminiSystemInstruction(instruction: String) {
         context.writeGeminiSystemInstruction(instruction)
+    }
+
+    //Deepseek
+    override fun getDeepSeekConfig(): Flow<DeepSeekConfig> {
+        return combine(
+            context.readDeepSeekTemperature(),
+            context.readDeepSeekSystemInstruction()
+        ) { temperature, systemInstruction ->
+            DeepSeekConfig(temperature, systemInstruction)
+        }
+    }
+
+    override suspend fun setDeepSeekTemperature(temperature: Double) {
+        context.writeDeepSeekTemperature(temperature)
+    }
+
+    override suspend fun setDeepSeekSystemInstruction(instruction: String) {
+        context.writeDeepSeekSystemInstruction(instruction)
     }
 }

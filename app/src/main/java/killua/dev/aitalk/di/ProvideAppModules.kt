@@ -4,6 +4,8 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import killua.dev.aitalk.api.DeepSeekApiService
+import killua.dev.aitalk.api.DeepSeekApiServiceImpl
 import killua.dev.aitalk.api.GeminiApiService
 import killua.dev.aitalk.api.GeminiApiServiceImpl
 import killua.dev.aitalk.api.GrokApiService
@@ -22,6 +24,10 @@ object ProvideAppModules {
     @Provides
     fun provideGrokApiService(httpClient: OkHttpClient): GrokApiService =
         GrokApiServiceImpl(httpClient)
+
+    @Provides
+    fun provideDeepseekApiService(httpClient: OkHttpClient): DeepSeekApiService =
+        DeepSeekApiServiceImpl(httpClient)
 
     @Provides
     @Singleton

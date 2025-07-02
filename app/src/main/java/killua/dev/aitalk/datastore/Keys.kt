@@ -30,3 +30,7 @@ val GEMINI_TOP_P_KEY = doublePreferencesKey("gemini_top_p")
 val GEMINI_TOP_K_KEY = intPreferencesKey("gemini_top_k")
 val GEMINI_RESPONSE_MIME_TYPE_KEY = stringPreferencesKey("gemini_response_mime_type")
 val GEMINI_SYSTEM_INSTRUCTION_KEY = stringPreferencesKey("gemini_system_instruction")
+
+//Deepseek
+val DEEPSEEK_TEMPERATURE_KEY = doublePreferencesKey("deepseek_temperature")
+val DEEPSEEK_SYSTEM_INSTRUCTION_KEY = stringPreferencesKey("deepseek_system_instruction")

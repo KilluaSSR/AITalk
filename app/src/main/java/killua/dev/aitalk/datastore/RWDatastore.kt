@@ -69,3 +69,16 @@ suspend fun Context.writeGeminiResponseMimeType(mimeType: String) =
 
 suspend fun Context.writeGeminiSystemInstruction(instruction: String) =
     saveStoreString(GEMINI_SYSTEM_INSTRUCTION_KEY, instruction)
+
+//Deekseek
+fun Context.readDeepSeekTemperature(defValue: Double = 1.0) =
+    readStoreDouble(DEEPSEEK_TEMPERATURE_KEY, defValue)
+
+fun Context.readDeepSeekSystemInstruction(defValue: String = "You are a helpful assistant.") =
+    readStoreString(DEEPSEEK_SYSTEM_INSTRUCTION_KEY, defValue)
+
+suspend fun Context.writeDeepSeekTemperature(temperature: Double) =
+    saveStoreDouble(DEEPSEEK_TEMPERATURE_KEY, temperature)
+
+suspend fun Context.writeDeepSeekSystemInstruction(instruction: String) =
+    saveStoreString(DEEPSEEK_SYSTEM_INSTRUCTION_KEY, instruction)

@@ -2,6 +2,7 @@ package killua.dev.aitalk.ui.viewmodels
 
 import android.util.Log
 import dagger.hilt.android.lifecycle.HiltViewModel
+import killua.dev.aitalk.api.configuration.DeepSeekConfig
 import killua.dev.aitalk.api.configuration.GeminiConfig
 import killua.dev.aitalk.api.configuration.GrokConfig
 import killua.dev.aitalk.models.AIModel
@@ -24,7 +25,8 @@ data class ApiConfigUIState(
     val errorMessage: String? = null,
     val isSaved: Boolean = false,
     val grokConfig: GrokConfig = GrokConfig(),
-    val geminiConfig: GeminiConfig = GeminiConfig()
+    val geminiConfig: GeminiConfig = GeminiConfig(),
+    val deepSeekConfig: DeepSeekConfig = DeepSeekConfig(),
 ) : UIState
 
 sealed interface ApiConfigUIIntent : UIIntent {
@@ -42,6 +44,8 @@ sealed interface ApiConfigUIIntent : UIIntent {
     data class UpdateGeminiTopK(val topK: Int) : ApiConfigUIIntent
     data class UpdateGeminiResponseMimeType(val mimeType: String) : ApiConfigUIIntent
     data class UpdateGeminiSystemInstruction(val instruction: String) : ApiConfigUIIntent
+    data class UpdateDeepSeekTemperature(val temperature: Double) : ApiConfigUIIntent
+    data class UpdateDeepSeekSystemInstruction(val instruction: String) : ApiConfigUIIntent
 }
 
 @HiltViewModel
@@ -96,6 +100,19 @@ class ApiConfigViewModel @Inject constructor(
                             )
                         }
                     }
+                    AIModel.DeepSeek -> {
+                        repository.getDeepSeekConfig().collectLatest { deepSeekConfig ->
+                            emitState(
+                                state.copy(
+                                    subModels = subModels,
+                                    apiKey = apiKey,
+                                    deepSeekConfig = deepSeekConfig,
+                                    optionIndex = optionIndex,
+                                    isLoading = false
+                                )
+                            )
+                        }
+                    }
                     else -> {
                         emitState(
                             state.copy(
@@ -140,6 +157,10 @@ class ApiConfigViewModel @Inject constructor(
                         repository.setGeminiTopK(state.geminiConfig.topK)
                         repository.setGeminiResponseMimeType(state.geminiConfig.responseMimeType)
                         repository.setGeminiSystemInstruction(state.geminiConfig.systemInstruction)
+                    }
+                    AIModel.DeepSeek -> {
+                        repository.setDeepSeekTemperature(state.deepSeekConfig.temperature)
+                        repository.setDeepSeekSystemInstruction(state.deepSeekConfig.systemInstruction)
                     }
                     else -> {
 
@@ -193,6 +214,16 @@ class ApiConfigViewModel @Inject constructor(
             is ApiConfigUIIntent.UpdateGeminiSystemInstruction -> {
                 updateState { old ->
                     old.copy(geminiConfig = old.geminiConfig.copy(systemInstruction = intent.instruction), isSaved = false)
+                }
+            }
+            is ApiConfigUIIntent.UpdateDeepSeekTemperature -> {
+                updateState { old ->
+                    old.copy(deepSeekConfig = old.deepSeekConfig.copy(temperature = intent.temperature), isSaved = false)
+                }
+            }
+            is ApiConfigUIIntent.UpdateDeepSeekSystemInstruction -> {
+                updateState { old ->
+                    old.copy(deepSeekConfig = old.deepSeekConfig.copy(systemInstruction = intent.instruction), isSaved = false)
                 }
             }
         }

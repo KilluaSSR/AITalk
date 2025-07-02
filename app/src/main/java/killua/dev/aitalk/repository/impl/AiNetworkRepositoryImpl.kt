@@ -2,6 +2,7 @@ package killua.dev.aitalk.repository.impl
 
 import android.content.Context
 import dagger.hilt.android.qualifiers.ApplicationContext
+import killua.dev.aitalk.api.DeepSeekApiService
 import killua.dev.aitalk.api.GeminiApiService
 import killua.dev.aitalk.api.GrokApiService
 import killua.dev.aitalk.models.AIModel
@@ -11,6 +12,7 @@ import killua.dev.aitalk.repository.ApiConfigRepository
 import killua.dev.aitalk.states.AIResponseState
 import killua.dev.aitalk.states.ResponseStatus
 import killua.dev.aitalk.utils.mapCommonNetworkErrorToUserFriendlyMessage
+import killua.dev.aitalk.utils.mapDeepSeekErrorToUserFriendlyMessage
 import killua.dev.aitalk.utils.mapGeminiErrorToUserFriendlyMessage
 import killua.dev.aitalk.utils.mapGrokErrorToUserFriendlyMessage
 import kotlinx.coroutines.flow.first
@@ -19,6 +21,7 @@ import javax.inject.Inject
 class AiNetworkRepositoryImpl @Inject constructor(
     private val geminiApiService: GeminiApiService,
     private val grokApiService: GrokApiService,
+    private val deepSeekApiService: DeepSeekApiService,
     private val apiConfigRepository: ApiConfigRepository,
     @ApplicationContext private val context: Context
 ) : AiNetworkRepository {
@@ -68,6 +71,29 @@ class AiNetworkRepositoryImpl @Inject constructor(
                             AIResponseState(
                                 status = ResponseStatus.Error,
                                 errorMessage = context.mapGrokErrorToUserFriendlyMessage(e)
+                            )
+                        }
+                    )
+                }
+                AIModel.DeepSeek -> {
+                    val deepSeekConfig = apiConfigRepository.getDeepSeekConfig().first()
+                    deepSeekApiService.generateContent(
+                        model = subModel,
+                        prompt = query,
+                        apiKey = apiKey,
+                        deepSeekConfig = deepSeekConfig
+                    ).fold(
+                        onSuccess = { content ->
+                            AIResponseState(
+                                status = ResponseStatus.Success,
+                                content = content,
+                                timestamp = System.currentTimeMillis()
+                            )
+                        },
+                        onFailure = { e ->
+                            AIResponseState(
+                                status = ResponseStatus.Error,
+                                errorMessage = context.mapDeepSeekErrorToUserFriendlyMessage(e) // 调用 DeepSeek 专属错误映射
                             )
                         }
                     )

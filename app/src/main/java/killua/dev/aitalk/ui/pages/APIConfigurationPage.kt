@@ -264,6 +264,41 @@ fun PageConfigurations(
                                 )
                             }
                         }
+                        AIModel.DeepSeek -> {
+                            Title(
+                                title = stringResource(R.string.system_instruction)
+                            ) {
+                                BaseTextField(
+                                    value = uiState.value.deepSeekConfig.systemInstruction,
+                                    onValueChange = { newValue ->
+                                        scope.launch {
+                                            viewModel.emitIntent(ApiConfigUIIntent.UpdateDeepSeekSystemInstruction(newValue))
+                                        }
+                                    },
+                                    label = { Text(stringResource(R.string.system_instruction)) },
+                                    shape = shape,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = PaddingTokens.Level4)
+                                        .padding(bottom = PaddingTokens.Level4)
+                                )
+                            }
+
+                            Title(title = stringResource(R.string.parameter_settings)) {
+                                Slideable(
+                                    title = stringResource(R.string.temperature),
+                                    value = uiState.value.deepSeekConfig.temperature.toFloat(),
+                                    valueRange = 0F .. 2F, // DeepSeek temperature 默认 1.0，范围通常 0-2
+                                    steps = 0, // 连续值
+                                    desc = uiState.value.deepSeekConfig.temperature.toString(),
+                                    onValueChange = { newValue ->
+                                        scope.launch {
+                                            viewModel.emitIntent(ApiConfigUIIntent.UpdateDeepSeekTemperature(newValue.toDouble()))
+                                        }
+                                    },
+                                )
+                            }
+                        }
                         else -> {
                             // 对于其他模型，目前没有额外配置，保持原样
                         }
