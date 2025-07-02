@@ -209,6 +209,8 @@ fun SettingsPage() {
                                 FloatingWindowQuestionMode.isThatTrueWithExplain -> stringResource(R.string.isThatTrueWithExplain)
                                 FloatingWindowQuestionMode.explainBriefly -> stringResource(R.string.explainBriefly)
                                 FloatingWindowQuestionMode.explainVerbose -> stringResource(R.string.explainVerbose)
+                                FloatingWindowQuestionMode.translate -> stringResource(R.string.translate)
+
                             },
                             content = {
                                 QuestionModeMenu(

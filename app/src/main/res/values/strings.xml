@@ -93,5 +93,6 @@
     <string name="no_history">暂无历史记录~</string>
     <string name="default_model">默认模型</string>
     <string name="parameter_settings">参数设置</string>
+    <string name="translate">翻译</string>
 
 </resources>

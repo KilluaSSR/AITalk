@@ -235,20 +235,17 @@ fun PageConfigurations(
                                         }
                                     },
                                 )
-                                BaseTextField(
-                                    value = uiState.value.geminiConfig.topK.toString(),
+                                Slideable(
+                                    title = stringResource(R.string.top_k),
+                                value = uiState.value.geminiConfig.topK.toFloat(),
+                                    valueRange = 0F .. 40F,
+                                    steps = 38,
+                                    desc = uiState.value.geminiConfig.topK.toString(),
                                     onValueChange = { newValue ->
-                                        val intValue = newValue.toIntOrNull() ?: 0
                                         scope.launch {
-                                            viewModel.emitIntent(ApiConfigUIIntent.UpdateGeminiTopK(intValue))
+                                            viewModel.emitIntent(ApiConfigUIIntent.UpdateGeminiTopK(newValue.toInt()))
                                         }
                                     },
-                                    label = { Text(stringResource(R.string.top_k)) }, 
-                                    shape = shape,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(horizontal = PaddingTokens.Level4) 
-                                        .padding(bottom = PaddingTokens.Level6)
                                 )
                                 BaseTextField(
                                     value = uiState.value.geminiConfig.responseMimeType,

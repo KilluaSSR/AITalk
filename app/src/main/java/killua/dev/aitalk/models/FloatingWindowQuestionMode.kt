@@ -8,6 +8,7 @@ enum class FloatingWindowQuestionMode {
     isThatTrueWithExplain,
     explainBriefly,
     explainVerbose,
+    translate
 }
 
 data class FloatingWindowQuestionModeItems(
@@ -31,5 +32,10 @@ val floatingWindowQuestionModeItemsItems = listOf(
     FloatingWindowQuestionModeItems(
         stringRes = R.string.explainVerbose,
         FloatingWindowQuestionMode.explainVerbose
+    ),
+    FloatingWindowQuestionModeItems(
+        stringRes = R.string.translate,
+        FloatingWindowQuestionMode.translate
     )
+
 )
