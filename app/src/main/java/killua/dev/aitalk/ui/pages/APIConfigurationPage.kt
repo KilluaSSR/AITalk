@@ -154,18 +154,18 @@ fun PageConfigurations(
                         )
                     }
                     Title(
-                        title = stringResource(R.string.floating_window_system_instruction_title) // 新增标题
+                        title = stringResource(R.string.floating_window_system_instruction_title)
                     ) {
                         BaseTextField(
-                            value = uiState.value.editableFloatingWindowSystemInstruction, // 绑定到 UIState 中的可编辑字段
+                            value = uiState.value.editableFloatingWindowSystemInstruction,
                             onValueChange = { newValue ->
                                 scope.launch {
                                     viewModel.emitIntent(ApiConfigUIIntent.UpdateFloatingWindowSystemInstruction(newValue))
                                 }
                             },
-                            // Label 是当前浮动窗口模式的名称
                             label = { Text(stringResource(uiState.value.currentFloatingWindowQuestionMode.stringRes)) },
                             shape = shape,
+                            singleLine = false,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = PaddingTokens.Level4)
@@ -307,8 +307,8 @@ fun PageConfigurations(
                                 Slideable(
                                     title = stringResource(R.string.temperature),
                                     value = uiState.value.deepSeekConfig.temperature.toFloat(),
-                                    valueRange = 0F .. 2F, // DeepSeek temperature 默认 1.0，范围通常 0-2
-                                    steps = 0, // 连续值
+                                    valueRange = 0F .. 2F,
+                                    steps = 0,
                                     desc = uiState.value.deepSeekConfig.temperature.toString(),
                                     onValueChange = { newValue ->
                                         scope.launch {

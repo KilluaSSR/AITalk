@@ -16,6 +16,7 @@ fun BaseTextField(
     trailingIcon: @Composable (() -> Unit)? = null,
     enabled: Boolean = true,
     shape: Shape = OutlinedTextFieldDefaults.shape,
+    singleLine: Boolean = true
 ) {
 
     OutlinedTextField(
@@ -27,6 +28,6 @@ fun BaseTextField(
         enabled = enabled,
         shape = shape,
         modifier = modifier,
-        singleLine = true
+        singleLine = singleLine,
     )
 }

@@ -6,6 +6,7 @@ import killua.dev.aitalk.models.AIModel
 import killua.dev.aitalk.models.FloatingWindowQuestionMode
 import killua.dev.aitalk.models.SubModel
 import killua.dev.aitalk.ui.theme.ThemeMode
+import killua.dev.aitalk.utils.getFloatingWindowInstructionStringRes
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -18,13 +19,20 @@ fun Context.readFloatingWindowQuestionMode(): Flow<FloatingWindowQuestionMode> =
                 ?: FloatingWindowQuestionMode.isThatTrueWithExplain
         }fun Context.readSaveDir(defValue: String = DEFAULT_SAVE_DIR) =
     readStoreString(SAVE_DIR_KEY, defValue)
-fun Context.readFloatingWindowSystemInstruction(questionMode: FloatingWindowQuestionMode, model: AIModel, defValue: String = "") =
-    readStoreString(floatingWindowSystemInstructionKey(questionMode, model), defValue)
+fun Context.readFloatingWindowSystemInstruction(questionMode: FloatingWindowQuestionMode, model: AIModel): Flow<String> =
+    dataStore.data.map { preferences ->
+        val instructionKey = floatingWindowSystemInstructionKey(questionMode, model)
+        val userCustomInstruction = preferences[instructionKey]
+        userCustomInstruction ?: getString(getFloatingWindowInstructionStringRes(questionMode, model))
+    }
 
 fun Context.readApiKeyForModel(model: AIModel, defValue: String = "") =
     readStoreString(apiKeyKeyForModel(model), defValue)
 fun Context.readDefaultSubModelForModel(model: AIModel, defValue: String = "") =
     readStoreString(defaultSubModelKeyForModel(model), defValue)
+        .map { displayName ->
+            SubModel.entries.firstOrNull { it.displayName == displayName }?.displayName ?: defValue
+        }
 
 suspend fun Context.writeFloatingWindowSystemInstruction(questionMode: FloatingWindowQuestionMode, model: AIModel, instruction: String) =
     saveStoreString(floatingWindowSystemInstructionKey(questionMode, model), instruction)
@@ -41,6 +49,8 @@ suspend fun Context.writeApiKeyForModel(model: AIModel, apiKey: String) =
     saveStoreString(apiKeyKeyForModel(model), apiKey)
 suspend fun Context.writeSaveDir(dir: String) =
     saveStoreString(SAVE_DIR_KEY, dir)
+
+
 
 //Grok
 fun Context.readGrokSystemMessage(defValue: String = "You are Grok, a chatbot inspired by the Hitchhikers Guide to the Galaxy.") =

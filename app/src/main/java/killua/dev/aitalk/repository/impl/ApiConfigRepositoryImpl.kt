@@ -39,7 +39,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class ApiConfigRepositoryImpl @Inject constructor(
     @ApplicationContext private val context: Context
 ) : ApiConfigRepository {
