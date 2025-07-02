@@ -1,5 +1,8 @@
 package killua.dev.aitalk.repository.impl
 
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
 import killua.dev.aitalk.db.SearchHistoryDao
 import killua.dev.aitalk.db.SearchHistoryEntity
 import killua.dev.aitalk.models.AIModel
@@ -12,7 +15,16 @@ class HistoryRepositoryImpl @Inject constructor(
     private val dao: SearchHistoryDao
 ) : HistoryRepository {
     override fun getAllHistory(): Flow<List<SearchHistoryEntity>> = dao.observeAll()
-
+    override fun getPagedHistory(): Flow<PagingData<SearchHistoryEntity>> {
+        return Pager(
+            config = PagingConfig(
+                pageSize = 20,
+                enablePlaceholders = false,
+                initialLoadSize = 40
+            ),
+            pagingSourceFactory = { dao.getPagedHistory() }
+        ).flow
+    }
     override suspend fun insertHistoryRecord(
         prompt: String,
         modelResponses: Map<AIModel, AIResponseState>

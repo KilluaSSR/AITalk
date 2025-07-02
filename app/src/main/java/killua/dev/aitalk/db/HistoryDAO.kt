@@ -1,5 +1,6 @@
 package killua.dev.aitalk.db
 
+import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
@@ -10,6 +11,9 @@ import kotlinx.coroutines.flow.Flow
 interface SearchHistoryDao {
     @Query("SELECT * FROM search_history ORDER BY timestamp DESC")
     fun observeAll(): Flow<List<SearchHistoryEntity>>
+
+    @Query("SELECT * FROM search_history ORDER BY timestamp DESC")
+    fun getPagedHistory(): PagingSource<Int, SearchHistoryEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(entity: SearchHistoryEntity)
