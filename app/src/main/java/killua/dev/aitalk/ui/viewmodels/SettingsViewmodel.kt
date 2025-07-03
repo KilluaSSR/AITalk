@@ -90,7 +90,6 @@ class SettingsViewmodel @Inject constructor(
             is SettingsUIIntent.OnArrive -> {
                 emitState(state.copy(isLoading = true))
                 val canOverlay = repository.canDrawOverlays()
-                // 其他检查
                 emitState(state.copy(canDrawOverlays = canOverlay, isLoading = false))
             }
 

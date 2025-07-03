@@ -3,9 +3,9 @@ package killua.dev.aitalk.repository.impl
 import android.content.Context
 import android.util.Log
 import dagger.hilt.android.qualifiers.ApplicationContext
-import killua.dev.aitalk.api.configuration.DeepSeekConfig
-import killua.dev.aitalk.api.configuration.GeminiConfig
-import killua.dev.aitalk.api.configuration.GrokConfig
+import killua.dev.aitalk.api.DeepSeekConfig
+import killua.dev.aitalk.api.GeminiConfig
+import killua.dev.aitalk.api.GrokConfig
 import killua.dev.aitalk.datastore.apiKeyKeyForModel
 import killua.dev.aitalk.datastore.readApiKeyForModel
 import killua.dev.aitalk.datastore.readDeepSeekSystemInstruction

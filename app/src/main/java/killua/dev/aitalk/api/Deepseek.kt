@@ -1,97 +1,74 @@
 package killua.dev.aitalk.api
 
-import killua.dev.aitalk.api.configuration.DeepSeekConfig
+import android.util.Log
+import killua.dev.aitalk.consts.DEEPSEEK_URL
 import killua.dev.aitalk.models.SubModel
-import okhttp3.OkHttpClient
-import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONArray
 import org.json.JSONObject
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import java.io.IOException
 import javax.inject.Inject
-import android.util.Log
-interface DeepSeekApiService {
-    suspend fun generateContent(
-        model: SubModel,
-        prompt: String,
-        apiKey: String,
-        deepSeekConfig: DeepSeekConfig
-    ): Result<String>
-}
 
 class DeepSeekApiServiceImpl @Inject constructor(
-    private val httpClient: OkHttpClient
-) : DeepSeekApiService {
+    httpClient: OkHttpClient
+) : BaseApiServiceImpl<DeepSeekConfig>(httpClient, "DeepSeekAPI"), DeepSeekApiService {
+
     override suspend fun generateContent(
         model: SubModel,
         prompt: String,
         apiKey: String,
         deepSeekConfig: DeepSeekConfig
-    ): Result<String> = withContext(Dispatchers.IO) {
-        try {
-            val url = "https://api.deepseek.com/chat/completions"
-            Log.d("DeepSeekAPI", "请求 URL: $url")
+    ): Result<String> {
+        return executeApiCall(model, prompt, apiKey, deepSeekConfig)
+    }
 
-            val messages = JSONArray().apply {
-                put(JSONObject().apply {
-                    put("role", "system")
-                    put("content", (deepSeekConfig.floatingWindowSystemInstruction ?: deepSeekConfig.systemInstruction).trim())
-                })
-                put(JSONObject().apply {
-                    put("role", "user")
-                    put("content", prompt.trim())
-                })
-            }
+    override fun buildRequest(
+        model: SubModel,
+        prompt: String,
+        apiKey: String,
+        config: DeepSeekConfig
+    ): Request {
 
-            val requestBodyJson = JSONObject().apply {
-                put("model", model.displayName.lowercase())
-                put("messages", messages)
-                put("stream", false)
-                put("temperature", deepSeekConfig.temperature)
-            }.toString()
+        val messages = JSONArray().apply {
+            put(JSONObject().apply {
+                put("role", "system")
+                put("content", getSystemInstruction(config))
+            })
+            put(JSONObject().apply {
+                put("role", "user")
+                put("content", prompt.trim())
+            })
+        }
+        val requestBodyJson = JSONObject().apply {
+            put("model", model.displayName.lowercase())
+            put("messages", messages)
+            put("stream", false)
+            put("temperature", config.temperature)
+        }.toString()
 
-            Log.d("DeepSeekAPI", "请求 JSON Payload: $requestBodyJson")
+        Log.d("DeepSeekAPI", "请求 JSON Payload: $requestBodyJson")
 
-            val request = Request.Builder()
-                .url(url)
-                .addHeader("Content-Type", "application/json")
-                .addHeader("Authorization", "Bearer $apiKey")
-                .post(requestBodyJson.toRequestBody("application/json".toMediaTypeOrNull()))
-                .build()
+        return Request.Builder()
+            .url(DEEPSEEK_URL)
+            .addHeader("Content-Type", "application/json")
+            .addHeader("Authorization", "Bearer $apiKey")
+            .post(requestBodyJson.toRequestBody("application/json".toMediaTypeOrNull()))
+            .build()
+    }
 
-            httpClient.newCall(request).execute().use { response ->
-                Log.d("DeepSeekAPI", "响应代码: ${response.code}")
-
-                val responseBodyString = response.body?.string().orEmpty()
-                Log.d("DeepSeekAPI", "原始响应体: $responseBodyString")
-
-                if (!response.isSuccessful) {
-                    Log.e("DeepSeekAPI", "HTTP 错误: ${response.code}, 错误体: $responseBodyString")
-                    return@withContext Result.failure(IOException("HTTP Error ${response.code}: $responseBodyString"))
-                }
-
-                val jsonResponse = JSONObject(responseBodyString)
-                val text = jsonResponse
-                    .optJSONArray("choices")
-                    ?.optJSONObject(0)
-                    ?.optJSONObject("message")
-                    ?.optString("content", "")
-                    ?: ""
-
-                if (text.isEmpty()) {
-                    Log.w("DeepSeekAPI", "未能从响应中提取 'text'，返回原始响应体。")
-                    return@withContext Result.success(responseBodyString)
-                }
-
-                Log.d("DeepSeekAPI", "提取到的文本: $text")
-                Result.success(text)
-            }
+    override fun parseSuccessfulResponse(responseBody: String): String {
+        return try {
+            JSONObject(responseBody)
+                .optJSONArray("choices")
+                ?.optJSONObject(0)
+                ?.optJSONObject("message")
+                ?.optString("content", "")
+                ?: ""
         } catch (e: Exception) {
-            Log.e("DeepSeekAPI", "DeepSeek API 调用失败: ${e.message}", e)
-            Result.failure(e)
+            Log.e("DeepSeekAPI", "解析响应失败: $e")
+            ""
         }
     }
 }

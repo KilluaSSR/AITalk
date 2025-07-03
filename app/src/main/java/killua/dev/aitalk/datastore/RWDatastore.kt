@@ -14,43 +14,67 @@ import kotlinx.coroutines.flow.map
 fun Context.readTheme() = readStoreString(THEME_MODE, defValue = ThemeMode.SYSTEM.name)
 fun Context.readSecureHistory() = readStoreBoolean(key = SECURE_HISTORY, defValue = false)
 fun Context.readFloatingWindowQuestionMode(): Flow<FloatingWindowQuestionMode> =
-    readStoreString(FLOATING_WINDOW_QUESTION_MODE, defValue = FloatingWindowQuestionMode.isThatTrueWithExplain.name)
+    readStoreString(
+        FLOATING_WINDOW_QUESTION_MODE,
+        defValue = FloatingWindowQuestionMode.isThatTrueWithExplain.name
+    )
         .map { name ->
             FloatingWindowQuestionMode.entries.firstOrNull { it.name == name }
                 ?: FloatingWindowQuestionMode.isThatTrueWithExplain
-        }fun Context.readSaveDir(defValue: String = DEFAULT_SAVE_DIR) =
+        }
+
+fun Context.readSaveDir(defValue: String = DEFAULT_SAVE_DIR) =
     readStoreString(SAVE_DIR_KEY, defValue)
-fun Context.readFloatingWindowSystemInstruction(questionMode: FloatingWindowQuestionMode, model: AIModel): Flow<String> =
+
+fun Context.readFloatingWindowSystemInstruction(
+    questionMode: FloatingWindowQuestionMode,
+    model: AIModel
+): Flow<String> =
     dataStore.data.map { preferences ->
         val instructionKey = floatingWindowSystemInstructionKey(questionMode, model)
         val userCustomInstruction = preferences[instructionKey]
-        userCustomInstruction ?: getString(getFloatingWindowInstructionStringRes(questionMode, model))
+        userCustomInstruction ?: getString(
+            getFloatingWindowInstructionStringRes(
+                questionMode,
+                model
+            )
+        )
     }
 
 fun Context.readApiKeyForModel(model: AIModel, defValue: String = "") =
     readStoreString(apiKeyKeyForModel(model), defValue)
+
 fun Context.readDefaultSubModelForModel(model: AIModel, defValue: String = "") =
     readStoreString(defaultSubModelKeyForModel(model), defValue)
 
 
-suspend fun Context.writeFloatingWindowSystemInstruction(questionMode: FloatingWindowQuestionMode, model: AIModel, instruction: String) =
+suspend fun Context.writeFloatingWindowSystemInstruction(
+    questionMode: FloatingWindowQuestionMode,
+    model: AIModel,
+    instruction: String
+) =
     saveStoreString(floatingWindowSystemInstructionKey(questionMode, model), instruction)
 
 
 suspend fun Context.writeDefaultSubModelForModel(model: AIModel, subModel: SubModel) {
-    Log.d("DataStore", "Setting default sub model for model ${defaultSubModelKeyForModel(model)}. Value: ${subModel.name}")
+    Log.d(
+        "DataStore",
+        "Setting default sub model for model ${defaultSubModelKeyForModel(model)}. Value: ${subModel.name}"
+    )
     saveStoreString(defaultSubModelKeyForModel(model), subModel.name)
 }
+
 suspend fun Context.writeTheme(theme: String) = saveStoreString(THEME_MODE, theme)
 suspend fun Context.writeSecureMyHistory(set: Boolean) = saveStoreBoolean(SECURE_HISTORY, set)
 
 suspend fun Context.writeFloatingWindowQuestionMode(mode: FloatingWindowQuestionMode) =
     saveStoreString(FLOATING_WINDOW_QUESTION_MODE, mode.name)
+
 suspend fun Context.writeApiKeyForModel(model: AIModel, apiKey: String) =
     saveStoreString(apiKeyKeyForModel(model), apiKey)
+
 suspend fun Context.writeSaveDir(dir: String) =
     saveStoreString(SAVE_DIR_KEY, dir)
-
 
 
 //Grok
@@ -79,8 +103,10 @@ fun Context.readGeminiTopK(defValue: Int = 40) =
 fun Context.readGeminiResponseMimeType(defValue: String = "text/plain") =
     readStoreString(GEMINI_RESPONSE_MIME_TYPE_KEY, defValue)
 
-fun Context.readGeminiSystemInstruction(defValue: String = "You are a helpful assistant.") = // 默认值，如果 curl 示例中是 "You are a cat. Your name is Neko."，则改为那个
+fun Context.readGeminiSystemInstruction(defValue: String = "You are a helpful assistant.") =
+    // 默认值，如果 curl 示例中是 "You are a cat. Your name is Neko."，则改为那个
     readStoreString(GEMINI_SYSTEM_INSTRUCTION_KEY, defValue)
+
 suspend fun Context.writeGeminiTemperature(temperature: Double) =
     saveStoreDouble(GEMINI_TEMPERATURE_KEY, temperature)
 

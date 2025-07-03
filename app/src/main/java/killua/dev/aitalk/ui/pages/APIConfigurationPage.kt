@@ -319,7 +319,6 @@ fun PageConfigurations(
                             }
                         }
                         else -> {
-                            // 对于其他模型，目前没有额外配置，保持原样
                         }
                     }
                 }

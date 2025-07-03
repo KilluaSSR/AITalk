@@ -1,102 +1,74 @@
 package killua.dev.aitalk.api
 
 import android.util.Log
-import killua.dev.aitalk.api.configuration.GeminiConfig
+import killua.dev.aitalk.consts.GEMINI_URL
 import killua.dev.aitalk.models.SubModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONArray
 import org.json.JSONObject
-import java.io.IOException
 import javax.inject.Inject
 
-interface GeminiApiService {
-    suspend fun generateContent(
-        model: SubModel,
-        prompt: String,
-        apiKey: String,
-        geminiConfig: GeminiConfig
-    ): Result<String>
-}
-
 class GeminiApiServiceImpl @Inject constructor(
-    private val httpClient: OkHttpClient
-) : GeminiApiService {
+    httpClient: OkHttpClient
+) : BaseApiServiceImpl<GeminiConfig>(httpClient, "GeminiAPI"), GeminiApiService {
+
     override suspend fun generateContent(
         model: SubModel,
         prompt: String,
         apiKey: String,
-        geminiConfig: GeminiConfig,
-    ): Result<String> = withContext(Dispatchers.IO) {
-        try {
-            val url = "https://generativelanguage.googleapis.com/v1beta/models/${model.displayName.lowercase()}:generateContent?key=$apiKey"
-            Log.d("GeminiURL", url)
-            val requestBodyJson = JSONObject().apply {
-                put("generationConfig", JSONObject().apply {
-                    put("temperature", geminiConfig.temperature)
-                    put("topP", geminiConfig.topP)
-                    put("topK", geminiConfig.topK)
-                    put("responseMimeType", geminiConfig.responseMimeType)
+        geminiConfig: GeminiConfig
+    ): Result<String> {
+        return executeApiCall(model, prompt, apiKey, geminiConfig)
+    }
+
+    override fun buildRequest(model: SubModel, prompt: String, apiKey: String, config: GeminiConfig): Request {
+        val url = GEMINI_URL+"${model.displayName.lowercase()}:generateContent?key=$apiKey"
+
+        val requestBodyJson = JSONObject().apply {
+            put("generationConfig", JSONObject().apply {
+                put("temperature", config.temperature)
+                put("topP", config.topP)
+                put("topK", config.topK)
+                put("responseMimeType", config.responseMimeType)
+            })
+            put("systemInstruction", JSONObject().apply {
+                put("parts", JSONArray().apply {
+                    put(JSONObject().put("text", getSystemInstruction(config)))
                 })
-                put("systemInstruction", JSONObject().apply {
+            })
+            put("contents", JSONArray().apply {
+                put(JSONObject().apply {
                     put("parts", JSONArray().apply {
-                        put(JSONObject().apply {
-                            put("text", (geminiConfig.floatingWindowSystemInstruction ?: geminiConfig.systemInstruction).trim())
-                        })
+                        put(JSONObject().put("text", prompt.trim()))
                     })
                 })
-                put("contents", JSONArray().apply {
-                    put(JSONObject().apply {
-                        put("parts", JSONArray().apply {
-                            put(JSONObject().apply {
-                                put("text", prompt.trim())
-                            })
-                        })
-                    })
-                })
-            }.toString()
-            Log.d("GeminiAPI", "Request JSON Payload: $requestBodyJson")
-            val request = Request.Builder()
-                .url(url)
-                .post(requestBodyJson.toRequestBody("application/json".toMediaTypeOrNull()))
-                .build()
-            httpClient.newCall(request).execute().use { response ->
-                Log.d("GeminiAPI", "Response Code: ${response.code}")
+            })
+        }.toString()
 
-                val responseBodyString = response.body?.string().orEmpty()
-                Log.d("GeminiAPI", "Raw Response Body: $responseBodyString")
+        Log.d("GeminiAPI", "请求 JSON Payload: $requestBodyJson")
 
-                if (!response.isSuccessful) {
-                    Log.e("GeminiAPI", "HTTP Error: ${response.code}, Error Body: $responseBodyString")
-                    return@withContext Result.failure(IOException("HTTP Error ${response.code}: $responseBodyString"))
-                }
+        return Request.Builder()
+            .url(url)
+            .post(requestBodyJson.toRequestBody("application/json".toMediaTypeOrNull()))
+            .build()
+    }
 
-                // 使用 JSONObject 解析响应体，安全地提取文本
-                val jsonResponse = JSONObject(responseBodyString)
-                val text = jsonResponse
-                    .optJSONArray("candidates") // 获取 candidates 数组
-                    ?.optJSONObject(0)          // 获取第一个 candidate 对象
-                    ?.optJSONObject("content")  // 获取 content 对象
-                    ?.optJSONArray("parts")     // 获取 parts 数组
-                    ?.optJSONObject(0)          // 获取第一个 part 对象
-                    ?.optString("text", "")     // 获取 text 字段，如果不存在则返回空字符串
-                    ?: "" // 如果链式调用中任何一步为 null，则返回空字符串
-
-                if (text.isEmpty()) {
-                    Log.w("GeminiAPI", "Could not extract 'text' from response, returning raw body.")
-                    return@withContext Result.success(responseBodyString) // 如果无法提取，返回原始响应体
-                }
-
-                Log.d("GeminiAPI", "Extracted Text: $text")
-                Result.success(text)
-            }
+    override fun parseSuccessfulResponse(responseBody: String): String {
+        return try {
+            JSONObject(responseBody)
+                .optJSONArray("candidates")
+                ?.optJSONObject(0)
+                ?.optJSONObject("content")
+                ?.optJSONArray("parts")
+                ?.optJSONObject(0)
+                ?.optString("text", "")
+                ?: ""
         } catch (e: Exception) {
-            Log.d("Exception", "GeminiAPICallingFailed: $e")
-            Result.failure(e)
+            Log.e("GeminiAPI", "解析响应失败: $e")
+            ""
         }
     }
 }

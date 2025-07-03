@@ -17,6 +17,7 @@ fun Context.readStoreLong(key: Preferences.Key<Long>, defValue: Long) = dataStor
 
 fun Context.readStoreDouble(key: Preferences.Key<Double>, defValue: Double) =
     dataStore.data.map { preferences -> preferences[key] ?: defValue }
+
 suspend fun Context.saveStoreString(key: Preferences.Key<String>, value: String) = dataStore.edit { settings -> settings[key] = value }
 suspend fun Context.saveStoreBoolean(key: Preferences.Key<Boolean>, value: Boolean) = dataStore.edit { settings -> settings[key] = value }
 suspend fun Context.saveStoreInt(key: Preferences.Key<Int>, value: Int) = dataStore.edit { settings -> settings[key] = value }

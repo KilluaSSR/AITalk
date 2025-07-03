@@ -51,8 +51,8 @@ fun AIResponseCard(
             contentColor = MaterialTheme.colorScheme.onErrorContainer,
         )
         else -> CardDefaults.elevatedCardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-            contentColor = MaterialTheme.colorScheme.onSurface,
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
         )
     }
 
@@ -103,7 +103,7 @@ fun AIResponseCard(
                             Text(
                                 text = textToShow,
                                 style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                color = MaterialTheme.colorScheme.onSurface,
                                 maxLines = if (expanded) Int.MAX_VALUE else 3,
                                 modifier = Modifier.animateContentSize()
                             )
@@ -152,7 +152,7 @@ fun AIResponseCard(
 @Composable
 fun AIResponseCardPreview(){
     AIResponseCard(
-        AIResponseState(status = ResponseStatus.Error),
+        AIResponseState(status = ResponseStatus.Loading),
         "Gemini",
         onCopyClicked = {},
         onSaveClicked = {},

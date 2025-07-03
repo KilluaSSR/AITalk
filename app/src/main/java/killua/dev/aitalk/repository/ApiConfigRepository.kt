@@ -1,8 +1,9 @@
 package killua.dev.aitalk.repository
 
-import killua.dev.aitalk.api.configuration.DeepSeekConfig
-import killua.dev.aitalk.api.configuration.GeminiConfig
-import killua.dev.aitalk.api.configuration.GrokConfig
+
+import killua.dev.aitalk.api.DeepSeekConfig
+import killua.dev.aitalk.api.GeminiConfig
+import killua.dev.aitalk.api.GrokConfig
 import killua.dev.aitalk.models.AIModel
 import killua.dev.aitalk.models.FloatingWindowQuestionMode
 import killua.dev.aitalk.models.SubModel
