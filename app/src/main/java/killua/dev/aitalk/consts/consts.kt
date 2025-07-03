@@ -5,4 +5,4 @@ const val GROK_URL = "https://api.x.ai/v1/chat/completions"
 const val DEEPSEEK_URL = "https://api.deepseek.com/chat/completions"
 const val GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/"
 
-const val LOCALE_DEFAULT = "auto"
+const val SYSTEM_LOCALE_TAG = "system"

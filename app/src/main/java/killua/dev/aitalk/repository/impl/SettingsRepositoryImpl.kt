@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
 import dagger.hilt.android.qualifiers.ApplicationContext
 import killua.dev.aitalk.consts.DEFAULT_SAVE_DIR
+import killua.dev.aitalk.consts.SYSTEM_LOCALE_TAG
 import killua.dev.aitalk.datastore.readFloatingWindowQuestionMode
 import killua.dev.aitalk.datastore.readFloatingWindowSystemInstruction
 import killua.dev.aitalk.datastore.readLocale
@@ -70,11 +71,15 @@ class SettingsRepositoryImpl @Inject constructor(
     }
 
     override fun readLocale(): Flow<String> = context.readLocale()
+
     override suspend fun changeMyLanguage(locale: String) {
         withMainContext{
-            AppCompatDelegate.setApplicationLocales(
+            val localeList = if (locale == SYSTEM_LOCALE_TAG) {
+                LocaleListCompat.getEmptyLocaleList()
+            } else {
                 LocaleListCompat.forLanguageTags(locale)
-            )
+            }
+            AppCompatDelegate.setApplicationLocales(localeList)
         }
     }
 }

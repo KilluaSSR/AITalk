@@ -3,7 +3,7 @@ package killua.dev.aitalk.datastore
 import android.content.Context
 import android.util.Log
 import killua.dev.aitalk.consts.DEFAULT_SAVE_DIR
-import killua.dev.aitalk.consts.LOCALE_DEFAULT
+import killua.dev.aitalk.consts.SYSTEM_LOCALE_TAG
 import killua.dev.aitalk.models.AIModel
 import killua.dev.aitalk.models.FloatingWindowQuestionMode
 import killua.dev.aitalk.models.SubModel
@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
 fun Context.readTheme() = readStoreString(THEME_MODE, defValue = ThemeMode.SYSTEM.name)
-fun Context.readLocale() = readStoreString(LOCALE_MODE, defValue = LOCALE_DEFAULT)
+fun Context.readLocale() = readStoreString(LOCALE_MODE, defValue = SYSTEM_LOCALE_TAG)
 fun Context.readSecureHistory() = readStoreBoolean(key = SECURE_HISTORY, defValue = false)
 fun Context.readFloatingWindowQuestionMode(): Flow<FloatingWindowQuestionMode> =
     readStoreString(

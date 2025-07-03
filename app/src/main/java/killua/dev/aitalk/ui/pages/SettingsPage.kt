@@ -40,8 +40,8 @@ import killua.dev.aitalk.R
 import killua.dev.aitalk.datastore.SECURE_HISTORY
 import killua.dev.aitalk.models.AIModel
 import killua.dev.aitalk.models.FloatingWindowQuestionMode
-import killua.dev.aitalk.models.localeToNameResMap
 import killua.dev.aitalk.models.stringRes
+import killua.dev.aitalk.models.supportedLanguageMenuItems
 import killua.dev.aitalk.ui.Routes
 import killua.dev.aitalk.ui.SnackbarUIEffect
 import killua.dev.aitalk.ui.components.Clickable
@@ -74,7 +74,8 @@ fun SettingsPage() {
     val viewModel: SettingsViewmodel = hiltViewModel()
     val uiState = viewModel.uiState.collectAsStateWithLifecycle()
     val lifecycleOwner = LocalLifecycleOwner.current
-
+    val currentLanguageItem = supportedLanguageMenuItems.find { it.localeTag == uiState.value.localeMode }
+        ?: supportedLanguageMenuItems.first()
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri: Uri? ->
         uri?.let {
             context.contentResolver.takePersistableUriPermission(
@@ -172,7 +173,7 @@ fun SettingsPage() {
                         }
                         Clickable(
                             title = stringResource(R.string.language),
-                            value = stringResource(localeToNameResMap[uiState.value.localeMode]!!)
+                            value = stringResource(currentLanguageItem.nameResId)
                         ) {
                             showLocaleMenu = true
                         }
