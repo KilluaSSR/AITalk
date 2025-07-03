@@ -138,5 +138,10 @@
     <string name="fw_instruction_translate_gemini">你是一个专业的翻译家。翻译给定的文本。</string>
     <string name="fw_instruction_translate_deepseek">你是一个专业的翻译家。翻译给定的文本。</string>
     <string name="fw_instruction_translate_grok">你是一个专业的翻译家。翻译给定的文本。</string>
+    <string name="zh_cn">简体中文</string>
+    <string name="zh_hk">繁体中文</string>
+    <string name="english">English</string>
+    <string name="japanese">日本語</string>
+    <string name="language">语言</string>
 
 </resources>
