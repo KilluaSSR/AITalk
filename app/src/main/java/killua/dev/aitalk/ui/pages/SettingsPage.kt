@@ -73,7 +73,6 @@ fun SettingsPage() {
     var showQuestionModeMenu by remember { mutableStateOf(false) }
     val viewModel: SettingsViewmodel = hiltViewModel()
     val uiState = viewModel.uiState.collectAsStateWithLifecycle()
-    val lifecycleOwner = LocalLifecycleOwner.current
     val currentLanguageItem = supportedLanguageMenuItems.find { it.localeTag == uiState.value.localeMode }
         ?: supportedLanguageMenuItems.first()
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri: Uri? ->
@@ -91,6 +90,7 @@ fun SettingsPage() {
         title = stringResource(R.string.settings),
         snackbarHostState = null
     ) {
+
         LaunchedEffect(Unit) {
             viewModel.navigationEvent.collect { event ->
                 when (event) {
@@ -107,20 +107,6 @@ fun SettingsPage() {
         LaunchedEffect(uiState.value.isChoosingDir) {
             if (uiState.value.isChoosingDir) {
                 launcher.launch(null)
-            }
-        }
-
-        DisposableEffect(lifecycleOwner) {
-            val observer = LifecycleEventObserver { _, event ->
-                if (event == Lifecycle.Event.ON_RESUME) {
-                    scope.launch {
-                        viewModel.emitIntent(SettingsUIIntent.OnArrive)
-                    }
-                }
-            }
-            lifecycleOwner.lifecycle.addObserver(observer)
-            onDispose {
-                lifecycleOwner.lifecycle.removeObserver(observer)
             }
         }
         Crossfade(

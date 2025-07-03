@@ -9,10 +9,12 @@ import killua.dev.aitalk.ui.theme.ThemeMode
 import killua.dev.aitalk.ui.viewmodels.base.BaseViewModel
 import killua.dev.aitalk.ui.viewmodels.base.UIIntent
 import killua.dev.aitalk.ui.viewmodels.base.UIState
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 sealed interface SettingsUIIntent : UIIntent {
@@ -21,7 +23,6 @@ sealed interface SettingsUIIntent : UIIntent {
     data class UpdateLocaleSettings(val locale: String) : SettingsUIIntent
     data class UpdateQuestionMode(val mode: FloatingWindowQuestionMode) : SettingsUIIntent
     data object GoToOverlaySettingsClicked : SettingsUIIntent
-    data object OnArrive : SettingsUIIntent
     data object ChooseSaveDir : SettingsUIIntent
     data class SaveDirSelected(val uri: String) : SettingsUIIntent
 }
@@ -53,25 +54,34 @@ class SettingsViewmodel @Inject constructor(
     val navigationEvent = _navigationEvent.asSharedFlow()
 
     init {
-        val themeFlow = repository.getThemeMode()
-        val securedHistoryFlow = repository.isHistorySecured()
-        val questionMode = repository.getFloatingWindowQuestionMode()
-        val saveDir = repository.getSaveDir()
-        val localeMode = repository.readLocale()
-        viewModelScope.launch {
-            combine(themeFlow, securedHistoryFlow, questionMode, saveDir, localeMode) { themeName, isSecured, questionMode, saveDir, localeMode ->
-                SettingsUIState(
-                    isLoading = false,
-                    themeMode = ThemeMode.valueOf(themeName),
-                    saveDir = saveDir,
-                    questionMode = questionMode,
-                    localeMode = localeMode,
-                    isBiometricAvailable = repository.isBiometricAvailable(),
-                    isHistorySecured = isSecured,
-                    canDrawOverlays = repository.canDrawOverlays()
-                )
-            }.collect { newState ->
-                emitState(newState)
+         viewModelScope.launch {
+            emitState(uiState.value.copy(isLoading = true))
+
+            withContext(Dispatchers.IO) {
+                val isBiometric = repository.isBiometricAvailable()
+                val canOverlay = repository.canDrawOverlays()
+                combine(
+                    repository.getThemeMode(),
+                    repository.isHistorySecured(),
+                    repository.getFloatingWindowQuestionMode(),
+                    repository.getSaveDir(),
+                    repository.readLocale()
+                ) { themeName, isSecured, questionMode, saveDir, localeMode ->
+                    SettingsUIState(
+                        isLoading = false,
+                        themeMode = ThemeMode.valueOf(themeName),
+                        saveDir = saveDir,
+                        questionMode = questionMode,
+                        localeMode = localeMode,
+                        isBiometricAvailable = isBiometric,
+                        isHistorySecured = isSecured,
+                        canDrawOverlays = canOverlay
+                    )
+                }.collect { newState ->
+                    withContext(Dispatchers.Main) {
+                        emitState(newState)
+                    }
+                }
             }
         }
     }
@@ -91,12 +101,6 @@ class SettingsViewmodel @Inject constructor(
                     }
                 }
             }
-            is SettingsUIIntent.OnArrive -> {
-                emitState(state.copy(isLoading = true))
-                val canOverlay = repository.canDrawOverlays()
-                emitState(state.copy(canDrawOverlays = canOverlay, isLoading = false))
-            }
-
             is SettingsUIIntent.UpdateQuestionMode -> {
                 repository.setFloatingWindowQuestionMode(intent.mode)
                 emitState(state.copy(questionMode = intent.mode))
