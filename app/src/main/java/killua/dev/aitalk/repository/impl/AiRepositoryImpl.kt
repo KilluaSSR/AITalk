@@ -1,6 +1,7 @@
 package killua.dev.aitalk.repository.impl
 
 import killua.dev.aitalk.models.AIModel
+import killua.dev.aitalk.models.ExtraInformation
 import killua.dev.aitalk.models.SubModel
 import killua.dev.aitalk.repository.AiNetworkRepository
 import killua.dev.aitalk.repository.AiRepository
@@ -20,12 +21,11 @@ class AiRepositoryImpl @Inject constructor(
     override fun fetchAiResponses(
         query: String,
         subModelMap: Map<AIModel, SubModel>,
-        floatingWindowSystemInstructions: Map<AIModel, String?>
+        extraInformation: ExtraInformation
     ): Flow<Pair<AIModel, AIResponseState>> = channelFlow {
         for ((model, subModel) in subModelMap) {
             launch {
-                val fwSystemInstruction = floatingWindowSystemInstructions[model]
-                val result = networkRepo.fetchResponse(query, subModel, fwSystemInstruction) // 传递给 Network 层
+                val result = networkRepo.fetchResponse(query, subModel, extraInformation)
                 send(model to result)
             }
         }

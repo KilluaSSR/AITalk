@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import killua.dev.aitalk.consts.DEFAULT_SAVE_DIR
 import killua.dev.aitalk.models.AIModel
+import killua.dev.aitalk.models.ExtraInformation
 import killua.dev.aitalk.models.FloatingWindowQuestionMode
 import killua.dev.aitalk.models.SubModel
 import killua.dev.aitalk.repository.AiRepository
@@ -25,7 +26,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
-
+import killua.dev.aitalk.utils.prepareAiSearchData
 sealed interface FloatingWindowUIIntent: UIIntent{
     data class StartSearch(val query: String) : FloatingWindowUIIntent
     data class CopyResponse(val model: AIModel) : FloatingWindowUIIntent
@@ -60,29 +61,15 @@ class FloatingWindowViewModel @Inject constructor(
         when(intent){
             is FloatingWindowUIIntent.StartSearch -> {
                 val query = intent.query
-                val subModelMap: Map<AIModel, SubModel> = AIModel.entries.associateWith { model ->
-                    apiConfigRepository.getDefaultSubModelForModel(model).firstOrNull()
-                        ?: SubModel.entries.first { it.parent == model }
-                }
+                val (filteredSubModelMap, _, initialResponses) = prepareAiSearchData(
+                    apiConfigRepository = apiConfigRepository
+                )
 
-                val apiKeyMap: Map<AIModel, String> = AIModel.entries.associateWith { model ->
-                    apiConfigRepository.getApiKeyForModel(model).firstOrNull().orEmpty()
-                }
-
-                val filteredSubModelMap: Map<AIModel, SubModel> = subModelMap.filter { (model, _) ->
-                    apiKeyMap[model]?.isNotBlank() == true
-                }
                 val currentFloatingWindowQuestionMode = settingsRepository.getFloatingWindowQuestionMode().firstOrNull()
                     ?: FloatingWindowQuestionMode.isThatTrueWithExplain
 
-                val floatingWindowSystemInstructions: MutableMap<AIModel, String?> = mutableMapOf()
-                for (model in filteredSubModelMap.keys) {
-                    val instruction = apiConfigRepository.getFloatingWindowSystemInstruction(model, currentFloatingWindowQuestionMode).firstOrNull()
-                    floatingWindowSystemInstructions[model] = instruction
-                }
-
-                val initialResponses: Map<AIModel, AIResponseState> = filteredSubModelMap.keys.associateWith {
-                    AIResponseState(status = ResponseStatus.Loading)
+                val floatingWindowSystemInstructions: Map<AIModel, String?> = filteredSubModelMap.keys.associateWith { model ->
+                    apiConfigRepository.getFloatingWindowSystemInstruction(model, currentFloatingWindowQuestionMode).firstOrNull()
                 }
 
                 emitState(
@@ -93,7 +80,11 @@ class FloatingWindowViewModel @Inject constructor(
                     )
                 )
 
-                aiRepository.fetchAiResponses(query, filteredSubModelMap, floatingWindowSystemInstructions)
+                val extraInformation = ExtraInformation(
+                    floatingWindowSystemInstructions = floatingWindowSystemInstructions
+                )
+
+                aiRepository.fetchAiResponses(query, filteredSubModelMap, extraInformation)
                     .onEach { (model, response) ->
                         updateState { old ->
                             val updatedMap = old.aiResponses.toMutableMap()

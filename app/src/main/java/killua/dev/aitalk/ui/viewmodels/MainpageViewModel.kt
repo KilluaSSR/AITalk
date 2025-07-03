@@ -24,7 +24,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
-
+import killua.dev.aitalk.utils.prepareAiSearchData
 sealed interface MainpageUIIntent : UIIntent {
     data class UpdateSearchQuery(val query: String) : MainpageUIIntent
     data object ClearInput : MainpageUIIntent
@@ -67,20 +67,10 @@ class MainpageViewModel @Inject constructor(
         when(intent){
             is MainpageUIIntent.OnSendButtonClick -> {
                 val newQuery = intent.query
-                val subModelMap: Map<AIModel, SubModel> = AIModel.entries.associateWith { model ->
-                    state.subModelMap[model]
-                        ?: apiConfigRepository.getDefaultSubModelForModel(model).firstOrNull()
-                        ?: SubModel.entries.first { it.parent == model }
-                }
-                val apiKeyMap: Map<AIModel, String> = AIModel.entries.associateWith { model ->
-                    apiConfigRepository.getApiKeyForModel(model).firstOrNull().orEmpty()
-                }
-                val filteredSubModelMap: Map<AIModel, SubModel> = subModelMap.filter { (model, _) ->
-                    apiKeyMap[model]?.isNotBlank() == true
-                }
-                val initialResponses: Map<AIModel, AIResponseState> = filteredSubModelMap.keys.associateWith {
-                    AIResponseState(status = ResponseStatus.Loading)
-                }
+                val (filteredSubModelMap, _, initialResponses) = prepareAiSearchData(
+                    apiConfigRepository = apiConfigRepository,
+                    currentSubModelMap = state.subModelMap // 传入当前 state 的 subModelMap
+                )
                 emitState(
                     state.copy(
                         showGreetings = false,

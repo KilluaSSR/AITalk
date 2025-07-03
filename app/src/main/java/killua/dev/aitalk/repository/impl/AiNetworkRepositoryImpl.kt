@@ -6,6 +6,7 @@ import killua.dev.aitalk.api.DeepSeekApiService
 import killua.dev.aitalk.api.GeminiApiService
 import killua.dev.aitalk.api.GrokApiService
 import killua.dev.aitalk.models.AIModel
+import killua.dev.aitalk.models.ExtraInformation
 import killua.dev.aitalk.models.SubModel
 import killua.dev.aitalk.repository.AiNetworkRepository
 import killua.dev.aitalk.repository.ApiConfigRepository
@@ -28,7 +29,7 @@ class AiNetworkRepositoryImpl @Inject constructor(
     override suspend fun fetchResponse(
         query: String,
         subModel: SubModel,
-        floatingWindowSystemInstruction: String?
+        extraInformation: ExtraInformation
     ): AIResponseState {
         val apiKey = apiConfigRepository.getApiKeyForModel(subModel.parent).first()
         return try {
@@ -36,7 +37,7 @@ class AiNetworkRepositoryImpl @Inject constructor(
                 AIModel.Gemini -> {
                     val baseGeminiConfig = apiConfigRepository.getGeminiConfig().first()
                     val geminiConfigWithFW = baseGeminiConfig.copy(
-                        floatingWindowSystemInstruction = floatingWindowSystemInstruction
+                        floatingWindowSystemInstruction = extraInformation.floatingWindowSystemInstructions[subModel.parent]
                     )
                     geminiApiService.generateContent(
                         model = subModel,
@@ -62,7 +63,7 @@ class AiNetworkRepositoryImpl @Inject constructor(
                 AIModel.Grok -> {
                     val baseGrokConfig = apiConfigRepository.getGrokConfig().first()
                     val grokConfigWithFW = baseGrokConfig.copy(
-                        floatingWindowSystemInstruction = floatingWindowSystemInstruction
+                        floatingWindowSystemInstruction = extraInformation.floatingWindowSystemInstructions[subModel.parent]
                     )
                     grokApiService.generateContent(
                         model = subModel,
@@ -88,7 +89,7 @@ class AiNetworkRepositoryImpl @Inject constructor(
                 AIModel.DeepSeek -> {
                     val baseDeepSeekConfig = apiConfigRepository.getDeepSeekConfig().first()
                     val deepSeekConfigWithFW = baseDeepSeekConfig.copy(
-                        floatingWindowSystemInstruction = floatingWindowSystemInstruction
+                        floatingWindowSystemInstruction = extraInformation.floatingWindowSystemInstructions[subModel.parent]
                     )
                     deepSeekApiService.generateContent(
                         model = subModel,
@@ -114,7 +115,7 @@ class AiNetworkRepositoryImpl @Inject constructor(
                 else -> {
                     val baseDeepSeekConfig = apiConfigRepository.getDeepSeekConfig().first()
                     val deepSeekConfigWithFW = baseDeepSeekConfig.copy(
-                        floatingWindowSystemInstruction = floatingWindowSystemInstruction
+                        floatingWindowSystemInstruction = extraInformation.floatingWindowSystemInstructions[subModel.parent]
                     )
                     deepSeekApiService.generateContent(
                         model = subModel,
