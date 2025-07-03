@@ -1,11 +1,8 @@
-import com.android.build.api.dsl.Packaging
-
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-    id("com.google.devtools.ksp")
-    id("dagger.hilt.android.plugin")
-    id("com.google.dagger.hilt.android")
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.hilt.android)
     alias(libs.plugins.compose.compiler)
 }
 
@@ -15,12 +12,15 @@ android {
 
     defaultConfig {
         applicationId = "killua.dev.aitalk"
-        minSdk = 31
-        targetSdk = 36
+        minSdk = 26
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        vectorDrawables {
+            useSupportLibrary = true
+        }
     }
 
     buildTypes {
@@ -33,35 +33,32 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-    }
-    kotlinOptions {
-        jvmTarget = "11"
-    }
-    buildFeatures {
-        compose = true
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     packaging {
-        resources.excludes.add("META-INF/*")
+        resources {
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        }
     }
 }
 
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+    }
+}
+
+
 dependencies {
-
-    implementation(libs.androidx.paging.runtime)
-    implementation(libs.androidx.paging.compose)
-    implementation(libs.androidx.room.paging)
-
-
-    implementation (libs.sqlite)
-    implementation (libs.jsoup)
-    implementation(libs.coil.compose)
-
-    // AndroidX Core
+    // AndroidX & Lifecycle
     implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.core.splashscreen)
     implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.lifecycle.service)
+    implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.core.splashscreen)
+    implementation(libs.androidx.startup.runtime)
 
     // Compose
     implementation(platform(libs.androidx.compose.bom))
@@ -69,45 +66,39 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
-    implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.material.icons.extended)
-    implementation(libs.androidx.lifecycle.service)
-    debugImplementation(libs.androidx.ui.tooling)
-    debugImplementation(libs.androidx.ui.test.manifest)
-    implementation(libs.androidx.hilt.navigation.compose)
 
     // Navigation
     implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.hilt.navigation.compose)
 
-    // Lifecycle
-    implementation(libs.androidx.lifecycle.runtime.ktx)
+    // Hilt (DI)
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
 
-    // Room
+    // Room (Database) & Paging
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
+    implementation(libs.androidx.room.paging)
     ksp(libs.androidx.room.compiler)
-    implementation(libs.androidx.biometric)
+    implementation(libs.androidx.paging.runtime)
+    implementation(libs.androidx.paging.compose)
 
-    // Hilt
-    implementation(libs.hilt.android)
-    ksp(libs.hilt.android.compiler)
+    // Network & Data
+    implementation(libs.okhttp)
+    implementation(libs.logging.interceptor)
+    implementation(libs.gson)
+    implementation(libs.coil.compose)
+    implementation(libs.jsoup)
+    implementation(libs.androidx.datastore.preferences)
 
     // Coroutines & Serialization
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.serialization.json)
-    implementation(libs.kotlinx.serialization.json.v151)
 
-    // Network
-    implementation(libs.okhttp)
-    implementation(libs.gson)
-    implementation(libs.logging.interceptor)
-    // DataStore
-    implementation(libs.androidx.datastore.preferences)
-
-    implementation(libs.androidx.startup.runtime)
-
-    // Material Design
+    // Other
     implementation(libs.material)
+    implementation(libs.androidx.biometric)
 
     // Testing
     testImplementation(libs.junit)
@@ -115,4 +106,6 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
+    debugImplementation(libs.androidx.ui.tooling)
+    debugImplementation(libs.androidx.ui.test.manifest)
 }

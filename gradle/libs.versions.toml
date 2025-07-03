@@ -1,93 +1,101 @@
 [versions]
-agp = "8.8.2"
+# --- 核心工具链版本 ---
+agp = "8.11.0"
+kotlin = "2.2.0"
+ksp = "2.2.0-2.0.2"
+composeCompiler = "2.2.0"
+composeBom = "2025.06.01"
+hilt = "2.56.2"
+jvmTarget = "17"
+
+# --- 常用库版本 ---
+activityCompose = "1.10.1"
+appcompat = "1.7.1"
 biometric = "1.2.0-alpha05"
-coilCompose = "2.3.0"
+coilCompose = "2.7.0"
+coreKtx = "1.16.0"
 coreSplashscreen = "1.0.1"
 datastorePreferences = "1.1.7"
-googleGenai = "1.6.0"
-gson = "2.10.1"
-hiltAndroidCompiler = "2.51.1"
-hiltCompiler = "2.51.1"
+gson = "2.13.1"
 hiltNavigationCompose = "1.2.0"
-jsoup = "1.15.3"
-kotlin = "2.0.0"
-coreKtx = "1.16.0"
+jsoup = "1.21.1"
+kotlinxCoroutines = "1.10.2"
+kotlinxSerializationJson = "1.9.0"
+lifecycle = "2.9.1"
+loggingInterceptor = "4.12.0"
+material = "1.12.0"
+navigationCompose = "2.9.1"
+okhttp = "4.12.0"
+paging = "3.3.6"
+room = "2.7.2"
+startupRuntime = "1.2.0"
+
+# --- 测试库版本 ---
 junit = "4.13.2"
 junitVersion = "1.2.1"
 espressoCore = "3.6.1"
-kotlinxCoroutinesCore = "1.7.3"
-kotlinxSerializationJson = "1.6.3"
-kotlinxSerializationJsonVersion = "1.6.3"
-lifecycleRuntimeKtx = "2.9.1"
-activityCompose = "1.10.1"
-composeBom = "2025.06.01"
-appcompat = "1.7.1"
-loggingInterceptor = "4.12.0"
-material = "1.12.0"
-navigationCompose = "2.9.0"
-okhttp = "4.10.0"
-pagingCompose = "3.3.6"
-pagingRuntime = "3.3.6"
-roomPaging = "2.7.2"
-roomRuntime = "2.7.2"
-hiltAndroid = "2.51.1"
-sqlite = "1.0.7"
-startupRuntime = "1.2.0"
-workRuntimeKtx = "2.10.2"
-jetbrainsKotlinJvm = "2.1.0"
-uiTooling = "1.8.3"
-lifecycleService = "2.9.1"
+
 
 [libraries]
-androidx-biometric = { module = "androidx.biometric:biometric", version.ref = "biometric" }
+# --- 核心与 AndroidX ---
+androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+androidx-biometric = { group = "androidx.biometric", name = "biometric", version.ref = "biometric" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "coreSplashscreen" }
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
-androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
-androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
-androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
-androidx-paging-compose = { module = "androidx.paging:paging-compose", version.ref = "pagingCompose" }
-androidx-paging-runtime = { module = "androidx.paging:paging-runtime", version.ref = "pagingRuntime" }
-androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomRuntime" }
-androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomRuntime" }
-androidx-room-paging = { module = "androidx.room:room-paging", version.ref = "roomPaging" }
-androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomRuntime" }
+androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycle" }
+androidx-lifecycle-service = { group = "androidx.lifecycle", name = "lifecycle-service", version.ref = "lifecycle" }
 androidx-startup-runtime = { module = "androidx.startup:startup-runtime", version.ref = "startupRuntime" }
-androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "workRuntimeKtx" }
-coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
-google-genai = { module = "com.google.genai:google-genai", version.ref = "googleGenai" }
-gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
-hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hiltAndroidCompiler" }
-hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hiltCompiler" }
-jsoup = { module = "org.jsoup:jsoup", version.ref = "jsoup" }
-junit = { group = "junit", name = "junit", version.ref = "junit" }
-androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
-androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
-androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
-androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
+
+# --- Compose ---
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
 androidx-ui = { group = "androidx.compose.ui", name = "ui" }
 androidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
-androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
-androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
-androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
-androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
-kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutinesCore" }
+androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
+
+# --- Navigation ---
+androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
+androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
+
+# --- Hilt (依赖注入) ---
+hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
+hilt-compiler = { group = "com.google.dagger", name = "hilt-compiler", version.ref = "hilt" }
+
+# --- Room (数据库) & Paging ---
+androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
+androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
+androidx-room-paging = { module = "androidx.room:room-paging", version.ref = "room" }
+androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
+androidx-paging-compose = { module = "androidx.paging:paging-compose", version.ref = "paging" }
+androidx-paging-runtime = { module = "androidx.paging:paging-runtime", version.ref = "paging" }
+
+# --- 网络与数据处理 ---
+coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
+gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
+jsoup = { module = "org.jsoup:jsoup", version.ref = "jsoup" }
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutines" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
-kotlinx-serialization-json-v151 = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJsonVersion" }
 logging-interceptor = { module = "com.squareup.okhttp3:logging-interceptor", version.ref = "loggingInterceptor" }
-material = { group = "com.google.android.material", name = "material", version.ref = "material" }
-hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hiltAndroid" }
 okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
-sqlite = { module = "com.liulishuo.okdownload:sqlite", version.ref = "sqlite" }
-androidx-lifecycle-service = { group = "androidx.lifecycle", name = "lifecycle-service", version.ref = "lifecycleService" }
+
+# --- 其他 ---
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+# sqlite = { module = "com.liulishuo.okdownload:sqlite", version.ref = "sqlite" } # 这个库看起来比较旧，如果不是必须，可以考虑移除
+
+# --- 测试 ---
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
+androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
+androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
+androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
+androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
-android-library = { id = "com.android.library", version.ref = "agp" }
-compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
-jetbrains-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "jetbrainsKotlinJvm" }
-
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+hilt-android = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "composeCompiler" }
