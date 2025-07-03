@@ -56,26 +56,23 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach 
 }
 
 fun generateSupportedLocales(): String {
-    val foundLocales = StringBuilder()
-    foundLocales.append("new String[]{")
-
-    val languages = mutableListOf<String>()
-    fileTree("src/main/res").visit {
-        if(file.path.endsWith("strings.xml")){
-            var languageCode = file.parent.replace("\\", "/").split('/').last()
-                .replace("values-", "").replace("-r", "-")
-            if (languageCode == "values") {
-                languageCode = "en"
+    val languages = fileTree("src/main/res")
+        .filter { it.name == "strings.xml" }
+        .map { file ->
+            val dirName = file.parentFile.name
+            when (dirName) {
+                "values" -> "zh-CN"
+                else -> dirName.substringAfter("values-")
+                    .replace("-r", "-")
             }
-            languages.add(languageCode)
         }
-    }
-    languages.sorted().forEach {
-        foundLocales.append("\"").append(it).append("\"").append(",")
-    }
-
-    foundLocales.append("}")
-    return foundLocales.toString().replace(",}","}")
+        .toSortedSet()
+    return languages.joinToString(
+        prefix = "new String[]{",
+        postfix = "}",
+        separator = ",",
+        transform = { "\"$it\"" }
+    )
 }
 
 dependencies {

@@ -18,6 +18,7 @@ import javax.inject.Inject
 sealed interface SettingsUIIntent : UIIntent {
     data class UpdateTheme(val theme: ThemeMode) : SettingsUIIntent
     data class UpdateSecureHistory(val isEnabled: Boolean) : SettingsUIIntent
+    data class UpdateLocaleSettings(val locale: String) : SettingsUIIntent
     data class UpdateQuestionMode(val mode: FloatingWindowQuestionMode) : SettingsUIIntent
     data object GoToOverlaySettingsClicked : SettingsUIIntent
     data object OnArrive : SettingsUIIntent
@@ -37,6 +38,7 @@ data class SettingsUIState(
     val themeMode: ThemeMode = ThemeMode.SYSTEM,
     val isBiometricAvailable: Boolean = false,
     val isHistorySecured: Boolean = false,
+    val localeMode: String = "",
     val canDrawOverlays: Boolean = false,
     val questionMode: FloatingWindowQuestionMode = FloatingWindowQuestionMode.isThatTrueWithExplain
 ) : UIState
@@ -55,13 +57,15 @@ class SettingsViewmodel @Inject constructor(
         val securedHistoryFlow = repository.isHistorySecured()
         val questionMode = repository.getFloatingWindowQuestionMode()
         val saveDir = repository.getSaveDir()
+        val localeMode = repository.readLocale()
         viewModelScope.launch {
-            combine(themeFlow, securedHistoryFlow, questionMode, saveDir) { themeName, isSecured, questionMode, saveDir ->
+            combine(themeFlow, securedHistoryFlow, questionMode, saveDir, localeMode) { themeName, isSecured, questionMode, saveDir, localeMode ->
                 SettingsUIState(
                     isLoading = false,
                     themeMode = ThemeMode.valueOf(themeName),
                     saveDir = saveDir,
                     questionMode = questionMode,
+                    localeMode = localeMode,
                     isBiometricAvailable = repository.isBiometricAvailable(),
                     isHistorySecured = isSecured,
                     canDrawOverlays = repository.canDrawOverlays()
@@ -103,6 +107,11 @@ class SettingsViewmodel @Inject constructor(
             is SettingsUIIntent.SaveDirSelected -> {
                 repository.setSaveDir(intent.uri)
                 emitState(state.copy(saveDir = intent.uri, isChoosingDir = false))
+            }
+
+            is SettingsUIIntent.UpdateLocaleSettings -> {
+                repository.setLocale(intent.locale)
+                repository.changeMyLanguage(intent.locale)
             }
         }
     }

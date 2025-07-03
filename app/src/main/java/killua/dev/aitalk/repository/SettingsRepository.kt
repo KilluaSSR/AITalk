@@ -15,4 +15,9 @@ interface SettingsRepository {
     suspend fun setFloatingWindowQuestionMode(mode: FloatingWindowQuestionMode)
     suspend fun setHistorySecured(isSecured: Boolean)
     suspend fun setSaveDir(dir: String)
+
+    suspend fun setLocale(locale: String)
+    fun readLocale(): Flow<String>
+
+    suspend fun changeMyLanguage(locale: String)
 }

@@ -40,11 +40,13 @@ import killua.dev.aitalk.R
 import killua.dev.aitalk.datastore.SECURE_HISTORY
 import killua.dev.aitalk.models.AIModel
 import killua.dev.aitalk.models.FloatingWindowQuestionMode
+import killua.dev.aitalk.models.localeToNameResMap
 import killua.dev.aitalk.models.stringRes
 import killua.dev.aitalk.ui.Routes
 import killua.dev.aitalk.ui.SnackbarUIEffect
 import killua.dev.aitalk.ui.components.Clickable
 import killua.dev.aitalk.ui.components.ClickableMenu
+import killua.dev.aitalk.ui.components.LocaleMenu
 import killua.dev.aitalk.ui.components.QuestionModeMenu
 import killua.dev.aitalk.ui.components.SettingsScaffold
 import killua.dev.aitalk.ui.components.SwitchableSecured
@@ -67,6 +69,7 @@ fun SettingsPage() {
         TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
     val scope = rememberCoroutineScope()
     var showThemeMenu by remember { mutableStateOf(false) }
+    var showLocaleMenu by remember { mutableStateOf(false) }
     var showQuestionModeMenu by remember { mutableStateOf(false) }
     val viewModel: SettingsViewmodel = hiltViewModel()
     val uiState = viewModel.uiState.collectAsStateWithLifecycle()
@@ -131,24 +134,35 @@ fun SettingsPage() {
                     CircularProgressIndicator()
                 }
             } else {
-                if (showThemeMenu) {
-                    ThemeModeMenu(
-                        expanded = showThemeMenu,
-                        onDismiss = { showThemeMenu = false },
-                        onThemeSelected = { theme ->
-                            scope.launch {
-                                viewModel.emitIntent(SettingsUIIntent.UpdateTheme(theme))
-                            }
-                            showThemeMenu = false
-                        }
-                    )
-                }
-
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .verticalScroll(rememberScrollState())
                 ) {
+                    if (showThemeMenu) {
+                        ThemeModeMenu(
+                            expanded = showThemeMenu,
+                            onDismiss = { showThemeMenu = false },
+                            onThemeSelected = { theme ->
+                                scope.launch {
+                                    viewModel.emitIntent(SettingsUIIntent.UpdateTheme(theme))
+                                }
+                                showThemeMenu = false
+                            }
+                        )
+                    }
+                    if(showLocaleMenu){
+                        LocaleMenu(
+                            expanded = showLocaleMenu,
+                            onDismissRequest = { showLocaleMenu = false },
+                            onSelected = { locale ->
+                                scope.launch {
+                                    viewModel.emitIntent(SettingsUIIntent.UpdateLocaleSettings(locale))
+                                }
+                                showLocaleMenu = false
+                            }
+                        )
+                    }
                     Title(title = stringResource(R.string.application_settings)) {
                         Clickable(
                             title = stringResource(R.string.theme),
@@ -156,7 +170,12 @@ fun SettingsPage() {
                         ) {
                             showThemeMenu = true
                         }
-
+                        Clickable(
+                            title = stringResource(R.string.language),
+                            value = stringResource(localeToNameResMap[uiState.value.localeMode]!!)
+                        ) {
+                            showLocaleMenu = true
+                        }
                         Clickable(
                             title = stringResource(R.string.save_dir),
                             value = getVirtualPathFromTreeUri(uiState.value.saveDir)

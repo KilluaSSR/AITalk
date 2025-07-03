@@ -11,6 +11,7 @@ import killua.dev.aitalk.models.MainpageMenuItems
 import killua.dev.aitalk.models.floatingWindowQuestionModeItemsItems
 import killua.dev.aitalk.models.historyPageMenuItems
 import killua.dev.aitalk.models.mainpageMenuItems
+import killua.dev.aitalk.models.supportedLanguageMenuItems
 import killua.dev.aitalk.models.themeSettingItems
 import killua.dev.aitalk.ui.theme.ThemeMode
 import killua.dev.aitalk.ui.viewmodels.HistoryPageUIIntent
@@ -120,6 +121,34 @@ fun ThemeModeMenu(
                 scope.launch {
                     onThemeSelected(item.mode)
                     onDismiss()
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun LocaleMenu(
+    expanded: Boolean,
+    onDismissRequest: () -> Unit,
+    onSelected: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val scope = rememberCoroutineScope()
+
+    DropdownMenu(
+        expanded = expanded,
+        onDismissRequest = onDismissRequest,
+        modifier = modifier,
+    ) {
+        supportedLanguageMenuItems.forEach { item ->
+            BaseDropdownMenu(
+                text = stringResource(item.nameResId)
+            ) {
+                scope.launch {
+                    onSelected(item.localeTag)
+                    onDismissRequest()
                 }
             }
         }

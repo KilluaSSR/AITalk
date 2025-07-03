@@ -3,12 +3,23 @@ package killua.dev.aitalk
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Text
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.core.os.LocaleListCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -31,7 +42,7 @@ import killua.dev.aitalk.utils.BiometricManagerSingleton
 import killua.dev.aitalk.utils.LocalNavHostController
 
 @AndroidEntryPoint
-class MainActivity : FragmentActivity() {
+class MainActivity : AppCompatActivity() {
 
     @OptIn(ExperimentalAnimationApi::class, ExperimentalFoundationApi::class,
         ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class
@@ -73,6 +84,7 @@ class MainActivity : FragmentActivity() {
                             PageConfigurations(parentModel = parentModel)
                         }
                     }
+
                 }
 
             }
