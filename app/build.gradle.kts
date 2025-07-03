@@ -18,9 +18,15 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        val supportedLocales = generateSupportedLocales()
+        buildConfigField("String[]", "SUPPORTED_LOCALES", supportedLocales)
         vectorDrawables {
             useSupportLibrary = true
         }
+    }
+
+    buildFeatures {
+        buildConfig = true
     }
 
     buildTypes {
@@ -49,6 +55,28 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach 
     }
 }
 
+fun generateSupportedLocales(): String {
+    val foundLocales = StringBuilder()
+    foundLocales.append("new String[]{")
+
+    val languages = mutableListOf<String>()
+    fileTree("src/main/res").visit {
+        if(file.path.endsWith("strings.xml")){
+            var languageCode = file.parent.replace("\\", "/").split('/').last()
+                .replace("values-", "").replace("-r", "-")
+            if (languageCode == "values") {
+                languageCode = "en"
+            }
+            languages.add(languageCode)
+        }
+    }
+    languages.sorted().forEach {
+        foundLocales.append("\"").append(it).append("\"").append(",")
+    }
+
+    foundLocales.append("}")
+    return foundLocales.toString().replace(",}","}")
+}
 
 dependencies {
     // AndroidX & Lifecycle
