@@ -10,32 +10,3 @@ enum class FloatingWindowQuestionMode(@StringRes val stringRes: Int) {
     explainVerbose(R.string.explainVerbose),
     translate(R.string.translate)
 }
-
-data class FloatingWindowQuestionModeItems(
-    @StringRes val stringRes: Int,
-    val mode: FloatingWindowQuestionMode
-)
-
-val floatingWindowQuestionModeItemsItems = listOf(
-    FloatingWindowQuestionModeItems(
-        stringRes = R.string.isThatTrueYNQuestion,
-        FloatingWindowQuestionMode.isThatTrueYNQuestion
-    ),
-    FloatingWindowQuestionModeItems(
-        stringRes = R.string.isThatTrueWithExplain,
-        FloatingWindowQuestionMode.isThatTrueWithExplain
-    ),
-    FloatingWindowQuestionModeItems(
-        stringRes = R.string.explainBriefly,
-        FloatingWindowQuestionMode.explainBriefly
-    ),
-    FloatingWindowQuestionModeItems(
-        stringRes = R.string.explainVerbose,
-        FloatingWindowQuestionMode.explainVerbose
-    ),
-    FloatingWindowQuestionModeItems(
-        stringRes = R.string.translate,
-        FloatingWindowQuestionMode.translate
-    )
-
-)

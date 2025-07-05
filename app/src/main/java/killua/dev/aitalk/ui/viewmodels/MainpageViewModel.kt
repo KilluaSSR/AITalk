@@ -19,12 +19,13 @@ import killua.dev.aitalk.ui.viewmodels.base.BaseViewModel
 import killua.dev.aitalk.ui.viewmodels.base.UIIntent
 import killua.dev.aitalk.ui.viewmodels.base.UIState
 import killua.dev.aitalk.utils.ClipboardHelper
+import killua.dev.aitalk.utils.prepareAiSearchData
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
-import killua.dev.aitalk.utils.prepareAiSearchData
+
 sealed interface MainpageUIIntent : UIIntent {
     data class UpdateSearchQuery(val query: String) : MainpageUIIntent
     data object ClearInput : MainpageUIIntent

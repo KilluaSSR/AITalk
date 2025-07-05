@@ -18,7 +18,6 @@ import killua.dev.aitalk.utils.ClipboardHelper
 import killua.dev.aitalk.utils.toSavable
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 sealed interface HistoryPageUIIntent : UIIntent {

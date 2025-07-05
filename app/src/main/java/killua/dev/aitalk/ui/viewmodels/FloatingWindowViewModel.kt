@@ -7,7 +7,6 @@ import killua.dev.aitalk.consts.DEFAULT_SAVE_DIR
 import killua.dev.aitalk.models.AIModel
 import killua.dev.aitalk.models.ExtraInformation
 import killua.dev.aitalk.models.FloatingWindowQuestionMode
-import killua.dev.aitalk.models.SubModel
 import killua.dev.aitalk.repository.AiRepository
 import killua.dev.aitalk.repository.ApiConfigRepository
 import killua.dev.aitalk.repository.FileRepository
@@ -21,12 +20,13 @@ import killua.dev.aitalk.ui.viewmodels.base.BaseViewModel
 import killua.dev.aitalk.ui.viewmodels.base.UIIntent
 import killua.dev.aitalk.ui.viewmodels.base.UIState
 import killua.dev.aitalk.utils.ClipboardHelper
+import killua.dev.aitalk.utils.prepareAiSearchData
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
-import killua.dev.aitalk.utils.prepareAiSearchData
+
 sealed interface FloatingWindowUIIntent: UIIntent{
     data class StartSearch(val query: String) : FloatingWindowUIIntent
     data class CopyResponse(val model: AIModel) : FloatingWindowUIIntent

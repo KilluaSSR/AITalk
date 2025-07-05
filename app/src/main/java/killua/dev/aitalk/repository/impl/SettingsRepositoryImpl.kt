@@ -8,7 +8,6 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import killua.dev.aitalk.consts.DEFAULT_SAVE_DIR
 import killua.dev.aitalk.consts.SYSTEM_LOCALE_TAG
 import killua.dev.aitalk.datastore.readFloatingWindowQuestionMode
-import killua.dev.aitalk.datastore.readFloatingWindowSystemInstruction
 import killua.dev.aitalk.datastore.readLocale
 import killua.dev.aitalk.datastore.readSaveDir
 import killua.dev.aitalk.datastore.readSecureHistory
@@ -18,13 +17,11 @@ import killua.dev.aitalk.datastore.writeLocale
 import killua.dev.aitalk.datastore.writeSaveDir
 import killua.dev.aitalk.datastore.writeSecureMyHistory
 import killua.dev.aitalk.datastore.writeTheme
-import killua.dev.aitalk.models.AIModel
 import killua.dev.aitalk.models.FloatingWindowQuestionMode
 import killua.dev.aitalk.repository.SettingsRepository
 import killua.dev.aitalk.utils.BiometricManagerSingleton
 import killua.dev.aitalk.utils.withMainContext
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 

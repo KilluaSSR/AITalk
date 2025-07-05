@@ -19,22 +19,14 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import killua.dev.aitalk.R
 import killua.dev.aitalk.datastore.SECURE_HISTORY
@@ -46,16 +38,11 @@ import killua.dev.aitalk.models.themeSettingItems
 import killua.dev.aitalk.ui.Routes
 import killua.dev.aitalk.ui.SnackbarUIEffect
 import killua.dev.aitalk.ui.components.Clickable
-import killua.dev.aitalk.ui.components.ClickableMenu
 import killua.dev.aitalk.ui.components.DropDownMenuWidget
-import killua.dev.aitalk.ui.components.LocaleMenu
-import killua.dev.aitalk.ui.components.QuestionModeMenu
 import killua.dev.aitalk.ui.components.SettingsScaffold
 import killua.dev.aitalk.ui.components.SwitchableSecured
-import killua.dev.aitalk.ui.components.ThemeModeMenu
 import killua.dev.aitalk.ui.components.Title
 import killua.dev.aitalk.ui.theme.ThemeMode
-import killua.dev.aitalk.ui.theme.getThemeModeName
 import killua.dev.aitalk.ui.viewmodels.SettingsNavigationEvent
 import killua.dev.aitalk.ui.viewmodels.SettingsUIIntent
 import killua.dev.aitalk.ui.viewmodels.SettingsViewmodel
@@ -71,7 +58,6 @@ fun SettingsPage() {
     val scrollBehavior =
         TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
     val scope = rememberCoroutineScope()
-    var showQuestionModeMenu by remember { mutableStateOf(false) }
     val viewModel: SettingsViewmodel = hiltViewModel()
     val uiState = viewModel.uiState.collectAsStateWithLifecycle()
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri: Uri? ->
@@ -186,32 +172,15 @@ fun SettingsPage() {
                             }
                         }
 
-                        ClickableMenu(
-                            title = stringResource(R.string.flowting_window_search_mode),
-                            value = when(uiState.value.questionMode){
-                                FloatingWindowQuestionMode.isThatTrueYNQuestion -> stringResource(R.string.isThatTrueYNQuestion)
-                                FloatingWindowQuestionMode.isThatTrueWithExplain -> stringResource(R.string.isThatTrueWithExplain)
-                                FloatingWindowQuestionMode.explainBriefly -> stringResource(R.string.explainBriefly)
-                                FloatingWindowQuestionMode.explainVerbose -> stringResource(R.string.explainVerbose)
-                                FloatingWindowQuestionMode.translate -> stringResource(R.string.translate)
-
-                            },
-                            content = {
-                                QuestionModeMenu(
-                                    expanded = showQuestionModeMenu,
-                                    onDismissRequest = {showQuestionModeMenu = false},
-                                    onSelected = { item ->
-                                        scope.launch {
-                                            viewModel.emitIntent(SettingsUIIntent.UpdateQuestionMode(item))
-                                            showQuestionModeMenu = false
-                                        }
-                                    },
-                                    modifier = Modifier,
-                                )
+                        QuestionModeSelectionWidget(
+                            currentMode = uiState.value.questionMode,
+                            onModeSelected = { newMode ->
+                                scope.launch {
+                                    viewModel.emitIntent(SettingsUIIntent.UpdateQuestionMode(newMode))
+                                }
                             }
-                        ){
-                            showQuestionModeMenu = true
-                        }
+                        )
+
                     }
 
                     Title(
@@ -286,6 +255,35 @@ fun ThemeSelectionWidget(
             val selectedItem = themeSettingItems.getOrNull(newIndex)
             if (selectedItem != null) {
                 onThemeModeSelected(selectedItem.mode)
+            }
+        }
+    )
+}
+
+
+@Composable
+fun QuestionModeSelectionWidget(
+    currentMode: FloatingWindowQuestionMode,
+    onModeSelected: (FloatingWindowQuestionMode) -> Unit
+) {
+    val allModes = FloatingWindowQuestionMode.entries
+    val modeNames = allModes.map { mode ->
+        stringResource(id = mode.stringRes)
+    }
+
+    val currentIndex = allModes.indexOf(currentMode).coerceAtLeast(0)
+
+    val currentModeName = stringResource(id = currentMode.stringRes)
+    DropDownMenuWidget(
+        icon = null,
+        title = stringResource(id = R.string.flowting_window_search_mode),
+        description = currentModeName,
+        choice = currentIndex,
+        data = modeNames,
+        onChoiceChange = { newIndex ->
+            val selectedMode = allModes.getOrNull(newIndex)
+            if (selectedMode != null) {
+                onModeSelected(selectedMode)
             }
         }
     )
