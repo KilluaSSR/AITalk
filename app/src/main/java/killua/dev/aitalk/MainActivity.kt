@@ -12,16 +12,15 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
 import dagger.hilt.android.AndroidEntryPoint
-import killua.dev.aitalk.models.AIModel
 import killua.dev.aitalk.ui.Routes
+import killua.dev.aitalk.ui.pages.ConfigPages.DeepSeekConfigPage
+import killua.dev.aitalk.ui.pages.ConfigPages.GeminiConfigPage
+import killua.dev.aitalk.ui.pages.ConfigPages.GrokConfigPage
 import killua.dev.aitalk.ui.pages.HistoryPage
 import killua.dev.aitalk.ui.pages.Mainpage
-import killua.dev.aitalk.ui.pages.PageConfigurations
 import killua.dev.aitalk.ui.pages.SettingsPage
 import killua.dev.aitalk.ui.theme.AITalkTheme
 import killua.dev.aitalk.ui.theme.ThemeMode
@@ -64,14 +63,16 @@ class MainActivity : AppCompatActivity() {
                         composable (Routes.SettingsPage.route){
                             SettingsPage()
                         }
-                        composable(
-                            route = Routes.APIConfigurationPage.route,
-                            arguments = listOf(navArgument("parentModel") { type = NavType.StringType })
-                        ) { backStackEntry ->
-                            val parentModelName = backStackEntry.arguments?.getString("parentModel") ?: AIModel.ChatGPT.name
-                            val parentModel = AIModel.valueOf(parentModelName)
-                            PageConfigurations(parentModel = parentModel)
+                        composable(Routes.GrokConfigPage.route) {
+                            GrokConfigPage()
                         }
+                        composable(Routes.GeminiConfigPage.route) {
+                            GeminiConfigPage()
+                        }
+                        composable(Routes.DeepSeekConfigPage.route) {
+                            DeepSeekConfigPage()
+                        }
+
                     }
 
                 }

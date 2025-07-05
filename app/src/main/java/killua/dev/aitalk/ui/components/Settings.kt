@@ -638,12 +638,17 @@ fun PreferenceSwitchWithContainer(
 ) {
 
     val interactionSource = remember { MutableInteractionSource() }
+    val color = if(isChecked){
+        Pair(MaterialTheme.colorScheme.primaryContainer,MaterialTheme.colorScheme.onPrimaryContainer)
+    }else{
+        Pair(MaterialTheme.colorScheme.errorContainer,MaterialTheme.colorScheme.onErrorContainer)
+    }
     Row(
         modifier =
             Modifier.fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 12.dp)
                 .clip(MaterialTheme.shapes.extraLarge)
-                .background(MaterialTheme.colorScheme.primaryContainer)
+                .background(color.first)
                 .toggleable(
                     value = isChecked,
                     onValueChange = { onClick() },
@@ -658,7 +663,7 @@ fun PreferenceSwitchWithContainer(
                 imageVector = icon,
                 contentDescription = null,
                 modifier = Modifier.padding(start = 8.dp, end = 16.dp).size(24.dp),
-                tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                tint = color.second,
             )
         }
         Column(
@@ -669,7 +674,7 @@ fun PreferenceSwitchWithContainer(
                 text = title,
                 maxLines = 2,
                 style = PreferenceTitleVariant,
-                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                color = color.second,
             )
         }
         Switch(

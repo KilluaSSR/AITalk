@@ -93,19 +93,15 @@ fun SettingsScaffold(
         }
     }
 }
-
-@ExperimentalAnimationApi
-@ExperimentalMaterial3Api
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ConfigurationsScaffold(
     scrollBehavior: TopAppBarScrollBehavior,
     snackbarHostState: SnackbarHostState,
     title: String,
     actions: @Composable RowScope.() -> Unit = {},
-    content: @Composable (ColumnScope.() -> Unit)
+    content: @Composable (PaddingValues) -> Unit
 ) {
-    var bottomBarSize by remember { mutableStateOf(IntSize.Zero) }
-
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
@@ -115,39 +111,23 @@ fun ConfigurationsScaffold(
             )
         },
         snackbarHost = {
-            with(LocalDensity.current) {
-                SnackbarHost(
-                    modifier = Modifier
-                        .paddingBottom(bottomBarSize.height.toDp() + SizeTokens.Level24 + SizeTokens.Level4),
-                    hostState = snackbarHostState,
-                )
-            }
+            SnackbarHost(hostState = snackbarHostState)
         },
-    ) { innerPadding ->
-        Column {
-            InnerTopSpacer(innerPadding = innerPadding)
-
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth()
-                    .verticalScroll(rememberScrollState())
-            ) {
-                content()
+        bottomBar = {
+            Column {
+                Divider()
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(SizeTokens.Level16),
+                    horizontalArrangement = Arrangement.spacedBy(SizeTokens.Level12, Alignment.End),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    actions()
+                }
             }
-
-            Divider()
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(SizeTokens.Level16)
-                    .onSizeChanged { bottomBarSize = it },
-                horizontalArrangement = Arrangement.spacedBy(SizeTokens.Level12, Alignment.End),
-            ) {
-                actions()
-            }
-
-            InnerBottomSpacer(innerPadding = innerPadding)
         }
+    ) { innerPadding ->
+        content(innerPadding)
     }
 }

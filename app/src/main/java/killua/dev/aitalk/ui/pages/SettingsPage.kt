@@ -190,7 +190,14 @@ fun SettingsPage() {
                             Clickable(
                                 title = stringResource(model.stringRes()),
                             ) {
-                                navController.navigate(Routes.APIConfigurationPage.createRoute(model))
+                                val route = when(model){
+                                    AIModel.ChatGPT -> Routes.DeepSeekConfigPage.route //占位
+                                    AIModel.Claude -> Routes.DeepSeekConfigPage.route //占位
+                                    AIModel.Gemini -> Routes.GeminiConfigPage.route
+                                    AIModel.DeepSeek -> Routes.DeepSeekConfigPage.route
+                                    AIModel.Grok -> Routes.GrokConfigPage.route
+                                }
+                                navController.navigate(route)
                             }
                         }
                     }

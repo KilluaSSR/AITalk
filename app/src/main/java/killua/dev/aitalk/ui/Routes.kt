@@ -8,8 +8,13 @@ sealed class Routes(val route: String){
     data object SettingsPage : Routes(route = "settings_page")
     data object AboutPage : Routes(route = "about_page")
     data object HelpPage : Routes(route = "help_page")
-    data object APIConfigurationPage: Routes("api_configuration_page/{parentModel}") {
-        fun createRoute(parentModel: AIModel) = "api_configuration_page/${parentModel.name}"
+    data object GrokConfigPage : Routes("grok_config_page")
+    data object GeminiConfigPage : Routes("gemini_config_page")
+    data object DeepSeekConfigPage : Routes("deepseek_config_page")
+
+    // New Generic Route for models without special settings
+    data object GenericApiConfigPage : Routes("generic_api_config_page/{parentModel}") {
+        fun createRoute(parentModel: AIModel) = "generic_api_config_page/${parentModel.name}"
     }
 
 }
