@@ -114,7 +114,7 @@ fun ThemeModeMenu(
 
     DropdownMenu(expanded, onDismiss, modifier) {
         themeSettingItems.forEach { item ->
-            BottomSheetItem(
+            BaseDropdownMenu(
                 icon = item.icon,
                 text = stringResource(item.titleRes)
             ) {

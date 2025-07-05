@@ -42,16 +42,19 @@ import killua.dev.aitalk.models.AIModel
 import killua.dev.aitalk.models.FloatingWindowQuestionMode
 import killua.dev.aitalk.models.stringRes
 import killua.dev.aitalk.models.supportedLanguageMenuItems
+import killua.dev.aitalk.models.themeSettingItems
 import killua.dev.aitalk.ui.Routes
 import killua.dev.aitalk.ui.SnackbarUIEffect
 import killua.dev.aitalk.ui.components.Clickable
 import killua.dev.aitalk.ui.components.ClickableMenu
+import killua.dev.aitalk.ui.components.DropDownMenuWidget
 import killua.dev.aitalk.ui.components.LocaleMenu
 import killua.dev.aitalk.ui.components.QuestionModeMenu
 import killua.dev.aitalk.ui.components.SettingsScaffold
 import killua.dev.aitalk.ui.components.SwitchableSecured
 import killua.dev.aitalk.ui.components.ThemeModeMenu
 import killua.dev.aitalk.ui.components.Title
+import killua.dev.aitalk.ui.theme.ThemeMode
 import killua.dev.aitalk.ui.theme.getThemeModeName
 import killua.dev.aitalk.ui.viewmodels.SettingsNavigationEvent
 import killua.dev.aitalk.ui.viewmodels.SettingsUIIntent
@@ -68,13 +71,9 @@ fun SettingsPage() {
     val scrollBehavior =
         TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
     val scope = rememberCoroutineScope()
-    var showThemeMenu by remember { mutableStateOf(false) }
-    var showLocaleMenu by remember { mutableStateOf(false) }
     var showQuestionModeMenu by remember { mutableStateOf(false) }
     val viewModel: SettingsViewmodel = hiltViewModel()
     val uiState = viewModel.uiState.collectAsStateWithLifecycle()
-    val currentLanguageItem = supportedLanguageMenuItems.find { it.localeTag == uiState.value.localeMode }
-        ?: supportedLanguageMenuItems.first()
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri: Uri? ->
         uri?.let {
             context.contentResolver.takePersistableUriPermission(
@@ -126,42 +125,21 @@ fun SettingsPage() {
                         .fillMaxWidth()
                         .verticalScroll(rememberScrollState())
                 ) {
-                    if (showThemeMenu) {
-                        ThemeModeMenu(
-                            expanded = showThemeMenu,
-                            onDismiss = { showThemeMenu = false },
-                            onThemeSelected = { theme ->
-                                scope.launch {
-                                    viewModel.emitIntent(SettingsUIIntent.UpdateTheme(theme))
-                                }
-                                showThemeMenu = false
-                            }
-                        )
-                    }
-                    if(showLocaleMenu){
-                        LocaleMenu(
-                            expanded = showLocaleMenu,
-                            onDismissRequest = { showLocaleMenu = false },
-                            onSelected = { locale ->
-                                scope.launch {
-                                    viewModel.emitIntent(SettingsUIIntent.UpdateLocaleSettings(locale))
-                                }
-                                showLocaleMenu = false
-                            }
-                        )
-                    }
+
                     Title(title = stringResource(R.string.application_settings)) {
-                        Clickable(
-                            title = stringResource(R.string.theme),
-                            value = getThemeModeName(uiState.value.themeMode)
+                        ThemeSelectionWidget(
+                            currentThemeMode = uiState.value.themeMode
                         ) {
-                            showThemeMenu = true
+                            scope.launch {
+                                viewModel.emitIntent(SettingsUIIntent.UpdateTheme(it))
+                            }
                         }
-                        Clickable(
-                            title = stringResource(R.string.language),
-                            value = stringResource(currentLanguageItem.nameResId)
-                        ) {
-                            showLocaleMenu = true
+                        LanguageSelectionWidget(
+                            currentLocaleTag = uiState.value.localeMode,
+                        ){
+                            scope.launch {
+                                viewModel.emitIntent(SettingsUIIntent.UpdateLocaleSettings(it))
+                            }
                         }
                         Clickable(
                             title = stringResource(R.string.save_dir),
@@ -252,4 +230,63 @@ fun SettingsPage() {
         }
 
     }
+}
+
+@Composable
+fun LanguageSelectionWidget(
+    currentLocaleTag: String,
+    onLocaleTagSelected: (String) -> Unit
+) {
+
+    val languageNames = supportedLanguageMenuItems.map { item ->
+        stringResource(id = item.nameResId)
+    }
+
+    val currentIndex = supportedLanguageMenuItems.indexOfFirst { it.localeTag == currentLocaleTag }
+        .coerceAtLeast(0)
+
+    val currentLanguageName = stringResource(id = supportedLanguageMenuItems[currentIndex].nameResId)
+    DropDownMenuWidget(
+        icon = null,
+        title = stringResource(id = R.string.language),
+        description = currentLanguageName,
+        choice = currentIndex,
+        data = languageNames,
+        onChoiceChange = { newIndex ->
+            val selectedItem = supportedLanguageMenuItems.getOrNull(newIndex)
+            if (selectedItem != null) {
+                onLocaleTagSelected(selectedItem.localeTag)
+            }
+        }
+    )
+}
+
+@Composable
+fun ThemeSelectionWidget(
+    currentThemeMode: ThemeMode,
+    onThemeModeSelected: (ThemeMode) -> Unit
+) {
+    val themeNames = themeSettingItems.map { item ->
+        stringResource(id = item.titleRes)
+    }
+    val currentIndex = themeSettingItems.indexOfFirst { it.mode == currentThemeMode }
+        .coerceAtLeast(0)
+
+    val currentThemeName = stringResource(id = themeSettingItems[currentIndex].titleRes)
+
+    val currentIcon = themeSettingItems[currentIndex].icon
+
+    DropDownMenuWidget(
+        icon = currentIcon,
+        title = stringResource(id = R.string.theme),
+        description = currentThemeName,
+        choice = currentIndex,
+        data = themeNames,
+        onChoiceChange = { newIndex ->
+            val selectedItem = themeSettingItems.getOrNull(newIndex)
+            if (selectedItem != null) {
+                onThemeModeSelected(selectedItem.mode)
+            }
+        }
+    )
 }
