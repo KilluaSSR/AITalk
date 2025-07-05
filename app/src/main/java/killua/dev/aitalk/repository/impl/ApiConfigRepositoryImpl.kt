@@ -19,6 +19,7 @@ import killua.dev.aitalk.datastore.readGeminiTopK
 import killua.dev.aitalk.datastore.readGeminiTopP
 import killua.dev.aitalk.datastore.readGrokSystemMessage
 import killua.dev.aitalk.datastore.readGrokTemperature
+import killua.dev.aitalk.datastore.readModelEnabled
 import killua.dev.aitalk.datastore.writeApiKeyForModel
 import killua.dev.aitalk.datastore.writeDeepSeekSystemInstruction
 import killua.dev.aitalk.datastore.writeDeepSeekTemperature
@@ -31,6 +32,7 @@ import killua.dev.aitalk.datastore.writeGeminiTopK
 import killua.dev.aitalk.datastore.writeGeminiTopP
 import killua.dev.aitalk.datastore.writeGrokSystemMessage
 import killua.dev.aitalk.datastore.writeGrokTemperature
+import killua.dev.aitalk.datastore.writeModelEnabled
 import killua.dev.aitalk.models.AIModel
 import killua.dev.aitalk.models.FloatingWindowQuestionMode
 import killua.dev.aitalk.models.SubModel
@@ -50,7 +52,11 @@ class ApiConfigRepositoryImpl @Inject constructor(
         Log.d("ApiConfigRepo", "Getting API key for model ${model.name}. Key used: ${key.name}")
         return context.readApiKeyForModel(model)
     }
-
+    override fun getModelEnabled(model: AIModel): Flow<Boolean> =
+        context.readModelEnabled(model)
+    override suspend fun setModelEnabled(model: AIModel, isEnabled: Boolean) {
+        context.writeModelEnabled(model, isEnabled)
+    }
     override suspend fun setApiKeyForModel(model: AIModel, apiKey: String) {
         val key = apiKeyKeyForModel(model)
         Log.d("ApiConfigRepo", "Setting API key for model ${model.name}. Key used: ${key.name}. Value: $apiKey")

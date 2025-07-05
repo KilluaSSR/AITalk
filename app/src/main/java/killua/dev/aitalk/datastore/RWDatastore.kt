@@ -43,6 +43,9 @@ fun Context.readFloatingWindowSystemInstruction(
         )
     }
 
+fun Context.readModelEnabled(model: AIModel, defaultValue: Boolean = true): Flow<Boolean> =
+    readStoreBoolean(modelEnabledKey(model), defaultValue)
+
 fun Context.readApiKeyForModel(model: AIModel, defValue: String = "") =
     readStoreString(apiKeyKeyForModel(model), defValue)
 
@@ -69,6 +72,9 @@ suspend fun Context.writeDefaultSubModelForModel(model: AIModel, subModel: SubMo
 suspend fun Context.writeLocale(locale: String) = saveStoreString(LOCALE_MODE, locale)
 suspend fun Context.writeTheme(theme: String) = saveStoreString(THEME_MODE, theme)
 suspend fun Context.writeSecureMyHistory(set: Boolean) = saveStoreBoolean(SECURE_HISTORY, set)
+
+suspend fun Context.writeModelEnabled(model: AIModel, isEnabled: Boolean) =
+    saveStoreBoolean(modelEnabledKey(model), isEnabled)
 
 suspend fun Context.writeFloatingWindowQuestionMode(mode: FloatingWindowQuestionMode) =
     saveStoreString(FLOATING_WINDOW_QUESTION_MODE, mode.name)

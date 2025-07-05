@@ -17,6 +17,7 @@
     <string name="settings">设置</string>
     <string name="application_settings">主应用设置</string>
     <string name="theme">主题</string>
+    <string name="toogle_model" translatable="false">启用此模型</string>
     <string name="help">帮助</string>
     <string name="about">关于</string>
     <string name="feedback">反馈</string>

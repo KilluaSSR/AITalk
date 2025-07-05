@@ -22,6 +22,9 @@ fun defaultSubModelKeyForModel(model: AIModel): Preferences.Key<String> =
 fun floatingWindowSystemInstructionKey(questionMode: FloatingWindowQuestionMode, model: AIModel): Preferences.Key<String> =
     stringPreferencesKey("floating_window_system_instruction_${questionMode.name.lowercase()}_${model.name.lowercase()}")
 
+fun modelEnabledKey(model: AIModel): Preferences.Key<Boolean> =
+    booleanPreferencesKey("model_enabled_${model.name.lowercase()}")
+
 //Grok
 
 val GROK_SYSTEM_MESSAGE_KEY = stringPreferencesKey("grok_system_message")
