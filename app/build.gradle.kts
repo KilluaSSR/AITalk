@@ -76,6 +76,10 @@ fun generateSupportedLocales(): String {
 }
 
 dependencies {
+
+    //Markdown
+    implementation("com.github.jeziellago:compose-markdown:0.5.7")
+
     // AndroidX & Lifecycle
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)

@@ -28,6 +28,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import dev.jeziellago.compose.markdowntext.MarkdownText
 import killua.dev.aitalk.R
 import killua.dev.aitalk.states.AIResponseState
 import killua.dev.aitalk.states.ResponseStatus
@@ -85,7 +86,6 @@ fun AIResponseCard(
                     style = MaterialTheme.typography.headlineSmall.copy(
                         fontWeight = FontWeight.Normal
                     ),
-                    color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.padding(bottom = SizeTokens.Level8)
                 )
 
@@ -100,10 +100,9 @@ fun AIResponseCard(
                         AnimatedTextContainer(
                             targetState = responseState.content ?: ""
                         ) {
-                            Text(
-                                text = textToShow,
+                            MarkdownText(
+                                markdown = textToShow,
                                 style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.onSurface,
                                 maxLines = if (expanded) Int.MAX_VALUE else 3,
                                 modifier = Modifier.animateContentSize()
                             )
@@ -118,19 +117,19 @@ fun AIResponseCard(
                         TextButton(onClick = onCopyClicked) {
                             Text(
                                 text = context.getString(R.string.onCopyButton),
-                                color = MaterialTheme.colorScheme.onSurface
+                                color = colors.contentColor
                             )
                         }
                         TextButton(onClick = onSaveClicked) {
                             Text(
                                 text = context.getString(R.string.onSaveButton),
-                                color = MaterialTheme.colorScheme.onSurface
+                                color = colors.contentColor
                             )
                         }
                         TextButton(onClick = onRegenerateClicked) {
                             Text(
                                 text = context.getString(R.string.onRegenerateButton),
-                                color = MaterialTheme.colorScheme.onSurface
+                                color = colors.contentColor
                             )
                         }
                         Spacer(modifier = Modifier.weight(1f))
