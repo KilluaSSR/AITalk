@@ -11,11 +11,13 @@ import killua.dev.aitalk.repository.FileRepository
 import killua.dev.aitalk.repository.HistoryRepository
 import killua.dev.aitalk.repository.SettingsRepository
 import killua.dev.aitalk.ui.SnackbarUIEffect
+import killua.dev.aitalk.ui.SnackbarUIEffect.ShowSnackbar
 import killua.dev.aitalk.ui.viewmodels.base.BaseViewModel
 import killua.dev.aitalk.ui.viewmodels.base.UIIntent
 import killua.dev.aitalk.ui.viewmodels.base.UIState
 import killua.dev.aitalk.utils.ClipboardHelper
 import killua.dev.aitalk.utils.toSavable
+import killua.dev.aitalk.utils.toSavableMap
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
 import javax.inject.Inject
@@ -26,6 +28,7 @@ sealed interface HistoryPageUIIntent : UIIntent {
     data object DeleteAllHistory: HistoryPageUIIntent
     data class CopyPrompt(val prompt: String) : HistoryPageUIIntent
     data class SavePrompt(val index: Long) : HistoryPageUIIntent
+    data class CopyResponse(val responseContent: String) : HistoryPageUIIntent
 }
 
 data class HistoryPageUIState(
@@ -67,11 +70,17 @@ class HistoryPageViewModel @Inject constructor(
                     val directoryUri = if (saveDir.isNotBlank() && saveDir != DEFAULT_SAVE_DIR) saveDir.toUri() else null
                     fileRepository.saveAllResponsesToFile(
                         prompt = entity.prompt,
-                        responses = entity.toSavable(),
+                        responses = entity.toSavableMap(),
                         directoryUri = directoryUri
                     )
                 }else{
-                    emitEffect(SnackbarUIEffect.ShowSnackbar("Internal Error"))
+                    emitEffect(ShowSnackbar("Internal Error"))
+                }
+            }
+
+            is HistoryPageUIIntent.CopyResponse -> {
+                if (intent.responseContent.isNotEmpty()) {
+                    clipboardHelper.copy(intent.responseContent)
                 }
             }
         }

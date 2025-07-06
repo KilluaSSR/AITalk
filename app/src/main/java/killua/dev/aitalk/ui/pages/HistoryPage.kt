@@ -36,7 +36,6 @@ import killua.dev.aitalk.ui.tokens.SizeTokens
 import killua.dev.aitalk.ui.viewmodels.HistoryPageUIIntent
 import killua.dev.aitalk.ui.viewmodels.HistoryPageViewModel
 import killua.dev.aitalk.utils.LocalNavHostController
-import killua.dev.aitalk.utils.timestampToDate
 import kotlinx.coroutines.launch
 
 @Composable
@@ -75,7 +74,9 @@ fun HistoryPage() {
                         contentAlignment = Alignment.Center
                     ) {
                         Column(
-                            modifier = Modifier.fillMaxWidth().padding(SizeTokens.Level6),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(SizeTokens.Level6),
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.Center
                         ) {
@@ -86,7 +87,8 @@ fun HistoryPage() {
                                     .size(SizeTokens.Level72)
                                     .alpha(0.7F)
                             )
-                            Text(text = context.getString(R.string.no_history),
+                            Text(
+                                text = context.getString(R.string.no_history),
                                 style = MaterialTheme.typography.bodyLarge,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 fontWeight = FontWeight.SemiBold
@@ -107,12 +109,43 @@ fun HistoryPage() {
                             val history = historyList[index]
                             if (history != null) {
                                 HistorypageItemCard(
-                                    content = history.prompt,
-                                    date = context.timestampToDate(history.timestamp),
-                                    onCopyClicked = { scope.launch { viewModel.emitIntent(HistoryPageUIIntent.CopyPrompt(history.prompt)) } },
-                                    onSaveClicked = { scope.launch { viewModel.emitIntent(HistoryPageUIIntent.SavePrompt(history.id)) } },
-                                    onDeleteClicked = { scope.launch { viewModel.emitIntent(HistoryPageUIIntent.DeleteHistory(history.id)) } },
-                                    onClick = { }
+                                    history = history,
+                                    onCopyPrompt = {
+                                        scope.launch {
+                                            viewModel.emitIntent(
+                                                HistoryPageUIIntent.CopyPrompt(
+                                                    history.prompt
+                                                )
+                                            )
+                                        }
+                                    },
+                                    onSaveAll = {
+                                        scope.launch {
+                                            viewModel.emitIntent(
+                                                HistoryPageUIIntent.SavePrompt(
+                                                    history.id
+                                                )
+                                            )
+                                        }
+                                    },
+                                    onDelete = {
+                                        scope.launch {
+                                            viewModel.emitIntent(
+                                                HistoryPageUIIntent.DeleteHistory(
+                                                    history.id
+                                                )
+                                            )
+                                        }
+                                    },
+                                    onCopyResponse = { model, content ->
+                                        scope.launch {
+                                            viewModel.emitIntent(
+                                                HistoryPageUIIntent.CopyResponse(
+                                                    content
+                                                )
+                                            )
+                                        }
+                                    }
                                 )
                             }
                         }
