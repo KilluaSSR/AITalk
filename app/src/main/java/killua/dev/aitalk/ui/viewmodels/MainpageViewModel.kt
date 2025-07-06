@@ -20,10 +20,13 @@ import killua.dev.aitalk.ui.viewmodels.base.UIIntent
 import killua.dev.aitalk.ui.viewmodels.base.UIState
 import killua.dev.aitalk.utils.ClipboardHelper
 import killua.dev.aitalk.utils.prepareAiSearchData
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 sealed interface MainpageUIIntent : UIIntent {
@@ -64,62 +67,81 @@ class MainpageViewModel @Inject constructor(
     ): BaseViewModel<MainpageUIIntent, MainpageUIState, SnackbarUIEffect>(
     MainpageUIState()
 ){
+    private var searchJob: Job? = null
     override suspend fun onEvent(state: MainpageUIState, intent: MainpageUIIntent) {
         when(intent){
             is MainpageUIIntent.OnSendButtonClick -> {
-                val newQuery = intent.query
-                val (filteredSubModelMap, _, initialResponses) = prepareAiSearchData(
-                    apiConfigRepository = apiConfigRepository,
-                    currentSubModelMap = state.subModelMap // 传入当前 state 的 subModelMap
-                )
-                emitState(
-                    state.copy(
-                        showGreetings = false,
-                        searchStartTime = System.currentTimeMillis(),
-                        searchQuery = newQuery,
-                        aiResponses = initialResponses,
-                        subModelMap = filteredSubModelMap
-                    )
-                )
-                aiRepository.fetchAiResponses(newQuery, filteredSubModelMap)
-                    .onEach { (model, response) ->
-                        updateState { old ->
-                            val updatedMap = old.aiResponses.toMutableMap()
-                            updatedMap[model] = response
-                            old.copy(aiResponses = updatedMap)
-                        }
-                        if (response.status == ResponseStatus.Error && !response.errorMessage.isNullOrBlank()) {
-                            emitEffect(ShowSnackbar("${model.name} 错误: ${response.errorMessage}"))
-                        }
-                    }
-                    .onCompletion {
-                        val latestResponses = uiState.value.aiResponses.filter { it.value.status == ResponseStatus.Success }
-                        historyRepository.insertHistoryRecord(
-                            prompt = newQuery,
-                            modelResponses = latestResponses
-                        )
-                        updateState { old ->
-                            old.copy(showResults = true)
-                        }
-                    }
-                    .launchIn(viewModelScope)
+                if (intent.query.isNotBlank()) {
+                    startSearch(intent.query)
+                }
             }
 
             MainpageUIIntent.OnStopButtonClick -> {
-
+                searchJob?.cancel()
+                updateState { oldState ->
+                    val updatedResponses = oldState.aiResponses.mapValues { (_, response) ->
+                        if (response.status == ResponseStatus.Loading) {
+                            response.copy(
+                                status = ResponseStatus.Error,
+                                errorMessage = "Cancelled by user"
+                            )
+                        } else {
+                            response
+                        }
+                    }
+                    oldState.copy(aiResponses = updatedResponses)
+                }
             }
             is MainpageUIIntent.UpdateSearchQuery -> {
-
+                emitState(state.copy(searchQuery = intent.query))
             }
-            MainpageUIIntent.ClearInput -> TODO()
+            MainpageUIIntent.ClearInput -> {
+                emitState(state.copy(searchQuery = ""))
+            }
             is MainpageUIIntent.CopyResponse -> {
                 val response = state.aiResponses[intent.model]?.content.orEmpty()
                 if (response.isNotEmpty()) {
                     clipboardHelper.copy(response)
                 }
             }
-            MainpageUIIntent.RegenerateAll -> TODO()
-            is MainpageUIIntent.RegenerateSpecificModel -> TODO()
+            MainpageUIIntent.RegenerateAll -> {
+                if (state.searchQuery.isNotBlank()) {
+                    startSearch(state.searchQuery)
+                }
+            }
+            is MainpageUIIntent.RegenerateSpecificModel -> {
+                val query = state.searchQuery
+                val subModel = state.subModelMap[intent.model]
+                if (query.isNotBlank() && subModel != null) {
+                    viewModelScope.launch {
+                        updateState { old ->
+                            val updatedMap = old.aiResponses.toMutableMap()
+                            updatedMap[intent.model] = AIResponseState(status = ResponseStatus.Loading)
+                            old.copy(aiResponses = updatedMap)
+                        }
+                        aiRepository.fetchAiResponses(query, mapOf(intent.model to subModel))
+                            .onEach { (model, response) ->
+                                updateState { old ->
+                                    val updatedMap = old.aiResponses.toMutableMap()
+                                    updatedMap[model] = response
+                                    old.copy(aiResponses = updatedMap)
+                                }
+                            }
+                            .catch { e ->
+                                updateState { old ->
+                                    val updatedMap = old.aiResponses.toMutableMap()
+                                    updatedMap[intent.model] = AIResponseState(
+                                        status = ResponseStatus.Error,
+                                        errorMessage = e.message ?: "An unknown error occurred"
+                                    )
+                                    old.copy(aiResponses = updatedMap)
+                                }
+                                emitEffect(ShowSnackbar("${intent.model.name} regeneration failed: ${e.message}"))
+                            }
+                            .launchIn(this)
+                    }
+                }
+            }
             MainpageUIIntent.SaveAll -> {
                 val allSuccess = state.aiResponses.values.all { it.status == ResponseStatus.Success && !it.content.isNullOrBlank() }
                 if (allSuccess) {
@@ -152,6 +174,51 @@ class MainpageViewModel @Inject constructor(
                 }
             }
             is MainpageUIIntent.ShareResponse -> TODO()
+        }
+    }
+
+    private fun startSearch(query: String) {
+        searchJob?.cancel()
+
+        viewModelScope.launch {
+            val (filteredSubModelMap, _, initialResponses) = prepareAiSearchData(
+                apiConfigRepository = apiConfigRepository,
+                currentSubModelMap = uiState.value.subModelMap
+            )
+            emitState(
+                uiState.value.copy(
+                    showGreetings = false,
+                    searchStartTime = System.currentTimeMillis(),
+                    searchQuery = query,
+                    aiResponses = initialResponses,
+                    subModelMap = filteredSubModelMap,
+                    showResults = false
+                )
+            )
+            searchJob = aiRepository.fetchAiResponses(query, filteredSubModelMap)
+                .onEach { (model, response) ->
+                    updateState { old ->
+                        val updatedMap = old.aiResponses.toMutableMap()
+                        updatedMap[model] = response
+                        old.copy(aiResponses = updatedMap)
+                    }
+                    if (response.status == ResponseStatus.Error && !response.errorMessage.isNullOrBlank()) {
+                        emitEffect(ShowSnackbar("${model.name} Error: ${response.errorMessage}"))
+                    }
+                }
+                .onCompletion { throwable ->
+                    if (throwable == null) {
+                        val latestResponses = uiState.value.aiResponses.filter { it.value.status == ResponseStatus.Success }
+                        historyRepository.insertHistoryRecord(
+                            prompt = query,
+                            modelResponses = latestResponses
+                        )
+                        updateState { old ->
+                            old.copy(showResults = true)
+                        }
+                    }
+                }
+                .launchIn(viewModelScope)
         }
     }
 }

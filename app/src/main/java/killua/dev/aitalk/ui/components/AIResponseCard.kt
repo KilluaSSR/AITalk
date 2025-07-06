@@ -59,7 +59,10 @@ fun AIResponseCard(
 
     val isSearching = responseState.status == ResponseStatus.Loading
     val modifierShimmer: Modifier = if (isSearching) {
-        Modifier.shimmerEffect()
+        Modifier.shimmerEffect(
+            baseColor = colors.containerColor,
+            highlightColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)
+        )
     } else {
         Modifier
     }
@@ -84,7 +87,8 @@ fun AIResponseCard(
                 Text(
                     text = modelName,
                     style = MaterialTheme.typography.headlineSmall.copy(
-                        fontWeight = FontWeight.Normal
+                        fontWeight = FontWeight.Normal,
+                        color = colors.contentColor
                     ),
                     modifier = Modifier.padding(bottom = SizeTokens.Level8)
                 )
@@ -102,7 +106,9 @@ fun AIResponseCard(
                         ) {
                             MarkdownText(
                                 markdown = textToShow,
-                                style = MaterialTheme.typography.bodyLarge,
+                                style = MaterialTheme.typography.bodyLarge.copy(
+                                    color = colors.contentColor
+                                ),
                                 maxLines = if (expanded) Int.MAX_VALUE else 3,
                                 modifier = Modifier.animateContentSize()
                             )
