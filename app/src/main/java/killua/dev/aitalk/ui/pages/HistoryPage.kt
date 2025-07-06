@@ -1,7 +1,11 @@
 package killua.dev.aitalk.ui.pages
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,6 +22,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -45,6 +51,7 @@ fun HistoryPage() {
     val viewModel: HistoryPageViewModel = hiltViewModel()
     val scope = rememberCoroutineScope()
     val historyList = viewModel.pagedHistory.collectAsLazyPagingItems()
+    val deletingItemIds by viewModel.deletingItemIds.collectAsState()
 
     PrimaryScaffold(
         topBar = {
@@ -100,7 +107,6 @@ fun HistoryPage() {
                         modifier = Modifier
                             .fillMaxSize(),
                         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-                        verticalArrangement = Arrangement.spacedBy(SizeTokens.Level8)
                     ) {
                         items(
                             count = historyList.itemCount,
@@ -108,45 +114,51 @@ fun HistoryPage() {
                         ) { index ->
                             val history = historyList[index]
                             if (history != null) {
-                                HistorypageItemCard(
-                                    history = history,
-                                    onCopyPrompt = {
-                                        scope.launch {
-                                            viewModel.emitIntent(
-                                                HistoryPageUIIntent.CopyPrompt(
-                                                    history.prompt
+                                AnimatedVisibility(
+                                    visible = history.id !in deletingItemIds,
+                                    exit = shrinkVertically(animationSpec = tween(500)) +
+                                            fadeOut(animationSpec = tween(500))
+                                ) {
+                                    HistorypageItemCard(
+                                        history = history,
+                                        onCopyPrompt = {
+                                            scope.launch {
+                                                viewModel.emitIntent(
+                                                    HistoryPageUIIntent.CopyPrompt(
+                                                        history.prompt
+                                                    )
                                                 )
-                                            )
-                                        }
-                                    },
-                                    onSaveAll = {
-                                        scope.launch {
-                                            viewModel.emitIntent(
-                                                HistoryPageUIIntent.SavePrompt(
-                                                    history.id
+                                            }
+                                        },
+                                        onSaveAll = {
+                                            scope.launch {
+                                                viewModel.emitIntent(
+                                                    HistoryPageUIIntent.SavePrompt(
+                                                        history.id
+                                                    )
                                                 )
-                                            )
-                                        }
-                                    },
-                                    onDelete = {
-                                        scope.launch {
-                                            viewModel.emitIntent(
-                                                HistoryPageUIIntent.DeleteHistory(
-                                                    history.id
+                                            }
+                                        },
+                                        onDelete = {
+                                            scope.launch {
+                                                viewModel.emitIntent(
+                                                    HistoryPageUIIntent.DeleteHistory(
+                                                        history.id
+                                                    )
                                                 )
-                                            )
-                                        }
-                                    },
-                                    onCopyResponse = { model, content ->
-                                        scope.launch {
-                                            viewModel.emitIntent(
-                                                HistoryPageUIIntent.CopyResponse(
-                                                    content
+                                            }
+                                        },
+                                        onCopyResponse = { model, content ->
+                                            scope.launch {
+                                                viewModel.emitIntent(
+                                                    HistoryPageUIIntent.CopyResponse(
+                                                        content
+                                                    )
                                                 )
-                                            )
+                                            }
                                         }
-                                    }
-                                )
+                                    )
+                                }
                             }
                         }
 

@@ -18,8 +18,12 @@ import killua.dev.aitalk.ui.viewmodels.base.UIState
 import killua.dev.aitalk.utils.ClipboardHelper
 import killua.dev.aitalk.utils.toSavable
 import killua.dev.aitalk.utils.toSavableMap
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 sealed interface HistoryPageUIIntent : UIIntent {
@@ -46,11 +50,17 @@ class HistoryPageViewModel @Inject constructor(
 ) {
     val pagedHistory: Flow<PagingData<SearchHistoryEntity>> =
         historyRepository.getPagedHistory().cachedIn(viewModelScope)
-
+    private val _deletingItemIds = MutableStateFlow<Set<Long>>(emptySet())
+    val deletingItemIds = _deletingItemIds.asStateFlow()
     override suspend fun onEvent(state: HistoryPageUIState, intent: HistoryPageUIIntent) {
         when (intent) {
             is HistoryPageUIIntent.DeleteHistory -> {
-                historyRepository.deleteRecord(intent.id)
+                _deletingItemIds.value = _deletingItemIds.value + intent.id
+                viewModelScope.launch {
+                    delay(500)
+                    historyRepository.deleteRecord(intent.id)
+                    _deletingItemIds.value = _deletingItemIds.value - intent.id
+                }
             }
             HistoryPageUIIntent.DeleteAllHistory -> {
                 emitState(uiState.value.copy(isLoading = true))
