@@ -111,6 +111,7 @@ dependencies {
 
     // Network & Data
     implementation(libs.okhttp)
+    implementation(libs.moshi.kotlin)
     implementation(libs.logging.interceptor)
     implementation(libs.gson)
     implementation(libs.coil.compose)

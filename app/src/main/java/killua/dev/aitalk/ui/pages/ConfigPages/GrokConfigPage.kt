@@ -22,7 +22,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,7 +42,6 @@ import killua.dev.aitalk.ui.components.Slideable
 import killua.dev.aitalk.ui.components.Title
 import killua.dev.aitalk.ui.tokens.PaddingTokens
 import killua.dev.aitalk.ui.tokens.SizeTokens
-import killua.dev.aitalk.ui.viewmodels.GeminiConfigUIIntent
 import killua.dev.aitalk.ui.viewmodels.GrokConfigUIIntent
 import killua.dev.aitalk.ui.viewmodels.GrokConfigViewModel
 import killua.dev.aitalk.utils.LocalNavHostController

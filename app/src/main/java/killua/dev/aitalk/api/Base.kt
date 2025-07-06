@@ -3,9 +3,12 @@ package killua.dev.aitalk.api
 import android.util.Log
 import killua.dev.aitalk.models.SubModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.Response
 import java.io.IOException
 
 interface BaseApiConfig {
@@ -21,12 +24,12 @@ data class DeepSeekConfig(
 ): BaseApiConfig
 
 interface DeepSeekApiService {
-    suspend fun generateContent(
+    fun generateContentStream(
         model: SubModel,
         prompt: String,
         apiKey: String,
         deepSeekConfig: DeepSeekConfig
-    ): Result<String>
+    ): Flow<String>
 }
 
 data class GeminiConfig(
@@ -39,12 +42,12 @@ data class GeminiConfig(
 ): BaseApiConfig
 
 interface GeminiApiService {
-    suspend fun generateContent(
+    fun generateContentStream(
         model: SubModel,
         prompt: String,
         apiKey: String,
         geminiConfig: GeminiConfig
-    ): Result<String>
+    ): Flow<String>
 }
 
 data class GrokConfig(
@@ -54,34 +57,34 @@ data class GrokConfig(
 ): BaseApiConfig
 
 interface GrokApiService {
-    suspend fun generateContent(
+    fun generateContentStream(
         model: SubModel,
         prompt: String,
         apiKey: String,
         grokConfig: GrokConfig
-    ): Result<String>
+    ): Flow<String>
 }
 
 abstract class BaseApiServiceImpl<C : BaseApiConfig>(
     protected val httpClient: OkHttpClient,
     private val apiName: String
 ) {
-    protected abstract fun buildRequest(model: SubModel, prompt: String, apiKey: String, config: C): Request
+    abstract fun buildRequest(model: SubModel, prompt: String, apiKey: String, config: C, stream: Boolean): Request
+    abstract fun parseStreamChunk(chunk: String): String?
+    abstract fun parseSuccessfulResponse(responseBody: String): String
 
-    protected abstract fun parseSuccessfulResponse(responseBody: String): String
-
-    protected fun getSystemInstruction(config: C): String {
+    fun getSystemInstruction(config: C): String {
         return (config.floatingWindowSystemInstruction ?: config.systemInstruction).trim()
     }
 
-    protected suspend fun executeApiCall(
+    suspend fun executeApiCall(
         model: SubModel,
         prompt: String,
         apiKey: String,
         config: C
     ): Result<String> = withContext(Dispatchers.IO) {
         try {
-            val request = buildRequest(model, prompt, apiKey, config)
+            val request = buildRequest(model, prompt, apiKey, config, stream = false)
             Log.d(apiName, "请求 URL: ${request.url}")
 
 
@@ -109,6 +112,53 @@ abstract class BaseApiServiceImpl<C : BaseApiConfig>(
         } catch (e: Exception) {
             Log.e(apiName, "$apiName 调用失败: ${e.message}", e)
             Result.failure(e)
+        }
+    }
+
+    fun executeStreamApiCall(
+        model: SubModel,
+        prompt: String,
+        apiKey: String,
+        config: C
+    ): Flow<String> = flow {
+        val request = buildRequest(model, prompt, apiKey, config, stream = true)
+        Log.d(apiName, "流式请求 URL: ${request.url}")
+
+        var response: Response? = null
+        try {
+            response = httpClient.newCall(request).execute()
+            Log.d(apiName, "流式响应代码: ${response.code}")
+
+            if (!response.isSuccessful) {
+                val errorBody = response.body?.string()
+                Log.e(apiName, "HTTP 错误: ${response.code}, 错误体: $errorBody")
+                throw IOException("HTTP Error ${response.code}: $errorBody")
+            }
+
+            val source = response.body?.source() ?: throw IOException("Response body is null")
+
+            while (!source.exhausted()) {
+                val line = source.readUtf8Line()
+                if (line.isNullOrBlank() || line.startsWith(":")) {
+                    continue // Skip empty lines and comments
+                }
+
+                if (line.startsWith("data: [DONE]")) {
+                    break // Stream finished
+                }
+
+                if (line.startsWith("data: ")) {
+                    val jsonData = line.substring(6)
+                    parseStreamChunk(jsonData)?.let { contentChunk ->
+                        emit(contentChunk)
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(apiName, "$apiName 流式调用失败: ${e.message}", e)
+            throw e
+        } finally {
+            response?.body?.close()
         }
     }
 }

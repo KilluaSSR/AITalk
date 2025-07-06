@@ -13,10 +13,10 @@ import killua.dev.aitalk.repository.ApiConfigRepository
 import killua.dev.aitalk.states.AIResponseState
 import killua.dev.aitalk.states.ResponseStatus
 import killua.dev.aitalk.utils.mapCommonNetworkErrorToUserFriendlyMessage
-import killua.dev.aitalk.utils.mapDeepSeekErrorToUserFriendlyMessage
-import killua.dev.aitalk.utils.mapGeminiErrorToUserFriendlyMessage
-import killua.dev.aitalk.utils.mapGrokErrorToUserFriendlyMessage
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
 class AiNetworkRepositoryImpl @Inject constructor(
@@ -26,124 +26,58 @@ class AiNetworkRepositoryImpl @Inject constructor(
     private val apiConfigRepository: ApiConfigRepository,
     @ApplicationContext private val context: Context
 ) : AiNetworkRepository {
-    override suspend fun fetchResponse(
+    override fun fetchResponseStream(
         query: String,
         subModel: SubModel,
         extraInformation: ExtraInformation
-    ): AIResponseState {
+    ): Flow<AIResponseState> = flow {
+        emit(AIResponseState(status = ResponseStatus.Loading))
+
         val apiKey = apiConfigRepository.getApiKeyForModel(subModel.parent).first()
-        return try {
-            when (subModel.parent) {
-                AIModel.Gemini -> {
-                    val baseGeminiConfig = apiConfigRepository.getGeminiConfig().first()
-                    val geminiConfigWithFW = baseGeminiConfig.copy(
-                        floatingWindowSystemInstruction = extraInformation.floatingWindowSystemInstructions[subModel.parent]
-                    )
-                    geminiApiService.generateContent(
-                        model = subModel,
-                        prompt = query,
-                        apiKey = apiKey,
-                        geminiConfig = geminiConfigWithFW
-                    ).fold(
-                        onSuccess = { content ->
-                            AIResponseState(
-                                status = ResponseStatus.Success,
-                                content = content,
-                                timestamp = System.currentTimeMillis()
-                            )
-                        },
-                        onFailure = { e ->
-                            AIResponseState(
-                                status = ResponseStatus.Error,
-                                errorMessage = context.mapGeminiErrorToUserFriendlyMessage(e)
-                            )
-                        }
-                    )
-                }
-                AIModel.Grok -> {
-                    val baseGrokConfig = apiConfigRepository.getGrokConfig().first()
-                    val grokConfigWithFW = baseGrokConfig.copy(
-                        floatingWindowSystemInstruction = extraInformation.floatingWindowSystemInstructions[subModel.parent]
-                    )
-                    grokApiService.generateContent(
-                        model = subModel,
-                        prompt = query,
-                        apiKey = apiKey,
-                        grokConfig = grokConfigWithFW
-                    ).fold(
-                        onSuccess = { content ->
-                            AIResponseState(
-                                status = ResponseStatus.Success,
-                                content = content,
-                                timestamp = System.currentTimeMillis()
-                            )
-                        },
-                        onFailure = { e ->
-                            AIResponseState(
-                                status = ResponseStatus.Error,
-                                errorMessage = context.mapGrokErrorToUserFriendlyMessage(e)
-                            )
-                        }
-                    )
-                }
-                AIModel.DeepSeek -> {
-                    val baseDeepSeekConfig = apiConfigRepository.getDeepSeekConfig().first()
-                    val deepSeekConfigWithFW = baseDeepSeekConfig.copy(
-                        floatingWindowSystemInstruction = extraInformation.floatingWindowSystemInstructions[subModel.parent]
-                    )
-                    deepSeekApiService.generateContent(
-                        model = subModel,
-                        prompt = query,
-                        apiKey = apiKey,
-                        deepSeekConfig = deepSeekConfigWithFW
-                    ).fold(
-                        onSuccess = { content ->
-                            AIResponseState(
-                                status = ResponseStatus.Success,
-                                content = content,
-                                timestamp = System.currentTimeMillis()
-                            )
-                        },
-                        onFailure = { e ->
-                            AIResponseState(
-                                status = ResponseStatus.Error,
-                                errorMessage = context.mapDeepSeekErrorToUserFriendlyMessage(e)
-                            )
-                        }
-                    )
-                }
-                else -> {
-                    val baseDeepSeekConfig = apiConfigRepository.getDeepSeekConfig().first()
-                    val deepSeekConfigWithFW = baseDeepSeekConfig.copy(
-                        floatingWindowSystemInstruction = extraInformation.floatingWindowSystemInstructions[subModel.parent]
-                    )
-                    deepSeekApiService.generateContent(
-                        model = subModel,
-                        prompt = query,
-                        apiKey = apiKey,
-                        deepSeekConfig = deepSeekConfigWithFW
-                    ).fold(
-                        onSuccess = { content ->
-                            AIResponseState(
-                                status = ResponseStatus.Success,
-                                content = content,
-                                timestamp = System.currentTimeMillis()
-                            )
-                        },
-                        onFailure = { e ->
-                            AIResponseState(
-                                status = ResponseStatus.Error,
-                                errorMessage = context.mapDeepSeekErrorToUserFriendlyMessage(e)
-                            )
-                        }
-                    )
-                }
+        val contentBuilder = StringBuilder()
+        var finalState: AIResponseState? = null
+
+        val apiFlow = when (subModel.parent) {
+            AIModel.Gemini -> {
+                val baseGeminiConfig = apiConfigRepository.getGeminiConfig().first()
+                val geminiConfigWithFW = baseGeminiConfig.copy(
+                    floatingWindowSystemInstruction = extraInformation.floatingWindowSystemInstructions[subModel.parent]
+                )
+                geminiApiService.generateContentStream(model = subModel, prompt = query, apiKey = apiKey, geminiConfig = geminiConfigWithFW)
             }
-        } catch (e: Exception) {
-            AIResponseState(
-                status = ResponseStatus.Error,
-                errorMessage = context.mapCommonNetworkErrorToUserFriendlyMessage(subModel.parent.name, e)
-            )
+            AIModel.Grok -> {
+                val baseGrokConfig = apiConfigRepository.getGrokConfig().first()
+                val grokConfigWithFW = baseGrokConfig.copy(
+                    floatingWindowSystemInstruction = extraInformation.floatingWindowSystemInstructions[subModel.parent]
+                )
+                grokApiService.generateContentStream(model = subModel, prompt = query, apiKey = apiKey, grokConfig = grokConfigWithFW)
+            }
+            else -> {
+                val baseDeepSeekConfig = apiConfigRepository.getDeepSeekConfig().first()
+                val deepSeekConfigWithFW = baseDeepSeekConfig.copy(
+                    floatingWindowSystemInstruction = extraInformation.floatingWindowSystemInstructions[subModel.parent]
+                )
+                deepSeekApiService.generateContentStream(model = subModel, prompt = query, apiKey = apiKey, deepSeekConfig = deepSeekConfigWithFW)
+            }
         }
+
+        apiFlow
+            .catch { e ->
+                finalState = AIResponseState(
+                    status = ResponseStatus.Error,
+                    errorMessage = context.mapCommonNetworkErrorToUserFriendlyMessage(subModel.parent.name, e)
+                )
+            }
+            .collect { chunk ->
+                contentBuilder.append(chunk)
+                finalState = AIResponseState(
+                    status = ResponseStatus.Success,
+                    content = contentBuilder.toString(),
+                    timestamp = System.currentTimeMillis()
+                )
+                emit(finalState)
+            }
+
+        finalState?.let { emit(it) }
     }
 }

@@ -3,6 +3,7 @@ package killua.dev.aitalk.api
 import android.util.Log
 import killua.dev.aitalk.consts.GROK_URL
 import killua.dev.aitalk.models.SubModel
+import kotlinx.coroutines.flow.Flow
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -15,16 +16,22 @@ class GrokApiServiceImpl @Inject constructor(
     httpClient: OkHttpClient
 ) : BaseApiServiceImpl<GrokConfig>(httpClient, "GrokAPI"), GrokApiService {
 
-    override suspend fun generateContent(
+    override fun generateContentStream(
         model: SubModel,
         prompt: String,
         apiKey: String,
         grokConfig: GrokConfig
-    ): Result<String> {
-        return executeApiCall(model, prompt, apiKey, grokConfig)
+    ): Flow<String> {
+        return executeStreamApiCall(model, prompt, apiKey, grokConfig)
     }
 
-    override fun buildRequest(model: SubModel, prompt: String, apiKey: String, config: GrokConfig): Request {
+    override fun buildRequest(
+        model: SubModel,
+        prompt: String,
+        apiKey: String,
+        config: GrokConfig,
+        stream: Boolean
+    ): Request {
         val messages = JSONArray().apply {
             put(JSONObject().apply {
                 put("role", "system")
@@ -38,7 +45,7 @@ class GrokApiServiceImpl @Inject constructor(
         val requestBodyJson = JSONObject().apply {
             put("messages", messages)
             put("model", model.displayName)
-            put("stream", false)
+            put("stream", stream)
             put("temperature", config.temperature)
         }.toString()
 
@@ -63,6 +70,19 @@ class GrokApiServiceImpl @Inject constructor(
         } catch (e: Exception) {
             Log.e("GrokAPI", "解析响应失败: $e")
             ""
+        }
+    }
+
+    override fun parseStreamChunk(chunk: String): String? {
+        return try {
+            JSONObject(chunk)
+                .optJSONArray("choices")
+                ?.optJSONObject(0)
+                ?.optJSONObject("delta")
+                ?.optString("content", null)
+        } catch (e: Exception) {
+            Log.e("GrokAPI", "解析流式块失败: $e")
+            null
         }
     }
 }

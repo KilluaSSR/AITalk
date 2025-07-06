@@ -3,11 +3,13 @@ package killua.dev.aitalk.repository
 import killua.dev.aitalk.models.ExtraInformation
 import killua.dev.aitalk.models.SubModel
 import killua.dev.aitalk.states.AIResponseState
+import kotlinx.coroutines.flow.Flow
 
 interface AiNetworkRepository {
-    suspend fun fetchResponse(
+
+    fun fetchResponseStream(
         query: String,
         subModel: SubModel,
         extraInformation: ExtraInformation
-    ): AIResponseState
+    ): Flow<AIResponseState>
 }

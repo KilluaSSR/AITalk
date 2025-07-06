@@ -9,7 +9,7 @@ import killua.dev.aitalk.models.SubModel
 import killua.dev.aitalk.repository.ApiConfigRepository
 import killua.dev.aitalk.repository.SettingsRepository
 import killua.dev.aitalk.ui.SnackbarUIEffect
-import killua.dev.aitalk.ui.SnackbarUIEffect.*
+import killua.dev.aitalk.ui.SnackbarUIEffect.ShowSnackbar
 import killua.dev.aitalk.ui.viewmodels.base.BaseViewModel
 import killua.dev.aitalk.ui.viewmodels.base.UIIntent
 import killua.dev.aitalk.ui.viewmodels.base.UIState
@@ -18,7 +18,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlin.collections.indexOf
 
 data class DeepSeekConfigUIState(
     val subModels: List<SubModel> = emptyList(),

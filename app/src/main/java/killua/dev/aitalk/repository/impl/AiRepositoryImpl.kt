@@ -25,8 +25,9 @@ class AiRepositoryImpl @Inject constructor(
     ): Flow<Pair<AIModel, AIResponseState>> = channelFlow {
         for ((model, subModel) in subModelMap) {
             launch {
-                val result = networkRepo.fetchResponse(query, subModel, extraInformation)
-                send(model to result)
+                networkRepo.fetchResponseStream(query, subModel, extraInformation).collect { state->
+                    send(model to state)
+                }
             }
         }
     }.flowOn(Dispatchers.IO)

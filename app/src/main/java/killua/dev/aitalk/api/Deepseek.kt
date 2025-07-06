@@ -3,6 +3,7 @@ package killua.dev.aitalk.api
 import android.util.Log
 import killua.dev.aitalk.consts.DEEPSEEK_URL
 import killua.dev.aitalk.models.SubModel
+import kotlinx.coroutines.flow.Flow
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -15,20 +16,21 @@ class DeepSeekApiServiceImpl @Inject constructor(
     httpClient: OkHttpClient
 ) : BaseApiServiceImpl<DeepSeekConfig>(httpClient, "DeepSeekAPI"), DeepSeekApiService {
 
-    override suspend fun generateContent(
+    override fun generateContentStream(
         model: SubModel,
         prompt: String,
         apiKey: String,
         deepSeekConfig: DeepSeekConfig
-    ): Result<String> {
-        return executeApiCall(model, prompt, apiKey, deepSeekConfig)
+    ): Flow<String> {
+        return executeStreamApiCall(model, prompt, apiKey, deepSeekConfig)
     }
 
     override fun buildRequest(
         model: SubModel,
         prompt: String,
         apiKey: String,
-        config: DeepSeekConfig
+        config: DeepSeekConfig,
+        stream: Boolean
     ): Request {
 
         val messages = JSONArray().apply {
@@ -44,7 +46,7 @@ class DeepSeekApiServiceImpl @Inject constructor(
         val requestBodyJson = JSONObject().apply {
             put("model", model.displayName.lowercase())
             put("messages", messages)
-            put("stream", false)
+            put("stream", stream)
             put("temperature", config.temperature)
         }.toString()
 
@@ -71,4 +73,17 @@ class DeepSeekApiServiceImpl @Inject constructor(
             ""
         }
     }
+    override fun parseStreamChunk(chunk: String): String? {
+        return try {
+            JSONObject(chunk)
+                .optJSONArray("choices")
+                ?.optJSONObject(0)
+                ?.optJSONObject("delta")
+                ?.optString("content", null)
+        } catch (e: Exception) {
+            Log.e("DeepSeekAPI", "解析流式块失败: $e")
+            null
+        }
+    }
+
 }
