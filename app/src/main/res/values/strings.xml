@@ -17,7 +17,7 @@
     <string name="settings">设置</string>
     <string name="application_settings">主应用设置</string>
     <string name="theme">主题</string>
-    <string name="toogle_model" translatable="false">启用此模型</string>
+    <string name="toogle_model">启用此模型</string>
     <string name="help">帮助</string>
     <string name="about">关于</string>
     <string name="feedback">反馈</string>
@@ -144,5 +144,10 @@
     <string name="english">English</string>
     <string name="japanese">日本語</string>
     <string name="language">语言</string>
+    <string name="no_api_key_set">你没有设置任何 API Key</string>
+    <string name="no_api_key_set_desc">前往设置里填写一个 API Key。</string>
+    <string name="no_api_key_set_action">怎么获取一个？</string>
+    <string name="no_model_enabled">所有模型都被关闭</string>
+    <string name="no_model_enabled_desc">前往设置里开启一个模型</string>
 
 </resources>

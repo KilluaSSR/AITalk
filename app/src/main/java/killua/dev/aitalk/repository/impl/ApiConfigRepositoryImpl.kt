@@ -37,8 +37,11 @@ import killua.dev.aitalk.models.AIModel
 import killua.dev.aitalk.models.FloatingWindowQuestionMode
 import killua.dev.aitalk.models.SubModel
 import killua.dev.aitalk.repository.ApiConfigRepository
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -54,6 +57,30 @@ class ApiConfigRepositoryImpl @Inject constructor(
     }
     override fun getModelEnabled(model: AIModel): Flow<Boolean> =
         context.readModelEnabled(model)
+
+    override fun hasAnyApiKeyBeenSet(): Flow<Boolean> {
+        val apiKeyFlows = AIModel.entries.map { getApiKeyForModel(it) }
+        return combine(apiKeyFlows) { keys ->
+            keys.any { it.isNotBlank() }
+        }
+    }
+
+    override fun isAnyModelWithKeyEnabled(): Flow<Boolean> {
+        val modelConfigFlows = AIModel.entries.map { model ->
+            combine(
+                getApiKeyForModel(model),
+                getModelEnabled(model)
+            ) { apiKey, isEnabled ->
+                Pair(apiKey, isEnabled)
+            }
+        }
+        return combine(modelConfigFlows) { configs ->
+            configs.any { (apiKey, isEnabled) ->
+                apiKey.isNotBlank() && isEnabled
+            }
+        }
+    }
+
     override suspend fun setModelEnabled(model: AIModel, isEnabled: Boolean) {
         context.writeModelEnabled(model, isEnabled)
     }

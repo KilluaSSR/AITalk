@@ -12,6 +12,7 @@ import killua.dev.aitalk.repository.FileRepository
 import killua.dev.aitalk.repository.HistoryRepository
 import killua.dev.aitalk.repository.SettingsRepository
 import killua.dev.aitalk.states.AIResponseState
+import killua.dev.aitalk.states.MainpageState
 import killua.dev.aitalk.states.ResponseStatus
 import killua.dev.aitalk.ui.SnackbarUIEffect
 import killua.dev.aitalk.ui.SnackbarUIEffect.ShowSnackbar
@@ -22,6 +23,7 @@ import killua.dev.aitalk.utils.ClipboardHelper
 import killua.dev.aitalk.utils.prepareAiSearchData
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onCompletion
@@ -43,14 +45,11 @@ sealed interface MainpageUIIntent : UIIntent {
 }
 
 data class MainpageUIState(
-    val showGreetings: Boolean = true,
+    val screenState: MainpageState = MainpageState.GREETINGS,
     val searchQuery: String = "",
     val aiResponses: Map<AIModel, AIResponseState> = emptyMap(),
     val subModelMap: Map<AIModel, SubModel> = emptyMap(),
     val searchStartTime: Long? = null,
-    val completedCount: Int = 0,
-    val totalCount: Int = 0,
-    val showResults: Boolean = false
 ) : UIState{
     val isSearching: Boolean
         get() = aiResponses.values.any { it.status == ResponseStatus.Loading }
@@ -64,16 +63,30 @@ class MainpageViewModel @Inject constructor(
     private val apiConfigRepository: ApiConfigRepository,
     private val clipboardHelper: ClipboardHelper,
     private val fileRepository: FileRepository,
-    ): BaseViewModel<MainpageUIIntent, MainpageUIState, SnackbarUIEffect>(
+): BaseViewModel<MainpageUIIntent, MainpageUIState, SnackbarUIEffect>(
     MainpageUIState()
-){
+) {
+
     private var searchJob: Job? = null
+
     override suspend fun onEvent(state: MainpageUIState, intent: MainpageUIIntent) {
         when(intent){
             is MainpageUIIntent.OnSendButtonClick -> {
-                if (intent.query.isNotBlank()) {
-                    startSearch(intent.query)
+                if (intent.query.isBlank()) return
+
+                val hasAnyKey = apiConfigRepository.hasAnyApiKeyBeenSet().first()
+                if (!hasAnyKey) {
+                    updateState { it.copy(screenState = MainpageState.NO_API_KEY) }
+                    return
                 }
+
+                val isConfiguredModelEnabled = apiConfigRepository.isAnyModelWithKeyEnabled().first()
+                if (!isConfiguredModelEnabled) {
+                    updateState { it.copy(screenState = MainpageState.NO_MODELS_ENABLED) }
+                    return
+                }
+
+                startSearch(intent.query)
             }
 
             MainpageUIIntent.OnStopButtonClick -> {
@@ -102,6 +115,7 @@ class MainpageViewModel @Inject constructor(
                 val response = state.aiResponses[intent.model]?.content.orEmpty()
                 if (response.isNotEmpty()) {
                     clipboardHelper.copy(response)
+                    emitEffect(ShowSnackbar("Response copied!"))
                 }
             }
             MainpageUIIntent.RegenerateAll -> {
@@ -173,13 +187,14 @@ class MainpageViewModel @Inject constructor(
                     emitEffect(ShowSnackbar("该模型回复未完成，无法保存"))
                 }
             }
-            is MainpageUIIntent.ShareResponse -> TODO()
+            is MainpageUIIntent.ShareResponse -> {
+                // Implement share logic here if needed
+            }
         }
     }
 
     private fun startSearch(query: String) {
         searchJob?.cancel()
-
         viewModelScope.launch {
             val (filteredSubModelMap, _, initialResponses) = prepareAiSearchData(
                 apiConfigRepository = apiConfigRepository,
@@ -187,12 +202,11 @@ class MainpageViewModel @Inject constructor(
             )
             emitState(
                 uiState.value.copy(
-                    showGreetings = false,
+                    screenState = MainpageState.SHOWING_RESULTS,
                     searchStartTime = System.currentTimeMillis(),
                     searchQuery = query,
                     aiResponses = initialResponses,
-                    subModelMap = filteredSubModelMap,
-                    showResults = false
+                    subModelMap = filteredSubModelMap
                 )
             )
             searchJob = aiRepository.fetchAiResponses(query, filteredSubModelMap)
@@ -213,9 +227,6 @@ class MainpageViewModel @Inject constructor(
                             prompt = query,
                             modelResponses = latestResponses
                         )
-                        updateState { old ->
-                            old.copy(showResults = true)
-                        }
                     }
                 }
                 .launchIn(viewModelScope)

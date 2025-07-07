@@ -16,6 +16,10 @@ interface ApiConfigRepository {
     fun getDefaultSubModelForModel(model: AIModel): Flow<SubModel?>
     suspend fun setDefaultSubModelForModel(model: AIModel, subModel: SubModel)
     fun getModelEnabled(model: AIModel): Flow<Boolean>
+
+    fun hasAnyApiKeyBeenSet(): Flow<Boolean>
+
+    fun isAnyModelWithKeyEnabled(): Flow<Boolean>
     fun getFloatingWindowSystemInstruction(model: AIModel, questionMode: FloatingWindowQuestionMode): Flow<String>
     suspend fun setFloatingWindowSystemInstruction(model: AIModel, questionMode: FloatingWindowQuestionMode, instruction: String)
     suspend fun setModelEnabled(model: AIModel, isEnabled: Boolean)

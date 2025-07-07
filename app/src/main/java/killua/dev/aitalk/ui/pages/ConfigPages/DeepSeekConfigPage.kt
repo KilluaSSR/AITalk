@@ -155,6 +155,7 @@ fun DeepSeekConfigPage() {
                             onValueChange = { scope.launch { viewModel.emitIntent(DeepSeekConfigUIIntent.UpdateDeepSeekSystemInstruction(it)) } },
                             label = { Text(stringResource(R.string.system_instruction)) },
                             shape = shape,
+                            singleLine = false,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = PaddingTokens.Level4)

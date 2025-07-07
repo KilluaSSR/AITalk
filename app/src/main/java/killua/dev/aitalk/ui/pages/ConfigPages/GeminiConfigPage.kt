@@ -153,6 +153,7 @@ fun GeminiConfigPage() {
                             onValueChange = { scope.launch { viewModel.emitIntent(GeminiConfigUIIntent.UpdateGeminiSystemInstruction(it)) } },
                             label = { Text(stringResource(R.string.system_instruction)) },
                             shape = shape,
+                            singleLine = false,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = PaddingTokens.Level4)
