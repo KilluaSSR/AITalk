@@ -191,7 +191,7 @@ fun SettingsPage() {
                                 title = stringResource(model.stringRes()),
                             ) {
                                 val route = when(model){
-                                    AIModel.ChatGPT -> Routes.DeepSeekConfigPage.route //占位
+                                    AIModel.ChatGPT -> Routes.OpenAIConfigPage.route
                                     AIModel.Claude -> Routes.DeepSeekConfigPage.route //占位
                                     AIModel.Gemini -> Routes.GeminiConfigPage.route
                                     AIModel.DeepSeek -> Routes.DeepSeekConfigPage.route

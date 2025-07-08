@@ -143,3 +143,22 @@ suspend fun Context.writeDeepSeekTemperature(temperature: Double) =
 
 suspend fun Context.writeDeepSeekSystemInstruction(instruction: String) =
     saveStoreString(DEEPSEEK_SYSTEM_INSTRUCTION_KEY, instruction)
+
+// OpenAI
+fun Context.readOpenAITemperature(defValue: Double = 1.0) =
+    readStoreDouble(OPENAI_TEMPERATURE_KEY, defValue)
+
+fun Context.readOpenAITopP(defValue: Double = 1.0) =
+    readStoreDouble(OPENAI_TOP_P_KEY, defValue)
+
+fun Context.readOpenAISystemInstruction(defValue: String = "You are a helpful assistant.") =
+    readStoreString(OPENAI_SYSTEM_INSTRUCTION_KEY, defValue)
+
+suspend fun Context.writeOpenAITemperature(temperature: Double) =
+    saveStoreDouble(OPENAI_TEMPERATURE_KEY, temperature)
+
+suspend fun Context.writeOpenAITopP(topP: Double) =
+    saveStoreDouble(OPENAI_TOP_P_KEY, topP)
+
+suspend fun Context.writeOpenAISystemInstruction(instruction: String) =
+    saveStoreString(OPENAI_SYSTEM_INSTRUCTION_KEY, instruction)

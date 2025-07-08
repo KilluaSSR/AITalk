@@ -4,6 +4,7 @@ package killua.dev.aitalk.repository
 import killua.dev.aitalk.api.DeepSeekConfig
 import killua.dev.aitalk.api.GeminiConfig
 import killua.dev.aitalk.api.GrokConfig
+import killua.dev.aitalk.api.OpenAIConfig
 import killua.dev.aitalk.models.AIModel
 import killua.dev.aitalk.models.FloatingWindowQuestionMode
 import killua.dev.aitalk.models.SubModel
@@ -41,4 +42,10 @@ interface ApiConfigRepository {
     fun getDeepSeekConfig(): Flow<DeepSeekConfig>
     suspend fun setDeepSeekTemperature(temperature: Double)
     suspend fun setDeepSeekSystemInstruction(instruction: String)
+
+    // OpenAI
+    fun getOpenAIConfig(): Flow<OpenAIConfig>
+    suspend fun setOpenAITemperature(temperature: Double)
+    suspend fun setOpenAITopP(topP: Double)
+    suspend fun setOpenAISystemInstruction(instruction: String)
 }

@@ -60,7 +60,7 @@
     <string name="response_mime_type">响应 MIME 类型</string>
     <string name="system_instruction">系统指令</string>
 
-    <string name="gemini_error_400_invalid_argument">请求正文格式有误或缺少必填字段。请检查您的提问内容，确保符合要求。</string>
+    <string name="gemini_error_400_invalid_argument">请求正文格式有误或缺少必填字段。请检查您的Gemini API 是否有效。</string>
     <string name="gemini_error_400_failed_precondition">Gemini API 免费层级在您所在国家/地区（中国）尚未推出，或您尚未在 Google AI Studio 中为项目启用结算功能。请前往 Google AI Studio 设置付费方案。</string>
     <string name="gemini_error_400_general">Gemini API 请求错误（%d），请求内容可能存在问题。</string>
     <string name="gemini_error_400_invalid_api">Gemini API 无效。</string>
@@ -96,6 +96,14 @@
     <string name="deepseek_error_503">DeepSeek 服务器过载（503）。服务器因高流量过载。请稍后重试。</string>
     <string name="deepseek_error_http_unknown">DeepSeek 网络或服务器错误: HTTP %d - %s</string>
     <string name="deepseek_error_unknown">DeepSeek 发生未知错误: %s</string>
+
+    <string name="openai_error_401">身份验证失败。请检查您的 OpenAI API 密钥是否正确。</string>
+    <string name="openai_error_403">访问被拒绝。您所在的地区可能不受 OpenAI 支持。</string>
+    <string name="openai_error_429">请求已达上限。您可能已超出使用配额或发送请求过于频繁。请检查您的套餐和账单详情。</string>
+    <string name="openai_error_500">OpenAI 服务器错误。这是 OpenAI 方面的问题，请稍后重试。</string>
+    <string name="openai_error_503">OpenAI 服务器当前负载过高，请稍后重试。</string>
+    <string name="openai_error_http_unknown">发生未知 HTTP 错误。代码: %1$d，信息: %2$s</string>
+    <string name="openai_error_unknown">发生未知错误。信息: %1$s</string>
 
     <string name="error_network_connection_failed">网络连接失败，请检查您的网络设置。</string>
     <string name="error_fetching_api_key">获取 API Key 失败或发生其他内部错误: %s</string>

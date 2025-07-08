@@ -6,6 +6,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import killua.dev.aitalk.api.DeepSeekConfig
 import killua.dev.aitalk.api.GeminiConfig
 import killua.dev.aitalk.api.GrokConfig
+import killua.dev.aitalk.api.OpenAIConfig
 import killua.dev.aitalk.datastore.apiKeyKeyForModel
 import killua.dev.aitalk.datastore.readApiKeyForModel
 import killua.dev.aitalk.datastore.readDeepSeekSystemInstruction
@@ -20,6 +21,9 @@ import killua.dev.aitalk.datastore.readGeminiTopP
 import killua.dev.aitalk.datastore.readGrokSystemMessage
 import killua.dev.aitalk.datastore.readGrokTemperature
 import killua.dev.aitalk.datastore.readModelEnabled
+import killua.dev.aitalk.datastore.readOpenAISystemInstruction
+import killua.dev.aitalk.datastore.readOpenAITemperature
+import killua.dev.aitalk.datastore.readOpenAITopP
 import killua.dev.aitalk.datastore.writeApiKeyForModel
 import killua.dev.aitalk.datastore.writeDeepSeekSystemInstruction
 import killua.dev.aitalk.datastore.writeDeepSeekTemperature
@@ -33,6 +37,9 @@ import killua.dev.aitalk.datastore.writeGeminiTopP
 import killua.dev.aitalk.datastore.writeGrokSystemMessage
 import killua.dev.aitalk.datastore.writeGrokTemperature
 import killua.dev.aitalk.datastore.writeModelEnabled
+import killua.dev.aitalk.datastore.writeOpenAISystemInstruction
+import killua.dev.aitalk.datastore.writeOpenAITemperature
+import killua.dev.aitalk.datastore.writeOpenAITopP
 import killua.dev.aitalk.models.AIModel
 import killua.dev.aitalk.models.FloatingWindowQuestionMode
 import killua.dev.aitalk.models.SubModel
@@ -171,5 +178,28 @@ class ApiConfigRepositoryImpl @Inject constructor(
 
     override suspend fun setDeepSeekSystemInstruction(instruction: String) {
         context.writeDeepSeekSystemInstruction(instruction)
+    }
+
+    // OpenAI
+    override fun getOpenAIConfig(): Flow<OpenAIConfig> {
+        return combine(
+            context.readOpenAITemperature(),
+            context.readOpenAITopP(),
+            context.readOpenAISystemInstruction()
+        ) { temperature, topP, systemInstruction ->
+            OpenAIConfig(temperature, topP, systemInstruction)
+        }
+    }
+
+    override suspend fun setOpenAITemperature(temperature: Double) {
+        context.writeOpenAITemperature(temperature)
+    }
+
+    override suspend fun setOpenAITopP(topP: Double) {
+        context.writeOpenAITopP(topP)
+    }
+
+    override suspend fun setOpenAISystemInstruction(instruction: String) {
+        context.writeOpenAISystemInstruction(instruction)
     }
 }

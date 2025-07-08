@@ -57,7 +57,7 @@
     <string name="top_k">Top K</string>
     <string name="response_mime_type">レスポンスMIMEタイプ</string>
     <string name="system_instruction">システム指示</string>
-    <string name="gemini_error_400_invalid_argument">リクエストボディの形式が正しくないか、必須フィールドがありません。クエリ内容を確認してください。</string>
+    <string name="gemini_error_400_invalid_argument">リクエストボディのフォーマットが正しくないか、必須フィールドが欠落しています。お使いのGemini APIが有効かご確認ください。</string>
     <string name="gemini_error_400_failed_precondition">Gemini APIの無料利用枠はお住まいの国（中国）では利用できません。または、Google AI Studioでプロジェクトの課金が有効になっていません。Google AI Studioで支払いプランを設定してください。</string>
     <string name="gemini_error_400_general">Gemini APIリクエストエラー（%d）、リクエスト内容に問題がある可能性があります。</string>
     <string name="gemini_error_400_invalid_api">無効なGemini APIキーです。</string>
@@ -91,6 +91,14 @@
     <string name="deepseek_error_503">DeepSeekサーバー過負荷（503）。サーバーが高トラフィックのため過負荷です。後でもう一度お試しください。</string>
     <string name="deepseek_error_http_unknown">DeepSeekネットワークまたはサーバーエラー: HTTP %d - %s</string>
     <string name="deepseek_error_unknown">不明なDeepSeekエラーが発生しました: %s</string>
+    <string name="openai_error_401">認証に失敗しました。OpenAI APIキーが正しいか確認してください。</string>
+    <string name="openai_error_403">アクセスが拒否されました。お使いの地域はOpenAIによってサポートされていない可能性があります。</string>
+    <string name="openai_error_429">リクエスト上限に達しました。使用量の上限を超えたか、リクエストの送信が速すぎる可能性があります。プランと請求詳細をご確認ください。</string>
+    <string name="openai_error_500">OpenAIサーバーでエラーが発生しました。これはOpenAI側の問題です。しばらくしてからもう一度お試しください。</string>
+    <string name="openai_error_503">OpenAIサーバーは現在過負荷です。しばらくしてからもう一度お試しください。</string>
+    <string name="openai_error_http_unknown">予期せぬHTTPエラーが発生しました。コード: %1$d、メッセージ: %2$s</string>
+    <string name="openai_error_unknown">不明なエラーが発生しました。メッセージ: %1$s</string>
+
     <string name="error_network_connection_failed">ネットワーク接続に失敗しました。ネットワーク設定を確認してください。</string>
     <string name="error_fetching_api_key">APIキーの取得に失敗したか、他の内部エラーが発生しました: %s</string>
     <string name="error_model_network_issue">モデル %s のネットワークまたはサーバーエラー: %s</string>

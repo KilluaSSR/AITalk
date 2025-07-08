@@ -57,7 +57,7 @@
     <string name="top_k">Top K</string>
     <string name="response_mime_type">Response MIME Type</string>
     <string name="system_instruction">System Instruction</string>
-    <string name="gemini_error_400_invalid_argument">The request body is malformed or missing required fields. Please check your query content.</string>
+    <string name="gemini_error_400_invalid_argument">The request body is malformed or missing required fields. Please check your Gemini API key.</string>
     <string name="gemini_error_400_failed_precondition">The Gemini API free tier is not available in your country (China), or you have not enabled billing for your project in Google AI Studio. Please set up a payment plan in Google AI Studio.</string>
     <string name="gemini_error_400_general">Gemini API request error (%d), there may be an issue with the request content.</string>
     <string name="gemini_error_400_invalid_api">Invalid Gemini API key.</string>
@@ -92,6 +92,17 @@
     <string name="deepseek_error_http_unknown">DeepSeek network or server error: HTTP %d - %s</string>
     <string name="deepseek_error_unknown">An unknown DeepSeek error occurred: %s</string>
     <string name="error_network_connection_failed">Network connection failed. Please check your network settings.</string>
+    <!-- OpenAI Specific Errors -->
+    <string name="openai_error_401">Authentication failed. Please check if your OpenAI API key is correct.</string>
+    <string name="openai_error_403">Access denied. Your region may not be supported by OpenAI.</string>
+    <string name="openai_error_429">Request limit reached. You have either exceeded your usage quota or are sending requests too quickly. Please check your plan and billing details.</string>
+    <string name="openai_error_500">OpenAI server error. This is an issue on their end. Please try again later.</string>
+    <string name="openai_error_503">OpenAI servers are currently overloaded. Please try again after a brief wait.</string>
+
+    <!-- Fallback error messages -->
+    <string name="openai_error_http_unknown">An unexpected HTTP error occurred. Code: %1$d. Message: %2$s</string>
+    <string name="openai_error_unknown">An unknown error occurred. Message: %1$s</string>
+
     <string name="error_fetching_api_key">Failed to fetch API Key or other internal error occurred: %s</string>
     <string name="error_model_network_issue">Model %s network or server error: %s</string>
     <string name="error_model_unknown_issue">An unknown error occurred with model %s: %s</string>

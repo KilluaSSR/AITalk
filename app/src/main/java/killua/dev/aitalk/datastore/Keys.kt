@@ -41,3 +41,8 @@ val GEMINI_SYSTEM_INSTRUCTION_KEY = stringPreferencesKey("gemini_system_instruct
 //Deepseek
 val DEEPSEEK_TEMPERATURE_KEY = doublePreferencesKey("deepseek_temperature")
 val DEEPSEEK_SYSTEM_INSTRUCTION_KEY = stringPreferencesKey("deepseek_system_instruction")
+
+// OpenAI
+val OPENAI_TEMPERATURE_KEY = doublePreferencesKey("openai_temperature")
+val OPENAI_TOP_P_KEY = doublePreferencesKey("openai_top_p")
+val OPENAI_SYSTEM_INSTRUCTION_KEY = stringPreferencesKey("openai_system_instruction")

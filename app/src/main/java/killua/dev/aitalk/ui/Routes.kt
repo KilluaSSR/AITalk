@@ -12,6 +12,8 @@ sealed class Routes(val route: String){
     data object GrokConfigPage : Routes("grok_config_page")
     data object GeminiConfigPage : Routes("gemini_config_page")
     data object DeepSeekConfigPage : Routes("deepseek_config_page")
+    data object OpenAIConfigPage : Routes("openai_config_page")
+    data object ClaudeConfigPage : Routes("claude_config_page")
 
     // New Generic Route for models without special settings
     data object GenericApiConfigPage : Routes("generic_api_config_page/{parentModel}") {

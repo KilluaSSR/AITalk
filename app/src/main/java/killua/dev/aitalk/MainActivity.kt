@@ -19,6 +19,7 @@ import killua.dev.aitalk.ui.Routes
 import killua.dev.aitalk.ui.pages.ConfigPages.DeepSeekConfigPage
 import killua.dev.aitalk.ui.pages.ConfigPages.GeminiConfigPage
 import killua.dev.aitalk.ui.pages.ConfigPages.GrokConfigPage
+import killua.dev.aitalk.ui.pages.ConfigPages.OpenAIConfigPage
 import killua.dev.aitalk.ui.pages.HelpPage
 import killua.dev.aitalk.ui.pages.HistoryPage
 import killua.dev.aitalk.ui.pages.Mainpage
@@ -75,6 +76,10 @@ class MainActivity : AppCompatActivity() {
                         }
                         composable(Routes.DeepSeekConfigPage.route) {
                             DeepSeekConfigPage()
+                        }
+
+                        composable ( Routes.OpenAIConfigPage.route){
+                            OpenAIConfigPage()
                         }
 
                     }

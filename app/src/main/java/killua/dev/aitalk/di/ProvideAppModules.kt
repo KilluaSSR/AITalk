@@ -10,6 +10,8 @@ import killua.dev.aitalk.api.GeminiApiService
 import killua.dev.aitalk.api.GeminiApiServiceImpl
 import killua.dev.aitalk.api.GrokApiService
 import killua.dev.aitalk.api.GrokApiServiceImpl
+import killua.dev.aitalk.api.OpenAIApiService
+import killua.dev.aitalk.api.OpenAIApiServiceImpl
 import okhttp3.OkHttpClient
 import javax.inject.Singleton
 
@@ -28,6 +30,10 @@ object ProvideAppModules {
     @Provides
     fun provideDeepseekApiService(httpClient: OkHttpClient): DeepSeekApiService =
         DeepSeekApiServiceImpl(httpClient)
+
+    @Provides
+    fun provideOpenAIApiService(httpClient: OkHttpClient): OpenAIApiService =
+        OpenAIApiServiceImpl(httpClient)
 
     @Provides
     @Singleton

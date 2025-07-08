@@ -16,6 +16,21 @@ interface BaseApiConfig {
     val floatingWindowSystemInstruction: String?
     val temperature: Double
 }
+data class OpenAIConfig(
+    override val temperature: Double = 1.0,
+    val topP: Double = 1.0,
+    override val systemInstruction: String = "You are a helpful assistant.",
+    override val floatingWindowSystemInstruction: String? = null
+) : BaseApiConfig
+
+interface OpenAIApiService {
+    fun generateContentStream(
+        model: SubModel,
+        prompt: String,
+        apiKey: String,
+        openAIConfig: OpenAIConfig
+    ): Flow<String>
+}
 
 data class DeepSeekConfig(
     override val temperature: Double = 1.0,

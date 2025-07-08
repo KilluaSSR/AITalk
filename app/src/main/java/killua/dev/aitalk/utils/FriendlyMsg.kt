@@ -82,6 +82,27 @@ fun Context.mapDeepSeekErrorToUserFriendlyMessage(e: Throwable): String {
     }
 }
 
+fun Context.mapOpenAIErrorToUserFriendlyMessage(e: Throwable): String {
+    Log.e("OpenAIErrorMapper", "映射 OpenAI 错误: ${e.message}", e)
+    return when {
+        e is IOException && e.message?.contains("HTTP Error", ignoreCase = true) == true -> {
+            val httpStatusCode = e.message?.substringAfter("HTTP Error ")?.substringBefore(":")?.trim()?.toIntOrNull()
+            when (httpStatusCode) {
+                401 -> getString(R.string.openai_error_401) // Invalid or incorrect API key
+                403 -> getString(R.string.openai_error_403) // Unsupported region
+                429 -> getString(R.string.openai_error_429) // Rate limit or quota exceeded
+                500 -> getString(R.string.openai_error_500) // Internal server error on OpenAI's side
+                503 -> getString(R.string.openai_error_503) // Server overloaded or experiencing high traffic
+                else -> getString(R.string.openai_error_http_unknown, httpStatusCode ?: -1, e.message ?: "未知错误")
+            }
+        }
+        e is IOException && (e.message?.contains("Unable to resolve host", ignoreCase = true) == true ||
+                e.message?.contains("Failed to connect", ignoreCase = true) == true) ->
+            getString(R.string.error_network_connection_failed)
+        else -> getString(R.string.openai_error_unknown, e.message ?: "未知错误")
+    }
+}
+
 fun Context.mapCommonNetworkErrorToUserFriendlyMessage(modelName: String, e: Throwable): String {
     return when {
         e is IOException && (e.message?.contains("Unable to resolve host", ignoreCase = true) == true ||
