@@ -20,7 +20,11 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -38,7 +42,9 @@ import killua.dev.aitalk.models.themeSettingItems
 import killua.dev.aitalk.ui.Routes
 import killua.dev.aitalk.ui.SnackbarUIEffect
 import killua.dev.aitalk.ui.components.Clickable
+import killua.dev.aitalk.ui.components.DevelopingAlert
 import killua.dev.aitalk.ui.components.DropDownMenuWidget
+import killua.dev.aitalk.ui.components.OKAlert
 import killua.dev.aitalk.ui.components.ScrollableScafflod
 import killua.dev.aitalk.ui.components.SwitchableSecured
 import killua.dev.aitalk.ui.components.Title
@@ -59,6 +65,7 @@ fun SettingsPage() {
         TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
     val scope = rememberCoroutineScope()
     val viewModel: SettingsViewmodel = hiltViewModel()
+    var showUnderDev by remember { mutableStateOf(false)}
     val uiState = viewModel.uiState.collectAsStateWithLifecycle()
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri: Uri? ->
         uri?.let {
@@ -76,6 +83,9 @@ fun SettingsPage() {
         snackbarHostState = null
     ) {
 
+        if(showUnderDev){
+            DevelopingAlert { showUnderDev = false }
+        }
         LaunchedEffect(Unit) {
             viewModel.navigationEvent.collect { event ->
                 when (event) {
@@ -190,14 +200,19 @@ fun SettingsPage() {
                             Clickable(
                                 title = stringResource(model.stringRes()),
                             ) {
-                                val route = when(model){
-                                    AIModel.ChatGPT -> Routes.OpenAIConfigPage.route
-                                    AIModel.Claude -> Routes.DeepSeekConfigPage.route //占位
-                                    AIModel.Gemini -> Routes.GeminiConfigPage.route
-                                    AIModel.DeepSeek -> Routes.DeepSeekConfigPage.route
-                                    AIModel.Grok -> Routes.GrokConfigPage.route
+                                if(model == AIModel.Claude){
+                                    showUnderDev = true
+                                }else{
+                                    val route = when(model){
+                                        AIModel.ChatGPT -> Routes.OpenAIConfigPage.route
+                                        AIModel.Claude -> Routes.DeepSeekConfigPage.route
+                                        AIModel.Gemini -> Routes.GeminiConfigPage.route
+                                        AIModel.DeepSeek -> Routes.DeepSeekConfigPage.route
+                                        AIModel.Grok -> Routes.GrokConfigPage.route
+                                    }
+                                    navController.navigate(route)
                                 }
-                                navController.navigate(route)
+
                             }
                         }
                     }

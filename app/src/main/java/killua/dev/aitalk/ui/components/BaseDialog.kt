@@ -208,3 +208,9 @@ fun CancellableAlert(
 
 }
 
+@Composable
+fun DevelopingAlert(
+    onDismiss: () -> Unit
+) {
+    OKAlert(stringResource(R.string.sorry),stringResource(R.string.under_dev),onDismiss)
+}

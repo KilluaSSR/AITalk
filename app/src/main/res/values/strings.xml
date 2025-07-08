@@ -165,5 +165,7 @@
     <string name="confirm">确认</string>
     <string name="confirm_delete_all_history">确认是否删除所有历史记录</string>
     <string name="confirm_delete_all_history_desc">此操作不可恢复。</string>
+    <string name="under_dev">该功能正在开发中，暂时不可用</string>
+    <string name="sorry">很抱歉</string>
 
 </resources>
