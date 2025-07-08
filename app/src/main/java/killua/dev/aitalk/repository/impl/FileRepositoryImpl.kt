@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.Uri
 import androidx.documentfile.provider.DocumentFile
 import dagger.hilt.android.qualifiers.ApplicationContext
+import killua.dev.aitalk.consts.PKG_NAME
 import killua.dev.aitalk.models.AIModel
 import killua.dev.aitalk.repository.FileRepository
 import killua.dev.aitalk.states.AIResponseState
@@ -29,13 +30,12 @@ class FileRepositoryImpl @Inject constructor(
             val dirName = model.name
 
             val uri = if (directoryUri != null) {
-                // SAF方式
                 val fileUri = createFileInDirectory(directoryUri, dirName, fileName)
                 writeTextToUri(fileUri, response)
                 fileUri
             } else {
                 // 默认目录
-                val defaultDir = File(context.getExternalFilesDir(null), "Documents/AITalk/$dirName")
+                val defaultDir = File(context.getExternalFilesDir(null), "Documents/$PKG_NAME/$dirName")
                 if (!defaultDir.exists()) defaultDir.mkdirs()
                 val file = File(defaultDir, fileName)
                 file.writeText(response)
@@ -61,14 +61,22 @@ class FileRepositoryImpl @Inject constructor(
 
     private fun createFileInDirectory(
         parentUri: Uri,
-        subDir: String,
+        modelSubDir: String,
         fileName: String
     ): Uri {
-        val docTree = DocumentFile.fromTreeUri(context, parentUri)
-        val dir = docTree?.findFile(subDir)
-            ?: docTree?.createDirectory(subDir)
-        val file = dir?.createFile("text/plain", fileName)
-        return file?.uri ?: throw IOException("无法创建文件")
+        val userPickedDir = DocumentFile.fromTreeUri(context, parentUri)
+            ?: throw IOException("无法访问用户授权的目录")
+        val appRootDir = userPickedDir.findFile(PKG_NAME)
+            ?: userPickedDir.createDirectory(PKG_NAME)
+            ?: throw IOException("无法创建应用根目录: $PKG_NAME")
+        val modelDir = appRootDir.findFile(modelSubDir)
+            ?: appRootDir.createDirectory(modelSubDir)
+            ?: throw IOException("无法创建模型子目录: $modelSubDir")
+
+        val file = modelDir.createFile("text/plain", fileName)
+            ?: throw IOException("无法在 $modelSubDir 中创建文件")
+
+        return file.uri
     }
 
     private fun writeTextToUri(uri: Uri, text: String) {
