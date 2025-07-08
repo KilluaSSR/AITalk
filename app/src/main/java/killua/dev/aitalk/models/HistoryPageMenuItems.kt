@@ -17,6 +17,6 @@ val historyPageMenuItems = listOf(
     HistoryPageMenuItems(
         titleRes = R.string.history_clear_all,
         icon = Icons.Rounded.ClearAll,
-        intent = HistoryPageUIIntent.DeleteAllHistory
+        intent = HistoryPageUIIntent.ShowDeleteAllDialog
     ),
 )

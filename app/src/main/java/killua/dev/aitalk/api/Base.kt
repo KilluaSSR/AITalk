@@ -140,7 +140,7 @@ abstract class BaseApiServiceImpl<C : BaseApiConfig>(
             while (!source.exhausted()) {
                 val line = source.readUtf8Line()
                 if (line.isNullOrBlank() || line.startsWith(":")) {
-                    continue // Skip empty lines and comments
+                    continue
                 }
 
                 if (line.startsWith("data: [DONE]")) {

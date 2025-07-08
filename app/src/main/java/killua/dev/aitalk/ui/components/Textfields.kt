@@ -1,9 +1,12 @@
 package killua.dev.aitalk.ui.components
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material3.Icon
@@ -19,7 +22,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
 import killua.dev.aitalk.R
+import killua.dev.aitalk.states.MainpageState
 import killua.dev.aitalk.ui.tokens.SizeTokens
 import killua.dev.aitalk.ui.viewmodels.MainpageUIIntent
 import killua.dev.aitalk.ui.viewmodels.MainpageUIState
@@ -65,21 +70,37 @@ fun MainpageTextfield(
                 Text(context.getString(R.string.maintextfield_ask))
             },
             trailingIcon = {
-                when {
-                    showStopButton -> {
-                        IconButton(onClick = { onIntent(MainpageUIIntent.OnStopButtonClick) }) {
-                            Icon(Icons.Default.Stop, contentDescription = "Stop")
-                        }
+                Row(modifier = Modifier.padding(SizeTokens.Level4)){
+                    IconButton(onClick = { onIntent(MainpageUIIntent.ClearInput) }) {
+                        Icon(Icons.Default.Clear, contentDescription = "Clear")
                     }
-                    showSendButton -> {
-                        IconButton(onClick = { onIntent(MainpageUIIntent.OnSendButtonClick(localText)) }) {
-                            Icon(Icons.Default.Send, contentDescription = "Send")
+                    when {
+                        showStopButton -> {
+                            IconButton(onClick = { onIntent(MainpageUIIntent.OnStopButtonClick) }) {
+                                Icon(Icons.Default.Stop, contentDescription = "Stop")
+                            }
+                        }
+                        showSendButton -> {
+                            IconButton(onClick = { onIntent(MainpageUIIntent.OnSendButtonClick(localText)) }) {
+                                Icon(Icons.Default.Send, contentDescription = "Send")
+                            }
                         }
                     }
                 }
+
             },
             modifier = modifier,
             shape = shape
         )
     }
+}
+
+@Preview
+@Composable
+
+fun MainpageTextfieldPreview(){
+    MainpageTextfield(
+        uiState = MainpageUIState(screenState = MainpageState.SHOWING_RESULTS),
+        onIntent = {},
+    )
 }

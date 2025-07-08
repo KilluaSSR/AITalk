@@ -3,7 +3,7 @@ package killua.dev.aitalk.models
 import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.Help
-import androidx.compose.material.icons.rounded.Report
+import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.ui.graphics.vector.ImageVector
 import killua.dev.aitalk.R
@@ -23,13 +23,13 @@ val mainpageMenuItems = listOf(
         Routes.SettingsPage.route
     ),
     MainpageMenuItems(
-        titleRes = R.string.feedback,
-        icon = Icons.Rounded.Report,
+        titleRes = R.string.help,
+        icon = Icons.AutoMirrored.Rounded.Help,
         Routes.HelpPage.route
     ),
     MainpageMenuItems(
         titleRes = R.string.about,
-        icon = Icons.AutoMirrored.Rounded.Help,
+        icon = Icons.Rounded.Info,
         Routes.AboutPage.route
     )
 )

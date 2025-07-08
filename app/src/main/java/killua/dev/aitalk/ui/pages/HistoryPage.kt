@@ -3,7 +3,6 @@ package killua.dev.aitalk.ui.pages
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Arrangement
@@ -29,12 +28,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import killua.dev.aitalk.R
+import killua.dev.aitalk.ui.components.CancellableAlert
 import killua.dev.aitalk.ui.components.HistoryPageTopBar
 import killua.dev.aitalk.ui.components.HistorypageItemCard
 import killua.dev.aitalk.ui.components.PrimaryScaffold
@@ -52,7 +54,7 @@ fun HistoryPage() {
     val scope = rememberCoroutineScope()
     val historyList = viewModel.pagedHistory.collectAsLazyPagingItems()
     val deletingItemIds by viewModel.deletingItemIds.collectAsState()
-
+    val uistate by viewModel.uiState.collectAsStateWithLifecycle()
     PrimaryScaffold(
         topBar = {
             HistoryPageTopBar(navController) { intent ->
@@ -62,6 +64,13 @@ fun HistoryPage() {
             }
         }
     ) {
+        if(uistate.isDeleteAllDialogVisible){
+            CancellableAlert(
+                stringResource(R.string.confirm_delete_all_history),
+                mainText = stringResource(R.string.confirm_delete_all_history_desc),
+                onDismiss = { scope.launch { viewModel.emitState(uistate.copy(isDeleteAllDialogVisible = false)) } }
+            ) { scope.launch { viewModel.emitIntent(HistoryPageUIIntent.DeleteAllHistory) } }
+        }
         Crossfade(
             targetState = historyList.loadState.refresh is LoadState.Loading,
             animationSpec = tween(durationMillis = 500),

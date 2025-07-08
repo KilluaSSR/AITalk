@@ -48,9 +48,10 @@ fun PrimaryScaffold(
     }
 }
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScaffold(
+fun ScrollableScafflod(
     scrollBehavior: TopAppBarScrollBehavior,
     snackbarHostState: SnackbarHostState? = null,
     title: String,

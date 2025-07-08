@@ -16,7 +16,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import killua.dev.aitalk.R
@@ -106,7 +105,7 @@ fun Mainpage() {
                             title = stringResource(R.string.no_api_key_set),
                             message = stringResource(R.string.no_api_key_set_desc),
                             actionText =stringResource(R.string.no_api_key_set_action),
-                            onActionClick = { navController.navigate(Routes.SettingsPage.route) }
+                            onActionClick = { navController.navigate(Routes.HelpPage.route) }
                         )
                     }
                     MainpageState.NO_MODELS_ENABLED -> {
@@ -114,7 +113,7 @@ fun Mainpage() {
                             modifier = Modifier.padding(horizontal = SizeTokens.Level8),
                             title = stringResource(R.string.no_model_enabled),
                             message = stringResource(R.string.no_model_enabled_desc),
-                            actionText = stringResource(R.string.settings),
+                            actionText = stringResource(R.string.goto_settings),
                             onActionClick = { navController.navigate(Routes.SettingsPage.route) }
                         )
                     }

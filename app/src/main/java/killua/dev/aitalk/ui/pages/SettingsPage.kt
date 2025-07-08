@@ -39,7 +39,7 @@ import killua.dev.aitalk.ui.Routes
 import killua.dev.aitalk.ui.SnackbarUIEffect
 import killua.dev.aitalk.ui.components.Clickable
 import killua.dev.aitalk.ui.components.DropDownMenuWidget
-import killua.dev.aitalk.ui.components.SettingsScaffold
+import killua.dev.aitalk.ui.components.ScrollableScafflod
 import killua.dev.aitalk.ui.components.SwitchableSecured
 import killua.dev.aitalk.ui.components.Title
 import killua.dev.aitalk.ui.theme.ThemeMode
@@ -70,7 +70,7 @@ fun SettingsPage() {
             }
         }
     }
-    SettingsScaffold(
+    ScrollableScafflod(
         scrollBehavior = scrollBehavior,
         title = stringResource(R.string.settings),
         snackbarHostState = null

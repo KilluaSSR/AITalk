@@ -16,7 +16,6 @@ import killua.dev.aitalk.ui.viewmodels.base.BaseViewModel
 import killua.dev.aitalk.ui.viewmodels.base.UIIntent
 import killua.dev.aitalk.ui.viewmodels.base.UIState
 import killua.dev.aitalk.utils.ClipboardHelper
-import killua.dev.aitalk.utils.toSavable
 import killua.dev.aitalk.utils.toSavableMap
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -28,7 +27,7 @@ import javax.inject.Inject
 
 sealed interface HistoryPageUIIntent : UIIntent {
     data class DeleteHistory(val id: Long) : HistoryPageUIIntent
-
+    data object ShowDeleteAllDialog: HistoryPageUIIntent
     data object DeleteAllHistory: HistoryPageUIIntent
     data class CopyPrompt(val prompt: String) : HistoryPageUIIntent
     data class SavePrompt(val index: Long) : HistoryPageUIIntent
@@ -36,7 +35,8 @@ sealed interface HistoryPageUIIntent : UIIntent {
 }
 
 data class HistoryPageUIState(
-    val isLoading: Boolean = false
+    val isLoading: Boolean = false,
+    val isDeleteAllDialogVisible: Boolean = false
 ) : UIState
 
 @HiltViewModel
@@ -92,6 +92,10 @@ class HistoryPageViewModel @Inject constructor(
                 if (intent.responseContent.isNotEmpty()) {
                     clipboardHelper.copy(intent.responseContent)
                 }
+            }
+
+            HistoryPageUIIntent.ShowDeleteAllDialog -> {
+                emitState(uiState.value.copy(isDeleteAllDialogVisible = true))
             }
         }
     }

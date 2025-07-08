@@ -1,6 +1,5 @@
 package killua.dev.aitalk.ui.components
 
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.expandVertically
@@ -33,13 +32,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
 import killua.dev.aitalk.R
 import killua.dev.aitalk.db.SearchHistoryEntity
 import killua.dev.aitalk.models.AIModel
 import killua.dev.aitalk.ui.tokens.SizeTokens
 import killua.dev.aitalk.utils.timestampToDate
-import killua.dev.aitalk.utils.toSavable
 import killua.dev.aitalk.utils.toSavableMap
 
 @Composable
@@ -67,13 +64,13 @@ fun HistorypageItemCard(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = SizeTokens.Level4)
+            .clickable { expanded = !expanded }
     ) {
         Column(
             modifier = Modifier.fillMaxWidth()
         ) {
             Column(
                 modifier = Modifier
-                    .clickable { expanded = !expanded }
                     .padding(
                         start = SizeTokens.Level16,
                         end = SizeTokens.Level16,

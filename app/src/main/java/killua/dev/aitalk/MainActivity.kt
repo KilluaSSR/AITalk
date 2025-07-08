@@ -19,6 +19,7 @@ import killua.dev.aitalk.ui.Routes
 import killua.dev.aitalk.ui.pages.ConfigPages.DeepSeekConfigPage
 import killua.dev.aitalk.ui.pages.ConfigPages.GeminiConfigPage
 import killua.dev.aitalk.ui.pages.ConfigPages.GrokConfigPage
+import killua.dev.aitalk.ui.pages.HelpPage
 import killua.dev.aitalk.ui.pages.HistoryPage
 import killua.dev.aitalk.ui.pages.Mainpage
 import killua.dev.aitalk.ui.pages.SettingsPage
@@ -62,6 +63,9 @@ class MainActivity : AppCompatActivity() {
                         }
                         composable (Routes.SettingsPage.route){
                             SettingsPage()
+                        }
+                        composable (Routes.HelpPage.route){
+                            HelpPage()
                         }
                         composable(Routes.GrokConfigPage.route) {
                             GrokConfigPage()

@@ -15,6 +15,7 @@
     <string name="dark">夜间模式</string>
     <string name="system">系统默认</string>
     <string name="settings">设置</string>
+    <string name="goto_settings">前往no设置</string>
     <string name="application_settings">主应用设置</string>
     <string name="theme">主题</string>
     <string name="toogle_model">启用此模型</string>
@@ -149,5 +150,12 @@
     <string name="no_api_key_set_action">怎么获取一个？</string>
     <string name="no_model_enabled">所有模型都被关闭</string>
     <string name="no_model_enabled_desc">前往设置里开启一个模型</string>
+    <string name="no_connection">网络连接失败</string>
+    <string name="no_api_key_set_solve">最简单的方法是使用Google的Gemini，因为API Key是免费的。首先你需要注册一个Google账号，然后前往 https://aistudio.google.com/apikey 注册一个API Key，并把它填到设置的Gemini API设置里。</string>
+    <string name="no_connection_solve">请检查你的网络连接是否正常，中国大陆用户请检查是否开启了VPN，并且使用的VPN地区是否不支持该大模型（例如：香港）</string>
+    <string name="ok">好</string>
+    <string name="confirm">确认</string>
+    <string name="confirm_delete_all_history">确认是否删除所有历史记录</string>
+    <string name="confirm_delete_all_history_desc">此操作不可恢复。</string>
 
 </resources>
