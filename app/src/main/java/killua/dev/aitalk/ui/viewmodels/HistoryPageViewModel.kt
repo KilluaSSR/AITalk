@@ -17,11 +17,21 @@ import killua.dev.aitalk.ui.viewmodels.base.UIIntent
 import killua.dev.aitalk.ui.viewmodels.base.UIState
 import killua.dev.aitalk.utils.ClipboardHelper
 import killua.dev.aitalk.utils.toSavableMap
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -32,11 +42,15 @@ sealed interface HistoryPageUIIntent : UIIntent {
     data class CopyPrompt(val prompt: String) : HistoryPageUIIntent
     data class SavePrompt(val index: Long) : HistoryPageUIIntent
     data class CopyResponse(val responseContent: String) : HistoryPageUIIntent
+    object SubmitSearch : HistoryPageUIIntent
+    data class SearchQueryChanged(val query: String) : HistoryPageUIIntent
 }
 
 data class HistoryPageUIState(
     val isLoading: Boolean = false,
-    val isDeleteAllDialogVisible: Boolean = false
+    val isDeleteAllDialogVisible: Boolean = false,
+    val searchQuery: String = "",
+    val isSearchActive: Boolean = false
 ) : UIState
 
 @HiltViewModel
@@ -52,6 +66,24 @@ class HistoryPageViewModel @Inject constructor(
         historyRepository.getPagedHistory().cachedIn(viewModelScope)
     private val _deletingItemIds = MutableStateFlow<Set<Long>>(emptySet())
     val deletingItemIds = _deletingItemIds.asStateFlow()
+
+    @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
+    val searchResults: StateFlow<List<SearchHistoryEntity>> = uiState
+        .map { it.searchQuery }
+        .debounce(100L) // 防抖，避免每次按键都触发搜索
+        .distinctUntilChanged() // 仅当查询文本改变时才继续
+        .flatMapLatest { query ->
+            if (query.isBlank()) {
+                flowOf(emptyList()) // 如果查询为空，返回空列表
+            } else {
+                historyRepository.searchHistory(query)
+            }
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
     override suspend fun onEvent(state: HistoryPageUIState, intent: HistoryPageUIIntent) {
         when (intent) {
             is HistoryPageUIIntent.DeleteHistory -> {
@@ -61,6 +93,11 @@ class HistoryPageViewModel @Inject constructor(
                     historyRepository.deleteRecord(intent.id)
                     _deletingItemIds.value = _deletingItemIds.value - intent.id
                 }
+            }
+            is HistoryPageUIIntent.SearchQueryChanged -> {
+                // 当用户清空搜索框时，自动退出搜索模式
+                val searchActive = if (intent.query.isBlank()) false else state.isSearchActive
+                emitState(state.copy(searchQuery = intent.query, isSearchActive = searchActive))
             }
             HistoryPageUIIntent.DeleteAllHistory -> {
                 emitState(uiState.value.copy(isLoading = true))
@@ -96,6 +133,12 @@ class HistoryPageViewModel @Inject constructor(
 
             HistoryPageUIIntent.ShowDeleteAllDialog -> {
                 emitState(uiState.value.copy(isDeleteAllDialogVisible = true))
+            }
+            HistoryPageUIIntent.SubmitSearch -> {
+                // 只有当搜索词不为空时，才激活搜索模式
+                if (state.searchQuery.isNotBlank()) {
+                    emitState(state.copy(isSearchActive = true))
+                }
             }
         }
     }

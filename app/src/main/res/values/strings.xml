@@ -167,5 +167,7 @@
     <string name="confirm_delete_all_history_desc">此操作不可恢复。</string>
     <string name="under_dev">该功能正在开发中，暂时不可用</string>
     <string name="sorry">很抱歉</string>
+    <string name="no_search_results_found">什么都没有搜到哦</string>
+    <string name="search">搜索</string>
 
 </resources>

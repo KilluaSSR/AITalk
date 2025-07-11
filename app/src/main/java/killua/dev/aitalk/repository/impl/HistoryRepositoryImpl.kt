@@ -48,4 +48,7 @@ class HistoryRepositoryImpl @Inject constructor(
     override suspend fun deleteAll() {
         dao.deleteAll()
     }
+    override fun searchHistory(query: String): Flow<List<SearchHistoryEntity>> {
+        return dao.searchHistory(query)
+    }
 }

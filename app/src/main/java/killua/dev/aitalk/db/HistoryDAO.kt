@@ -26,4 +26,7 @@ interface SearchHistoryDao {
 
     @Query("DELETE FROM search_history")
     suspend fun deleteAll()
+
+    @Query("SELECT * FROM search_history WHERE prompt LIKE '%' || :query || '%' ORDER BY timestamp DESC")
+    fun searchHistory(query: String): Flow<List<SearchHistoryEntity>>
 }
