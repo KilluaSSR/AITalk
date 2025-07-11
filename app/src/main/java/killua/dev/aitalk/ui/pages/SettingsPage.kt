@@ -41,6 +41,7 @@ import killua.dev.aitalk.models.supportedLanguageMenuItems
 import killua.dev.aitalk.models.themeSettingItems
 import killua.dev.aitalk.ui.Routes
 import killua.dev.aitalk.ui.SnackbarUIEffect
+import killua.dev.aitalk.ui.components.CancellableAlert
 import killua.dev.aitalk.ui.components.Clickable
 import killua.dev.aitalk.ui.components.DevelopingAlert
 import killua.dev.aitalk.ui.components.DropDownMenuWidget
@@ -49,6 +50,7 @@ import killua.dev.aitalk.ui.components.ScrollableScafflod
 import killua.dev.aitalk.ui.components.SwitchableSecured
 import killua.dev.aitalk.ui.components.Title
 import killua.dev.aitalk.ui.theme.ThemeMode
+import killua.dev.aitalk.ui.viewmodels.HistoryPageUIIntent
 import killua.dev.aitalk.ui.viewmodels.SettingsNavigationEvent
 import killua.dev.aitalk.ui.viewmodels.SettingsUIIntent
 import killua.dev.aitalk.ui.viewmodels.SettingsViewmodel
@@ -66,6 +68,7 @@ fun SettingsPage() {
     val scope = rememberCoroutineScope()
     val viewModel: SettingsViewmodel = hiltViewModel()
     var showUnderDev by remember { mutableStateOf(false)}
+    var showClearAll by remember { mutableStateOf(false) }
     val uiState = viewModel.uiState.collectAsStateWithLifecycle()
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri: Uri? ->
         uri?.let {
@@ -85,6 +88,17 @@ fun SettingsPage() {
 
         if(showUnderDev){
             DevelopingAlert { showUnderDev = false }
+        }
+        if(showClearAll){
+            CancellableAlert(
+                title = stringResource(R.string.confirm_delete_all_history),
+                mainText = stringResource(R.string.confirm_delete_all_history_desc),
+                onDismiss = {showClearAll = false}
+            ) {
+                scope.launch {
+                    viewModel.emitIntent(SettingsUIIntent.DeleteAllHistory)
+                }
+            }
         }
         LaunchedEffect(Unit) {
             viewModel.navigationEvent.collect { event ->
@@ -145,7 +159,9 @@ fun SettingsPage() {
                                 viewModel.emitIntent(SettingsUIIntent.ChooseSaveDir)
                             }
                         }
-
+                        Clickable(
+                            title = stringResource(R.string.history_clear_all)
+                        ) { showClearAll = true }
                         SwitchableSecured(
                             key = SECURE_HISTORY,
                             enabled = uiState.value.isBiometricAvailable,
@@ -216,6 +232,8 @@ fun SettingsPage() {
                             }
                         }
                     }
+
+
                 }
             }
         }

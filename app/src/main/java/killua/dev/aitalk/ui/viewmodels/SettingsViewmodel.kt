@@ -3,6 +3,7 @@ package killua.dev.aitalk.ui.viewmodels
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import killua.dev.aitalk.models.FloatingWindowQuestionMode
+import killua.dev.aitalk.repository.HistoryRepository
 import killua.dev.aitalk.repository.SettingsRepository
 import killua.dev.aitalk.ui.SnackbarUIEffect
 import killua.dev.aitalk.ui.theme.ThemeMode
@@ -25,6 +26,7 @@ sealed interface SettingsUIIntent : UIIntent {
     data object GoToOverlaySettingsClicked : SettingsUIIntent
     data object ChooseSaveDir : SettingsUIIntent
     data class SaveDirSelected(val uri: String) : SettingsUIIntent
+    data object DeleteAllHistory: SettingsUIIntent
 }
 
 sealed interface SettingsNavigationEvent {
@@ -46,7 +48,8 @@ data class SettingsUIState(
 
 @HiltViewModel
 class SettingsViewmodel @Inject constructor(
-    private val repository: SettingsRepository
+    private val repository: SettingsRepository,
+    private val historyRepository: HistoryRepository
 ) : BaseViewModel<SettingsUIIntent, SettingsUIState , SnackbarUIEffect>(
     SettingsUIState()
 ){
@@ -116,6 +119,10 @@ class SettingsViewmodel @Inject constructor(
             is SettingsUIIntent.UpdateLocaleSettings -> {
                 repository.setLocale(intent.locale)
                 repository.changeMyLanguage(intent.locale)
+            }
+
+            SettingsUIIntent.DeleteAllHistory -> {
+                historyRepository.deleteAll()
             }
         }
     }
