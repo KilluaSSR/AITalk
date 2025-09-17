@@ -8,6 +8,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
@@ -66,6 +69,19 @@ fun Mainpage() {
                 }
             )
         },
+        bottomBar = {
+            MainpageTextfield(
+                uiState = viewModel.uiState.value,
+                onIntent = { intent ->
+                    viewModel.launchOnIO { viewModel.emitIntent(intent) }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .imePadding() // navigationBarsPadding 已在 Scaffold bottomBar 包装内处理
+                    .padding(horizontal = SizeTokens.Level12, vertical = SizeTokens.Level8)
+            )
+        },
+        freezeTopBarOnIme = true,
         snackbarHostState = viewModel.snackbarHostState
     ) {
         Column(
@@ -73,18 +89,6 @@ fun Mainpage() {
                 .fillMaxSize()
                 .padding(horizontal = SizeTokens.Level12)
         ) {
-
-            MainpageTextfield(
-                uiState = viewModel.uiState.value,
-                onIntent = { intent ->
-                    viewModel.launchOnIO {
-                        viewModel.emitIntent(intent)
-                    }
-                },
-                modifier = Modifier
-                    .padding(SizeTokens.Level4)
-                    .fillMaxWidth()
-            )
             Crossfade(
                 targetState = uiState.value.screenState,
                 animationSpec = tween(durationMillis = 500)
@@ -95,9 +99,7 @@ fun Mainpage() {
                             modifier = Modifier
                                 .fillMaxSize(),
                             contentAlignment = Alignment.Center
-                        ) {
-                            Greetings()
-                        }
+                        ) { Greetings() }
                     }
                     MainpageState.NO_API_KEY -> {
                         RichInfoCard(
@@ -123,10 +125,11 @@ fun Mainpage() {
                         }, {
                             scope.launch { viewModel.emitIntent(MainpageUIIntent.SaveAll) }
                         }) {
-                            LazyColumn {
-                                items(uiState.value.aiResponses.keys.toList()) { model ->
+                            LazyColumn(
+                                contentPadding = androidx.compose.foundation.layout.PaddingValues(bottom = SizeTokens.Level56)
+                            ) {
+                                items(uiState.value.aiResponses.keys.toList(), key = { it.name }) { model ->
                                     val responseState = uiState.value.aiResponses[model]
-                                    val isSearching = responseState?.status == ResponseStatus.Loading
                                     AIResponseCard(
                                         responseState = responseState!!,
                                         modelName = model.name,

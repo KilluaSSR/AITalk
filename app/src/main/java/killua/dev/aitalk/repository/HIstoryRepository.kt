@@ -15,5 +15,6 @@ interface HistoryRepository {
     suspend fun getSpecificRecord(id: Long): SearchHistoryEntity?
     suspend fun deleteAll()
     fun searchHistory(query: String): Flow<List<SearchHistoryEntity>>
+    fun searchPagedHistory(query: String): Flow<PagingData<SearchHistoryEntity>>
 }
 

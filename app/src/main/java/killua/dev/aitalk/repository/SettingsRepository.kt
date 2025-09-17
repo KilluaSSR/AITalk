@@ -1,6 +1,7 @@
 package killua.dev.aitalk.repository
 
 import killua.dev.aitalk.models.FloatingWindowQuestionMode
+import killua.dev.aitalk.datastore.AppPreferences
 import kotlinx.coroutines.flow.Flow
 
 interface SettingsRepository {
@@ -20,4 +21,7 @@ interface SettingsRepository {
     fun readLocale(): Flow<String>
 
     suspend fun changeMyLanguage(locale: String)
+
+    // 聚合首屏需要的常用偏好，供 UI 直接订阅，减少多Flow磁盘触发
+    val appPreferences: kotlinx.coroutines.flow.StateFlow<AppPreferences>
 }

@@ -98,9 +98,8 @@ fun CustomizableSearchBar(
         SearchBar(
             modifier = Modifier
                 .align(Alignment.TopCenter)
-                .padding(bottom = SizeTokens.Level10)
                 .fillMaxWidth()
-                .padding(horizontal = SizeTokens.Level12)
+                .padding(bottom = SizeTokens.Level10)
                 .semantics { traversalIndex = 0f },
             inputField = {
                 // Customizable input field implementation

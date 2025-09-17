@@ -59,7 +59,8 @@ fun HistoryPage() {
     val viewModel: HistoryPageViewModel = hiltViewModel()
     val scope = rememberCoroutineScope()
     val uistate by viewModel.uiState.collectAsStateWithLifecycle()
-    val searchResults by viewModel.searchResults.collectAsStateWithLifecycle()
+    val searchSuggestions by viewModel.searchSuggestions.collectAsStateWithLifecycle()
+    val pagedSearchResults = viewModel.pagedSearchResults.collectAsLazyPagingItems()
     val historyList = viewModel.pagedHistory.collectAsLazyPagingItems()
     val deletingItemIds by viewModel.deletingItemIds.collectAsState()
 
@@ -67,17 +68,9 @@ fun HistoryPage() {
         topBar = {
             HistorySearchBar(
                 query = uistate.searchQuery,
-                onQueryChange = { query ->
-                    scope.launch {
-                        viewModel.emitIntent(HistoryPageUIIntent.SearchQueryChanged(query))
-                    }
-                },
-                onSearch = {
-                    scope.launch {
-                        viewModel.emitIntent(HistoryPageUIIntent.SubmitSearch)
-                    }
-                },
-                searchResults = searchResults,
+                onQueryChange = { query -> scope.launch { viewModel.emitIntent(HistoryPageUIIntent.SearchQueryChanged(query)) } },
+                onSearch = { scope.launch { viewModel.emitIntent(HistoryPageUIIntent.SubmitSearch) } },
+                searchResults = searchSuggestions,
                 onResultClick = { resultText ->
                     scope.launch {
                         viewModel.emitIntent(HistoryPageUIIntent.SearchQueryChanged(resultText))
@@ -106,8 +99,9 @@ fun HistoryPage() {
         }
 
         if (uistate.isSearchActive) {
-            SearchResultList(
-                results = searchResults,
+            PagedHistoryList(
+                historyList = pagedSearchResults,
+                deletingItemIds = deletingItemIds,
                 viewModel = viewModel,
                 scope = scope
             )
@@ -148,56 +142,21 @@ private fun PagedHistoryList(
         } else {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 16.dp, top = 8.dp),
+                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
             ) {
-                items(
-                    count = historyList.itemCount,
-                    key = { index -> historyList.peek(index)?.id ?: index }
-                ) { index ->
+                items(historyList.itemCount, key = { index -> historyList.peek(index)?.id ?: index }, contentType = { "history_item" }) { index ->
                     val history = historyList[index]
                     if (history != null) {
                         AnimatedVisibility(
                             visible = history.id !in deletingItemIds,
-                            exit = shrinkVertically(tween(500)) + fadeOut(tween(500))
+                            exit = shrinkVertically(tween(350)) + fadeOut(tween(350))
                         ) {
                             HistorypageItemCard(
                                 history = history,
-                                onCopyPrompt = {
-                                    scope.launch {
-                                        viewModel.emitIntent(
-                                            HistoryPageUIIntent.CopyPrompt(
-                                                history.prompt
-                                            )
-                                        )
-                                    }
-                                },
-                                onSaveAll = {
-                                    scope.launch {
-                                        viewModel.emitIntent(
-                                            HistoryPageUIIntent.SavePrompt(
-                                                history.id
-                                            )
-                                        )
-                                    }
-                                },
-                                onDelete = {
-                                    scope.launch {
-                                        viewModel.emitIntent(
-                                            HistoryPageUIIntent.DeleteHistory(
-                                                history.id
-                                            )
-                                        )
-                                    }
-                                },
-                                onCopyResponse = { model, content ->
-                                    scope.launch {
-                                        viewModel.emitIntent(
-                                            HistoryPageUIIntent.CopyResponse(
-                                                content
-                                            )
-                                        )
-                                    }
-                                }
+                                onCopyPrompt = { scope.launch { viewModel.emitIntent(HistoryPageUIIntent.CopyPrompt(history.prompt)) } },
+                                onSaveAll = { scope.launch { viewModel.emitIntent(HistoryPageUIIntent.SavePrompt(history.id)) } },
+                                onDelete = { scope.launch { viewModel.emitIntent(HistoryPageUIIntent.DeleteHistory(history.id)) } },
+                                onCopyResponse = { _, content -> scope.launch { viewModel.emitIntent(HistoryPageUIIntent.CopyResponse(content)) } }
                             )
                         }
                     }
@@ -209,41 +168,6 @@ private fun PagedHistoryList(
         }
     }
 }
-
-
-@Composable
-private fun SearchResultList(
-    results: List<SearchHistoryEntity>,
-    viewModel: HistoryPageViewModel,
-    scope: CoroutineScope
-) {
-    if (results.isEmpty()) {
-        EmptyState(
-            icon = Icons.Rounded.SearchOff,
-            text = stringResource(R.string.no_search_results_found)
-        )
-    } else {
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 16.dp, top = 8.dp),
-        ) {
-            items(
-                items = results,
-                key = { it.id }
-            ) { history ->
-                HistorypageItemCard(
-                    history = history,
-                    onCopyPrompt = { scope.launch { viewModel.emitIntent(HistoryPageUIIntent.CopyPrompt(history.prompt)) } },
-                    onSaveAll = { scope.launch { viewModel.emitIntent(HistoryPageUIIntent.SavePrompt(history.id)) } },
-                    onDelete = { scope.launch { viewModel.emitIntent(HistoryPageUIIntent.DeleteHistory(history.id)) } },
-                    onCopyResponse = { model, content -> scope.launch { viewModel.emitIntent(HistoryPageUIIntent.CopyResponse(content)) } }
-                )
-            }
-        }
-    }
-}
-
-
 
 @Composable
 private fun EmptyState(icon: ImageVector, text: String) {

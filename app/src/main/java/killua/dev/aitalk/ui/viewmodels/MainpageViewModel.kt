@@ -22,6 +22,7 @@ import killua.dev.aitalk.ui.viewmodels.base.UIState
 import killua.dev.aitalk.utils.ClipboardHelper
 import killua.dev.aitalk.utils.prepareAiSearchData
 import kotlinx.coroutines.Job
+import killua.dev.aitalk.R
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
@@ -96,7 +97,7 @@ class MainpageViewModel @Inject constructor(
                         if (response.status == ResponseStatus.Loading) {
                             response.copy(
                                 status = ResponseStatus.Error,
-                                errorMessage = "Cancelled by user"
+                                errorMessage = "${R.string.cancel}"
                             )
                         } else {
                             response
@@ -115,7 +116,7 @@ class MainpageViewModel @Inject constructor(
                 val response = state.aiResponses[intent.model]?.content.orEmpty()
                 if (response.isNotEmpty()) {
                     clipboardHelper.copy(response)
-                    emitEffect(ShowSnackbar("Response copied!"))
+                    emitEffect(ShowSnackbar("已复制到剪贴板"))
                 }
             }
             MainpageUIIntent.RegenerateAll -> {
@@ -166,9 +167,9 @@ class MainpageViewModel @Inject constructor(
                         responses = state.aiResponses,
                         directoryUri = directoryUri
                     )
-                    emitEffect(ShowSnackbar("全部保存成功"))
+                    emitEffect(ShowSnackbar("已保存全部响应"))
                 } else {
-                    emitEffect(ShowSnackbar("请等待所有模型回复完成后再保存"))
+                    emitEffect(ShowSnackbar("请等待所有模型完成后再保存"))
                 }
             }
             is MainpageUIIntent.SaveSpecificModel -> {
@@ -184,7 +185,7 @@ class MainpageViewModel @Inject constructor(
                     )
                     emitEffect(ShowSnackbar("保存成功"))
                 } else {
-                    emitEffect(ShowSnackbar("该模型回复未完成，无法保存"))
+                    emitEffect(ShowSnackbar("该模型回复尚未完成，无法保存"))
                 }
             }
             is MainpageUIIntent.ShareResponse -> {

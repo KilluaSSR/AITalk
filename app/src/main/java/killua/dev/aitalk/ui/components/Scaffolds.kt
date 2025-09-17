@@ -1,6 +1,11 @@
 package killua.dev.aitalk.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.displayCutout
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
@@ -28,22 +33,51 @@ import killua.dev.aitalk.utils.paddingBottom
 @Composable
 fun PrimaryScaffold(
     topBar: @Composable () -> Unit = {},
+    bottomBar: @Composable () -> Unit = {},
     snackbarHostState: SnackbarHostState? = null,
+    freezeTopBarOnIme: Boolean = false,
     content: @Composable () -> Unit
 ){
-    Scaffold(
-        topBar = topBar,
-        containerColor = MaterialTheme.colorScheme.surface,
-        snackbarHost = {
-            if(snackbarHostState != null) SnackbarHost(snackbarHostState)
+    if(!freezeTopBarOnIme){
+        Scaffold(
+            topBar = topBar,
+            bottomBar = bottomBar,
+            containerColor = MaterialTheme.colorScheme.surface,
+            snackbarHost = { if(snackbarHostState != null) SnackbarHost(snackbarHostState) }
+        ) { innerPadding ->
+            Box (
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+            ) { content() }
         }
-    ) { innerPadding ->
-        Box (
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-        ){
-            content()
+    }else{
+        // 手动管理 Insets，避免 IME 动画推挤 topBar
+        Scaffold(
+            contentWindowInsets = WindowInsets(0,0,0,0),
+            containerColor = MaterialTheme.colorScheme.surface,
+            snackbarHost = { if(snackbarHostState != null) SnackbarHost(snackbarHostState) },
+            bottomBar = {
+                // 仅给 bottomBar 适配设备底部安全区域；IME 由调用方再加 imePadding()
+                Box(Modifier.navigationBarsPadding()) { bottomBar() }
+            }
+        ) { innerPadding ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .windowInsetsPadding(WindowInsets.displayCutout)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .statusBarsPadding()
+                        .fillMaxWidth()
+                ) { topBar() }
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(innerPadding)
+                ) { content() }
+            }
         }
     }
 }

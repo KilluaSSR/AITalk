@@ -17,11 +17,24 @@ import killua.dev.aitalk.datastore.writeLocale
 import killua.dev.aitalk.datastore.writeSaveDir
 import killua.dev.aitalk.datastore.writeSecureMyHistory
 import killua.dev.aitalk.datastore.writeTheme
+import killua.dev.aitalk.datastore.AppPreferences
+import killua.dev.aitalk.datastore.dataStore
+import killua.dev.aitalk.datastore.SECURE_HISTORY
+import killua.dev.aitalk.datastore.THEME_MODE
+import killua.dev.aitalk.datastore.LOCALE_MODE
+import killua.dev.aitalk.datastore.FLOATING_WINDOW_QUESTION_MODE
+import killua.dev.aitalk.datastore.SAVE_DIR_KEY
+import killua.dev.aitalk.ui.theme.ThemeMode
 import killua.dev.aitalk.models.FloatingWindowQuestionMode
 import killua.dev.aitalk.repository.SettingsRepository
 import killua.dev.aitalk.utils.BiometricManagerSingleton
 import killua.dev.aitalk.utils.withMainContext
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -29,6 +42,22 @@ import javax.inject.Singleton
 class SettingsRepositoryImpl @Inject constructor(
     @ApplicationContext private val context: Context
 ) : SettingsRepository {
+    private val appScope: CoroutineScope = CoroutineScope(Dispatchers.IO)
+
+    override val appPreferences = context.dataStore.data
+        .map { prefs ->
+            AppPreferences(
+                themeMode = ThemeMode.valueOf(prefs[THEME_MODE] ?: ThemeMode.SYSTEM.name),
+                secureHistory = prefs[SECURE_HISTORY] ?: false,
+                locale = prefs[LOCALE_MODE] ?: SYSTEM_LOCALE_TAG,
+                floatingWindowQuestionMode = prefs[FLOATING_WINDOW_QUESTION_MODE]?.let { stored ->
+                    runCatching { killua.dev.aitalk.models.FloatingWindowQuestionMode.valueOf(stored) }
+                        .getOrDefault(killua.dev.aitalk.models.FloatingWindowQuestionMode.isThatTrueWithExplain)
+                } ?: killua.dev.aitalk.models.FloatingWindowQuestionMode.isThatTrueWithExplain,
+                saveDir = prefs[SAVE_DIR_KEY] ?: DEFAULT_SAVE_DIR
+            )
+        }
+        .stateIn(appScope, SharingStarted.Eagerly, AppPreferences())
 
     override fun getThemeMode(): Flow<String> = context.readTheme()
     override fun isHistorySecured(): Flow<Boolean> = context.readSecureHistory()

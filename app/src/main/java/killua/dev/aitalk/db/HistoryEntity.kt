@@ -1,9 +1,13 @@
 package killua.dev.aitalk.db
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "search_history")
+@Entity(
+    tableName = "search_history",
+    indices = [Index("timestamp"), Index("prompt")]
+)
 data class SearchHistoryEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val prompt: String,

@@ -5,6 +5,8 @@ import killua.dev.aitalk.models.SubModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.isActive
+import kotlin.coroutines.coroutineContext
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -152,7 +154,7 @@ abstract class BaseApiServiceImpl<C : BaseApiConfig>(
 
             val source = response.body?.source() ?: throw IOException("Response body is null")
 
-            while (!source.exhausted()) {
+            while (coroutineContext.isActive && !source.exhausted()) {
                 val line = source.readUtf8Line()
                 if (line.isNullOrBlank() || line.startsWith(":")) {
                     continue

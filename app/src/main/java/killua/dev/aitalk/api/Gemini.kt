@@ -10,6 +10,8 @@ import killua.dev.aitalk.models.GeminiStreamChunk
 import killua.dev.aitalk.models.SubModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.isActive
+import kotlin.coroutines.coroutineContext
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -54,7 +56,7 @@ class GeminiApiServiceImpl @Inject constructor(
             response.body?.source()?.use { source ->
                 val reader = JsonReader.of(source)
                 reader.beginArray()
-                while (reader.hasNext()) {
+                while (coroutineContext.isActive && reader.hasNext()) {
                     val chunk = chunkAdapter.fromJson(reader)
                     val text = chunk?.candidates?.firstOrNull()?.content?.parts?.firstOrNull()?.text
                     if (text != null) {

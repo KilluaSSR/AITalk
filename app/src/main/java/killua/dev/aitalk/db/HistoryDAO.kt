@@ -29,4 +29,8 @@ interface SearchHistoryDao {
 
     @Query("SELECT * FROM search_history WHERE prompt LIKE '%' || :query || '%' ORDER BY timestamp DESC")
     fun searchHistory(query: String): Flow<List<SearchHistoryEntity>>
+
+    // Paging variant for large result sets
+    @Query("SELECT * FROM search_history WHERE prompt LIKE '%' || :query || '%' ORDER BY timestamp DESC")
+    fun searchPaged(query: String): androidx.paging.PagingSource<Int, SearchHistoryEntity>
 }

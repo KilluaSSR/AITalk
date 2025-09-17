@@ -4,8 +4,10 @@ import androidx.core.net.toUri
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
+import androidx.paging.compose.LazyPagingItems
 import dagger.hilt.android.lifecycle.HiltViewModel
 import killua.dev.aitalk.consts.DEFAULT_SAVE_DIR
+import killua.dev.aitalk.R
 import killua.dev.aitalk.db.SearchHistoryEntity
 import killua.dev.aitalk.repository.FileRepository
 import killua.dev.aitalk.repository.HistoryRepository
@@ -67,23 +69,36 @@ class HistoryPageViewModel @Inject constructor(
     private val _deletingItemIds = MutableStateFlow<Set<Long>>(emptySet())
     val deletingItemIds = _deletingItemIds.asStateFlow()
 
+    // 轻量建议列表（限制前10条，避免一次性加载全部）
     @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
-    val searchResults: StateFlow<List<SearchHistoryEntity>> = uiState
+    val searchSuggestions: StateFlow<List<SearchHistoryEntity>> = uiState
         .map { it.searchQuery }
-        .debounce(100L) // 防抖，避免每次按键都触发搜索
-        .distinctUntilChanged() // 仅当查询文本改变时才继续
+        .debounce(200L)
+        .distinctUntilChanged()
         .flatMapLatest { query ->
-            if (query.isBlank()) {
-                flowOf(emptyList()) // 如果查询为空，返回空列表
-            } else {
-                historyRepository.searchHistory(query)
-            }
+            if (query.length < 2) flowOf(emptyList()) else historyRepository.searchHistory(query)
         }
+        .map { it.take(10) }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = emptyList()
         )
+
+    // 分页搜索结果（激活搜索模式时使用）
+    @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
+    val pagedSearchResults: Flow<PagingData<SearchHistoryEntity>> = uiState
+        .map { it.searchQuery }
+        .debounce(250L)
+        .distinctUntilChanged()
+        .flatMapLatest { query ->
+            if (query.length < 2) {
+                flowOf(PagingData.empty())
+            } else {
+                historyRepository.searchPagedHistory(query)
+            }
+        }
+        .cachedIn(viewModelScope)
     override suspend fun onEvent(state: HistoryPageUIState, intent: HistoryPageUIIntent) {
         when (intent) {
             is HistoryPageUIIntent.DeleteHistory -> {
@@ -95,9 +110,9 @@ class HistoryPageViewModel @Inject constructor(
                 }
             }
             is HistoryPageUIIntent.SearchQueryChanged -> {
-                // 当用户清空搜索框时，自动退出搜索模式
-                val searchActive = if (intent.query.isBlank()) false else state.isSearchActive
-                emitState(state.copy(searchQuery = intent.query, isSearchActive = searchActive))
+                val trimmed = intent.query.trim()
+                val searchActive = if (trimmed.isBlank()) false else state.isSearchActive
+                emitState(state.copy(searchQuery = trimmed, isSearchActive = searchActive))
             }
             HistoryPageUIIntent.DeleteAllHistory -> {
                 emitState(uiState.value.copy(isLoading = true))
@@ -107,6 +122,7 @@ class HistoryPageViewModel @Inject constructor(
             is HistoryPageUIIntent.CopyPrompt -> {
                 if (intent.prompt.isNotEmpty()) {
                     clipboardHelper.copy(intent.prompt)
+                    emitEffect(ShowSnackbar("已复制到剪贴板"))
                 }
             }
 
@@ -119,15 +135,16 @@ class HistoryPageViewModel @Inject constructor(
                         prompt = entity.prompt,
                         responses = entity.toSavableMap(),
                         directoryUri = directoryUri
-                    )
+                    ).onSuccess { emitEffect(ShowSnackbar("已保存全部响应")) }
                 }else{
-                    emitEffect(ShowSnackbar("Internal Error"))
+                    emitEffect(ShowSnackbar("内部错误"))
                 }
             }
 
             is HistoryPageUIIntent.CopyResponse -> {
                 if (intent.responseContent.isNotEmpty()) {
                     clipboardHelper.copy(intent.responseContent)
+                    emitEffect(ShowSnackbar("已复制到剪贴板"))
                 }
             }
 
@@ -135,8 +152,7 @@ class HistoryPageViewModel @Inject constructor(
                 emitState(uiState.value.copy(isDeleteAllDialogVisible = true))
             }
             HistoryPageUIIntent.SubmitSearch -> {
-                // 只有当搜索词不为空时，才激活搜索模式
-                if (state.searchQuery.isNotBlank()) {
+                if (state.searchQuery.length >= 2) {
                     emitState(state.copy(isSearchActive = true))
                 }
             }

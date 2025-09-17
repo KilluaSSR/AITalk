@@ -28,7 +28,25 @@ import killua.dev.aitalk.states.MainpageState
 import killua.dev.aitalk.ui.tokens.SizeTokens
 import killua.dev.aitalk.ui.viewmodels.MainpageUIIntent
 import killua.dev.aitalk.ui.viewmodels.MainpageUIState
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.filterNot
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.take
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.stateIn
+import androidx.compose.runtime.snapshotFlow
 
 @Composable
 fun MainpageTextfield(
@@ -40,11 +58,16 @@ fun MainpageTextfield(
 
     var localText by remember { mutableStateOf(uiState.searchQuery) }
 
-    LaunchedEffect(localText) {
-        delay(300)
-        if (localText != uiState.searchQuery) {
-            onIntent(MainpageUIIntent.UpdateSearchQuery(localText))
-        }
+    @OptIn(FlowPreview::class)
+    LaunchedEffect(Unit) {
+        snapshotFlow { localText }
+            .debounce(300)
+            .distinctUntilChanged()
+            .collectLatest { latest ->
+                if (latest != uiState.searchQuery) {
+                    onIntent(MainpageUIIntent.UpdateSearchQuery(latest))
+                }
+            }
     }
 
     LaunchedEffect(uiState.searchQuery) {
@@ -71,7 +94,10 @@ fun MainpageTextfield(
             },
             trailingIcon = {
                 Row(modifier = Modifier.padding(SizeTokens.Level4)){
-                    IconButton(onClick = { onIntent(MainpageUIIntent.ClearInput) }) {
+                    IconButton(onClick = {
+                        localText = ""
+                        onIntent(MainpageUIIntent.ClearInput)
+                    }) {
                         Icon(Icons.Default.Clear, contentDescription = "Clear")
                     }
                     when {

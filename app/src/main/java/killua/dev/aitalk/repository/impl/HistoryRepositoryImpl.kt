@@ -51,4 +51,14 @@ class HistoryRepositoryImpl @Inject constructor(
     override fun searchHistory(query: String): Flow<List<SearchHistoryEntity>> {
         return dao.searchHistory(query)
     }
+
+    override fun searchPagedHistory(query: String): Flow<PagingData<SearchHistoryEntity>> =
+        Pager(
+            config = PagingConfig(
+                pageSize = 20,
+                enablePlaceholders = false,
+                initialLoadSize = 40
+            ),
+            pagingSourceFactory = { dao.searchPaged(query) }
+        ).flow
 }

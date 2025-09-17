@@ -26,13 +26,16 @@ import killua.dev.aitalk.ui.pages.Mainpage
 import killua.dev.aitalk.ui.pages.SettingsPage
 import killua.dev.aitalk.ui.theme.AITalkTheme
 import killua.dev.aitalk.ui.theme.ThemeMode
-import killua.dev.aitalk.ui.theme.observeThemeMode
 import killua.dev.aitalk.utils.AnimatedNavHost
 import killua.dev.aitalk.utils.BiometricManagerSingleton
 import killua.dev.aitalk.utils.LocalNavHostController
+import killua.dev.aitalk.repository.SettingsRepository
+import javax.inject.Inject
+import kotlinx.coroutines.flow.map
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
+    @Inject lateinit var settingsRepository: SettingsRepository
 
     @OptIn(ExperimentalAnimationApi::class, ExperimentalFoundationApi::class,
         ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class
@@ -42,7 +45,8 @@ class MainActivity : AppCompatActivity() {
         BiometricManagerSingleton.init(this)
         enableEdgeToEdge()
         setContent {
-            val themeMode by this.observeThemeMode()
+            val themeMode by settingsRepository.appPreferences
+                .map { it.themeMode }
                 .collectAsStateWithLifecycle(initialValue = ThemeMode.SYSTEM)
             AITalkTheme(
                 themeMode = themeMode

@@ -4,6 +4,8 @@ import killua.dev.aitalk.consts.OPENAI_RESPONSES_URL
 import killua.dev.aitalk.models.SubModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.isActive
+import kotlin.coroutines.coroutineContext
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -42,7 +44,7 @@ class OpenAIApiServiceImpl @Inject constructor(
 
             val source = response.body?.source() ?: throw IOException("Response body is null")
 
-            while (!source.exhausted()) {
+            while (coroutineContext.isActive && !source.exhausted()) {
                 val line = source.readUtf8Line()
                 if (line == "event: response.output_text.delta") {
                     val dataLine = source.readUtf8Line()
