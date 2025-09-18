@@ -8,6 +8,9 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import killua.dev.aitalk.ui.Routes
+import androidx.compose.material3.Text
 
 @Composable
 fun AnimatedNavHost(
@@ -24,19 +27,15 @@ fun AnimatedNavHost(
         modifier = modifier,
         contentAlignment = contentAlignment,
         route = route,
-        enterTransition = {
-            slideInHorizontally(initialOffsetX = { it })
-        },
-        exitTransition = {
-            slideOutHorizontally()
-        },
-        popEnterTransition = {
-            slideInHorizontally()
-        },
-        popExitTransition = {
-            slideOutHorizontally(targetOffsetX = { it })
-        },
-        builder = builder,
-    )
-
+        enterTransition = { slideInHorizontally(initialOffsetX = { it }) },
+        exitTransition = { slideOutHorizontally() },
+        popEnterTransition = { slideInHorizontally() },
+        popExitTransition = { slideOutHorizontally(targetOffsetX = { it }) }
+    ) {
+        builder()
+        // Ensure AboutPage route exists to avoid crash if menu references it
+        composable(Routes.AboutPage.route) {
+            Text("About AITalk (Placeholder)")
+        }
+    }
 }

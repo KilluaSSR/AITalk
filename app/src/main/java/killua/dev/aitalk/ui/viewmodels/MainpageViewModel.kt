@@ -8,6 +8,8 @@ import killua.dev.aitalk.models.AIModel
 import killua.dev.aitalk.models.SubModel
 import killua.dev.aitalk.repository.AiRepository
 import killua.dev.aitalk.repository.ApiConfigRepository
+import killua.dev.aitalk.repository.ChatRepository
+import killua.dev.aitalk.repository.ChatMessageWithId
 import killua.dev.aitalk.repository.FileRepository
 import killua.dev.aitalk.repository.HistoryRepository
 import killua.dev.aitalk.repository.SettingsRepository
@@ -43,6 +45,12 @@ sealed interface MainpageUIIntent : UIIntent {
     data object SaveAll: MainpageUIIntent
     data class OnSendButtonClick(val query: String) : MainpageUIIntent
     data object OnStopButtonClick : MainpageUIIntent
+    // Chat mode intents
+    data object EnterChatMode: MainpageUIIntent
+    data class SendChatMessage(val text: String): MainpageUIIntent
+    data class EditChatUserMessage(val messageId: Long, val newText: String): MainpageUIIntent
+    data object CancelAllChatGeneration: MainpageUIIntent
+    data class CancelSingleAssistant(val messageId: Long): MainpageUIIntent
 }
 
 data class MainpageUIState(
@@ -51,6 +59,11 @@ data class MainpageUIState(
     val aiResponses: Map<AIModel, AIResponseState> = emptyMap(),
     val subModelMap: Map<AIModel, SubModel> = emptyMap(),
     val searchStartTime: Long? = null,
+    // Chat mode
+    val chatMode: Boolean = false,
+    val conversationId: Long? = null,
+    val chatMessages: List<ChatMessageWithId> = emptyList(),
+    val activeChatModels: Set<AIModel> = emptySet(),
 ) : UIState{
     val isSearching: Boolean
         get() = aiResponses.values.any { it.status == ResponseStatus.Loading }
@@ -64,6 +77,7 @@ class MainpageViewModel @Inject constructor(
     private val apiConfigRepository: ApiConfigRepository,
     private val clipboardHelper: ClipboardHelper,
     private val fileRepository: FileRepository,
+    private val chatRepository: ChatRepository,
 ): BaseViewModel<MainpageUIIntent, MainpageUIState, SnackbarUIEffect>(
     MainpageUIState()
 ) {
@@ -88,6 +102,48 @@ class MainpageViewModel @Inject constructor(
                 }
 
                 startSearch(intent.query)
+            }
+            MainpageUIIntent.EnterChatMode -> {
+                updateState { it.copy(chatMode = true) }
+            }
+            is MainpageUIIntent.SendChatMessage -> {
+                val text = intent.text.trim()
+                if (text.isEmpty()) return
+                viewModelScope.launch {
+                    val activeModels = if (uiState.value.activeChatModels.isEmpty()) {
+                        // derive enabled models
+                        val data = prepareAiSearchData(apiConfigRepository, null)
+                        data.filteredSubModelMap.keys.toSet()
+                    } else uiState.value.activeChatModels
+                    val convId = chatRepository.sendUserMessage(
+                        uiState.value.conversationId,
+                        text,
+                        activeModels.toList()
+                    )
+                    if (uiState.value.conversationId == null) {
+                        chatRepository.observeConversation(convId)
+                            .onEach { msgs ->
+                                updateState { old -> old.copy(conversationId = convId, chatMessages = msgs, activeChatModels = activeModels) }
+                            }
+                            .launchIn(this)
+                    }
+                }
+            }
+            is MainpageUIIntent.EditChatUserMessage -> {
+                val convId = state.conversationId ?: return
+                viewModelScope.launch {
+                    val activeModels = state.activeChatModels.ifEmpty {
+                        val data = prepareAiSearchData(apiConfigRepository, null)
+                        data.filteredSubModelMap.keys.toSet()
+                    }
+                    chatRepository.editUserMessage(convId, intent.messageId, intent.newText, activeModels.toList())
+                }
+            }
+            MainpageUIIntent.CancelAllChatGeneration -> {
+                state.conversationId?.let { chatRepository.cancelActiveGenerations(it) }
+            }
+            is MainpageUIIntent.CancelSingleAssistant -> {
+                chatRepository.cancelAssistantMessage(intent.messageId)
             }
 
             MainpageUIIntent.OnStopButtonClick -> {

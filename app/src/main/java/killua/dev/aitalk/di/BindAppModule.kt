@@ -10,6 +10,8 @@ import killua.dev.aitalk.repository.ApiConfigRepository
 import killua.dev.aitalk.repository.FileRepository
 import killua.dev.aitalk.repository.HistoryRepository
 import killua.dev.aitalk.repository.SettingsRepository
+import killua.dev.aitalk.repository.ChatRepository
+import killua.dev.aitalk.repository.impl.ChatRepositoryImpl
 import killua.dev.aitalk.repository.impl.AiNetworkRepositoryImpl
 import killua.dev.aitalk.repository.impl.AiRepositoryImpl
 import killua.dev.aitalk.repository.impl.ApiConfigRepositoryImpl
@@ -64,4 +66,10 @@ abstract class BindAppModule {
     abstract fun bindClipboardHelper(
         impl: ClipboardHelperImpl
     ): ClipboardHelper
+
+    @Binds
+    @Singleton
+    abstract fun bindChatRepository(
+        impl: ChatRepositoryImpl
+    ): ChatRepository
 }
