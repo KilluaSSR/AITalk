@@ -14,9 +14,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.SearchOff
 import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -42,14 +40,11 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import killua.dev.aitalk.R
 import killua.dev.aitalk.db.SearchHistoryEntity
 import killua.dev.aitalk.ui.components.CancellableAlert
-import killua.dev.aitalk.ui.components.HistoryPageTopBar
 import killua.dev.aitalk.ui.components.HistorySearchBar
 import killua.dev.aitalk.ui.components.HistorypageItemCard
 import killua.dev.aitalk.ui.components.PrimaryScaffold
-import killua.dev.aitalk.ui.tokens.SizeTokens
 import killua.dev.aitalk.ui.viewmodels.HistoryPageUIIntent
 import killua.dev.aitalk.ui.viewmodels.HistoryPageViewModel
-import killua.dev.aitalk.utils.LocalNavHostController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -162,7 +157,7 @@ private fun PagedHistoryList(
                     }
                 }
                 if (historyList.loadState.append is LoadState.Loading) {
-                    item { LoadingIndicator() }
+                    item(key = "loading_indicator") { LoadingIndicator() }
                 }
             }
         }

@@ -35,7 +35,7 @@ abstract class BaseViewModel<I: UIIntent, S: UIState, E: UIEffect>(state: S): Vi
     val uiState: StateFlow<S> = _uiState.asStateFlow()
 
     suspend fun withMainContext(block: suspend CoroutineScope.() -> Unit) = withContext(
-        Dispatchers.IO, block
+        Dispatchers.Main, block
     )
 
     suspend fun emitState(state: S) = withMainContext {

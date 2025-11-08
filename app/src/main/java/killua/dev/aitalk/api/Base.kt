@@ -148,6 +148,7 @@ abstract class BaseApiServiceImpl<C : BaseApiConfig>(
 
             if (!response.isSuccessful) {
                 val errorBody = response.body?.string()
+                response.close()
                 Log.e(apiName, "HTTP 错误: ${response.code}, 错误体: $errorBody")
                 throw IOException("HTTP Error ${response.code}: $errorBody")
             }
@@ -175,7 +176,7 @@ abstract class BaseApiServiceImpl<C : BaseApiConfig>(
             Log.e(apiName, "$apiName 流式调用失败: ${e.message}", e)
             throw e
         } finally {
-            response?.body?.close()
+            response?.close()
         }
     }
 }

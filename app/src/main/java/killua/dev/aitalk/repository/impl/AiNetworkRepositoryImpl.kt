@@ -13,16 +13,16 @@ import killua.dev.aitalk.repository.AiNetworkRepository
 import killua.dev.aitalk.repository.ApiConfigRepository
 import killua.dev.aitalk.states.AIResponseState
 import killua.dev.aitalk.states.ResponseStatus
-import killua.dev.aitalk.utils.mapCommonNetworkErrorToUserFriendlyMessage
+import killua.dev.aitalk.utils.isValidApiKey
 import killua.dev.aitalk.utils.mapDeepSeekErrorToUserFriendlyMessage
+import killua.dev.aitalk.utils.mapGeminiErrorToUserFriendlyMessage
+import killua.dev.aitalk.utils.mapGrokErrorToUserFriendlyMessage
+import killua.dev.aitalk.utils.mapOpenAIErrorToUserFriendlyMessage
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
-import killua.dev.aitalk.utils.mapGeminiErrorToUserFriendlyMessage
-import killua.dev.aitalk.utils.mapGrokErrorToUserFriendlyMessage
-import killua.dev.aitalk.utils.mapOpenAIErrorToUserFriendlyMessage
 
 class AiNetworkRepositoryImpl @Inject constructor(
     private val geminiApiService: GeminiApiService,
@@ -40,6 +40,16 @@ class AiNetworkRepositoryImpl @Inject constructor(
         emit(AIResponseState(status = ResponseStatus.Loading))
 
         val apiKey = apiConfigRepository.getApiKeyForModel(subModel.parent).first()
+
+        // 验证API密钥
+        if (!apiKey.isValidApiKey()) {
+            emit(AIResponseState(
+                status = ResponseStatus.Error,
+                errorMessage = "API密钥无效或未设置，请检查配置"
+            ))
+            return@flow
+        }
+
         val contentBuilder = StringBuilder()
         var finalState: AIResponseState? = null
 

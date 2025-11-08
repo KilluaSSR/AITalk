@@ -111,7 +111,7 @@ fun HistorypageItemCard(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = SizeTokens.Level8),
+                    .padding(horizontal = SizeTokens.Level8, vertical = SizeTokens.Level4),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 TextButton(onClick = onCopyPrompt) {
@@ -136,7 +136,7 @@ fun HistorypageItemCard(
                 IconButton(onClick = { expanded = !expanded }) {
                     Icon(
                         imageVector = if (!expanded) Icons.Rounded.ExpandMore else Icons.Rounded.ExpandLess,
-                        contentDescription = null
+                        contentDescription = if (!expanded) "展开" else "收起"
                     )
                 }
             }

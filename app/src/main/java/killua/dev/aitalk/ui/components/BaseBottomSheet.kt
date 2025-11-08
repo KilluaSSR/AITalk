@@ -60,7 +60,7 @@ fun BottomSheetItem(
         ) {
             Icon(
                 imageVector = icon,
-                contentDescription = null,
+                contentDescription = "$text 的图标",
                 tint = MaterialTheme.colorScheme.onSurface
             )
 

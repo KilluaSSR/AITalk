@@ -1,27 +1,22 @@
 package killua.dev.aitalk.ui.pages
 
-import android.annotation.SuppressLint
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,7 +32,6 @@ import killua.dev.aitalk.R
 import killua.dev.aitalk.datastore.readSecureHistory
 import killua.dev.aitalk.models.ChatRole
 import killua.dev.aitalk.states.MainpageState
-import killua.dev.aitalk.states.ResponseStatus
 import killua.dev.aitalk.ui.Routes
 import killua.dev.aitalk.ui.components.AIResponseCard
 import killua.dev.aitalk.ui.components.BaseResponseCardContainer
@@ -55,7 +49,6 @@ import killua.dev.aitalk.utils.navigateSingle
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
-@SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun Mainpage() {
     val context = LocalContext.current
@@ -84,7 +77,7 @@ fun Mainpage() {
         },
         bottomBar = {
             MainpageTextfield(
-                uiState = viewModel.uiState.value,
+                uiState = uiState.value,
                 onIntent = { intent ->
                     viewModel.launchOnIO { viewModel.emitIntent(intent) }
                 },
@@ -142,7 +135,7 @@ fun Mainpage() {
                                 scope.launch { viewModel.emitIntent(MainpageUIIntent.SaveAll) }
                             }) {
                                 LazyColumn(
-                                    contentPadding = androidx.compose.foundation.layout.PaddingValues(bottom = SizeTokens.Level56)
+                                    contentPadding = PaddingValues(bottom = SizeTokens.Level4)
                                 ) {
                                     items(uiState.value.aiResponses.keys.toList(), key = { it.name }) { model ->
                                         val responseState = uiState.value.aiResponses[model]

@@ -2,6 +2,7 @@ package killua.dev.aitalk.api
 import android.util.Log
 import killua.dev.aitalk.consts.OPENAI_RESPONSES_URL
 import killua.dev.aitalk.models.SubModel
+import killua.dev.aitalk.utils.JsonResponseParser
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.isActive
@@ -39,7 +40,9 @@ class OpenAIApiServiceImpl @Inject constructor(
             response = streamingHttpClient.newCall(request).execute()
 
             if (!response.isSuccessful) {
-                throw IOException("HTTP Error ${response.code}: ${response.body?.string()}")
+                val errorBody = response.body?.string()
+                response.close()
+                throw IOException("HTTP Error ${response.code}: $errorBody")
             }
 
             val source = response.body?.source() ?: throw IOException("Response body is null")
@@ -59,7 +62,7 @@ class OpenAIApiServiceImpl @Inject constructor(
             Log.e("OpenAI_API", "OpenAI 流式调用失败: ${e.message}", e)
             throw e
         } finally {
-            response?.body?.close()
+            response?.close()
         }
     }
 
@@ -90,31 +93,10 @@ class OpenAIApiServiceImpl @Inject constructor(
     }
 
     override fun parseStreamChunk(chunk: String): String? {
-        if (!chunk.startsWith("data: ")) return null
-
-        return try {
-            val jsonData = chunk.substring(6)
-            JSONObject(jsonData)
-                .optString("delta", null)
-        } catch (e: Exception) {
-            Log.e("OpenAI_API", "解析流式块失败: $e")
-            null
-        }
+        return JsonResponseParser.parseOpenAIStreamChunk(chunk)
     }
 
-
     override fun parseSuccessfulResponse(responseBody: String): String {
-        return try {
-            JSONObject(responseBody)
-                .optJSONArray("output")
-                ?.optJSONObject(0)
-                ?.optJSONArray("content")
-                ?.optJSONObject(0)
-                ?.optString("text", "")
-                ?: ""
-        } catch (e: Exception) {
-            Log.e("OpenAI_API", "解析响应失败: $e")
-            ""
-        }
+        return JsonResponseParser.parseOpenAIResponse(responseBody)
     }
 }

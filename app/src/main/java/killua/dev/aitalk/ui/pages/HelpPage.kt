@@ -3,6 +3,7 @@ package killua.dev.aitalk.ui.pages
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -15,6 +16,7 @@ import killua.dev.aitalk.R
 import killua.dev.aitalk.models.helppageMenuItems
 import killua.dev.aitalk.ui.components.ExtendableHelpBox
 import killua.dev.aitalk.ui.components.ScrollableScafflod
+import killua.dev.aitalk.ui.tokens.SizeTokens
 import killua.dev.aitalk.utils.LocalNavHostController
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
@@ -32,6 +34,7 @@ fun HelpPage() {
             modifier = Modifier
                 .fillMaxWidth()
                 .verticalScroll(rememberScrollState())
+                .padding(horizontal = SizeTokens.Level6)
         ) {
 
             helppageMenuItems.forEach { helpPageItem ->

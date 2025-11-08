@@ -40,16 +40,30 @@ fun PrimaryScaffold(
 ){
     if(!freezeTopBarOnIme){
         Scaffold(
-            topBar = topBar,
-            bottomBar = bottomBar,
+            contentWindowInsets = WindowInsets(0,0,0,0),
             containerColor = MaterialTheme.colorScheme.surface,
-            snackbarHost = { if(snackbarHostState != null) SnackbarHost(snackbarHostState) }
+            snackbarHost = { if(snackbarHostState != null) SnackbarHost(snackbarHostState) },
+            bottomBar = {
+                // 仅给 bottomBar 适配设备底部安全区域
+                Box(Modifier.navigationBarsPadding()) { bottomBar() }
+            }
         ) { innerPadding ->
-            Box (
+            Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(innerPadding)
-            ) { content() }
+                    .windowInsetsPadding(WindowInsets.displayCutout)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .statusBarsPadding()
+                        .fillMaxWidth()
+                ) { topBar() }
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(innerPadding)
+                ) { content() }
+            }
         }
     }else{
         // 手动管理 Insets，避免 IME 动画推挤 topBar

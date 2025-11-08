@@ -2,7 +2,6 @@ package killua.dev.aitalk.ui.components
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -30,7 +29,6 @@ import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.traversalIndex
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import killua.dev.aitalk.R
 import killua.dev.aitalk.db.SearchHistoryEntity
 import killua.dev.aitalk.ui.tokens.SizeTokens
@@ -51,14 +49,13 @@ fun HistorySearchBar(
     onResultClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var showMenu by remember { mutableStateOf(false) }
-
     val resultPrompts = remember(searchResults) {
         searchResults.map { it.prompt }
     }
 
-    Column(modifier = Modifier.fillMaxWidth()) {
+    Box(modifier = modifier.fillMaxWidth()) {
         CustomizableSearchBar(
+            modifier = Modifier.padding(horizontal = SizeTokens.Level16, vertical = SizeTokens.Level10),
             query = query,
             onQueryChange = onQueryChange,
             onSearch = onSearch,
@@ -66,7 +63,6 @@ fun HistorySearchBar(
             onResultClick = onResultClick,
             placeholder = { Text(stringResource(R.string.search)) },
             leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search") },
-            //supportingContent = { Text("Android dessert") },
             leadingContent = { Icon(Icons.Filled.History, contentDescription = "Starred item") }
         )
     }
@@ -75,6 +71,7 @@ fun HistorySearchBar(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CustomizableSearchBar(
+    modifier: Modifier = Modifier,
     query: String,
     onQueryChange: (String) -> Unit,
     onSearch: (String) -> Unit,
@@ -84,8 +81,7 @@ fun CustomizableSearchBar(
     leadingIcon: @Composable (() -> Unit)? = { Icon(Icons.Default.Search, contentDescription = "Search") },
     trailingIcon: @Composable (() -> Unit)? = null,
     supportingContent: (@Composable (String) -> Unit)? = null,
-    leadingContent: (@Composable () -> Unit)? = null,
-    modifier: Modifier = Modifier
+    leadingContent: (@Composable () -> Unit)? = null
 ) {
     // Track expanded state of search bar
     var expanded by rememberSaveable { mutableStateOf(false) }
@@ -93,13 +89,12 @@ fun CustomizableSearchBar(
     Box(
         modifier
             .semantics { isTraversalGroup = true }
-            .fillMaxWidth(),
+            .fillMaxWidth()
     ) {
         SearchBar(
             modifier = Modifier
                 .align(Alignment.TopCenter)
                 .fillMaxWidth()
-                .padding(bottom = SizeTokens.Level10)
                 .semantics { traversalIndex = 0f },
             inputField = {
                 // Customizable input field implementation
@@ -120,7 +115,7 @@ fun CustomizableSearchBar(
             onExpandedChange = { expanded = it },
         ) {
             LazyColumn {
-                items(count = searchResults.size) { index ->
+                items(searchResults.size) { index ->
                     val resultText = searchResults[index]
                     ListItem(
                         headlineContent = { Text(resultText) },
@@ -133,7 +128,6 @@ fun CustomizableSearchBar(
                                 expanded = false
                             }
                             .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 4.dp)
                     )
                 }
             }

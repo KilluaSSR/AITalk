@@ -8,6 +8,7 @@ import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import killua.dev.aitalk.consts.GEMINI_URL
 import killua.dev.aitalk.models.GeminiStreamChunk
 import killua.dev.aitalk.models.SubModel
+import killua.dev.aitalk.utils.JsonResponseParser
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.isActive
@@ -111,33 +112,10 @@ class GeminiApiServiceImpl @Inject constructor(
     }
 
     override fun parseStreamChunk(chunk: String): String? {
-        return try {
-            JSONObject(chunk)
-                .optJSONArray("candidates")
-                ?.optJSONObject(0)
-                ?.optJSONObject("content")
-                ?.optJSONArray("parts")
-                ?.optJSONObject(0)
-                ?.optString("text", null)
-        } catch (e: Exception) {
-            Log.e("GeminiAPI", "解析流式块失败: $e")
-            null
-        }
+        return JsonResponseParser.parseGeminiStreamChunk(chunk)
     }
 
     override fun parseSuccessfulResponse(responseBody: String): String {
-        return try {
-            JSONObject(responseBody)
-                .optJSONArray("candidates")
-                ?.optJSONObject(0)
-                ?.optJSONObject("content")
-                ?.optJSONArray("parts")
-                ?.optJSONObject(0)
-                ?.optString("text", "")
-                ?: ""
-        } catch (e: Exception) {
-            Log.e("GeminiAPI", "解析响应失败: $e")
-            ""
-        }
+        return JsonResponseParser.parseGeminiResponse(responseBody)
     }
 }

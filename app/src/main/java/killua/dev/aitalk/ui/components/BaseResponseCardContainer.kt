@@ -34,7 +34,7 @@ fun BaseResponseCardContainer(
         colors = colors,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(SizeTokens.Level8)
+            .padding(SizeTokens.Level6)
 
     ){
         Column(

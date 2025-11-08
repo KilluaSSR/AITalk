@@ -3,6 +3,7 @@ package killua.dev.aitalk.api
 import android.util.Log
 import killua.dev.aitalk.consts.DEEPSEEK_URL
 import killua.dev.aitalk.models.SubModel
+import killua.dev.aitalk.utils.JsonResponseParser
 import kotlinx.coroutines.flow.Flow
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
@@ -61,29 +62,11 @@ class DeepSeekApiServiceImpl @Inject constructor(
     }
 
     override fun parseSuccessfulResponse(responseBody: String): String {
-        return try {
-            JSONObject(responseBody)
-                .optJSONArray("choices")
-                ?.optJSONObject(0)
-                ?.optJSONObject("message")
-                ?.optString("content", "")
-                ?: ""
-        } catch (e: Exception) {
-            Log.e("DeepSeekAPI", "解析响应失败: $e")
-            ""
-        }
+        return JsonResponseParser.parseDeepSeekResponse(responseBody)
     }
+
     override fun parseStreamChunk(chunk: String): String? {
-        return try {
-            JSONObject(chunk)
-                .optJSONArray("choices")
-                ?.optJSONObject(0)
-                ?.optJSONObject("delta")
-                ?.optString("content", null)
-        } catch (e: Exception) {
-            Log.e("DeepSeekAPI", "解析流式块失败: $e")
-            null
-        }
+        return JsonResponseParser.parseDeepSeekStreamChunk(chunk)
     }
 
 }

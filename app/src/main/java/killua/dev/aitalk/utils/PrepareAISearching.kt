@@ -32,7 +32,7 @@ suspend fun prepareAiSearchData(
     }
 
     val filteredSubModelMap: Map<AIModel, SubModel> = subModelMap.filter { (model, _) ->
-        (apiKeyMap[model]?.isNotBlank() == true) && turnedOnMap[model] == true
+        (apiKeyMap[model]?.isValidApiKey() == true) && turnedOnMap[model] == true
     }
 
     val initialResponses: Map<AIModel, AIResponseState> = filteredSubModelMap.keys.associateWith {
