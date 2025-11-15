@@ -48,6 +48,8 @@ fun Mainpage() {
     val uiState = viewModel.uiState.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
 
+
+
     PrimaryScaffold(
         topBar = {
             MainpageTopBar(

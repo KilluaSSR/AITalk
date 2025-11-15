@@ -129,6 +129,8 @@ dependencies {
     // Other
     implementation(libs.material)
     implementation(libs.androidx.biometric)
+    debugImplementation (libs.leakcanary.android)
+
 
     // Testing
     testImplementation(libs.junit)

@@ -3,6 +3,7 @@ package killua.dev.aitalk.ui.components
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -57,7 +58,7 @@ fun HistorySearchBar(
         searchResults.map { it.prompt }
     }
 
-    Column(modifier = Modifier.fillMaxWidth()) {
+    Column(modifier = Modifier.fillMaxSize()) {
         CustomizableSearchBar(
             query = query,
             onQueryChange = onQueryChange,
@@ -80,27 +81,25 @@ fun CustomizableSearchBar(
     onSearch: (String) -> Unit,
     searchResults: List<String>,
     onResultClick: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    // Customization options
     placeholder: @Composable () -> Unit = { Text("Search") },
     leadingIcon: @Composable (() -> Unit)? = { Icon(Icons.Default.Search, contentDescription = "Search") },
     trailingIcon: @Composable (() -> Unit)? = null,
     supportingContent: (@Composable (String) -> Unit)? = null,
     leadingContent: (@Composable () -> Unit)? = null,
-    modifier: Modifier = Modifier
 ) {
     // Track expanded state of search bar
     var expanded by rememberSaveable { mutableStateOf(false) }
 
     Box(
         modifier
+            .fillMaxSize()
             .semantics { isTraversalGroup = true }
-            .fillMaxWidth(),
     ) {
         SearchBar(
             modifier = Modifier
                 .align(Alignment.TopCenter)
-                .padding(bottom = SizeTokens.Level10)
-                .fillMaxWidth()
-                .padding(horizontal = SizeTokens.Level12)
                 .semantics { traversalIndex = 0f },
             inputField = {
                 // Customizable input field implementation
@@ -115,11 +114,13 @@ fun CustomizableSearchBar(
                     onExpandedChange = { expanded = it },
                     placeholder = placeholder,
                     leadingIcon = leadingIcon,
+                    trailingIcon = trailingIcon
                 )
             },
             expanded = expanded,
             onExpandedChange = { expanded = it },
         ) {
+            // Show search results in a lazy column for better performance
             LazyColumn {
                 items(count = searchResults.size) { index ->
                     val resultText = searchResults[index]

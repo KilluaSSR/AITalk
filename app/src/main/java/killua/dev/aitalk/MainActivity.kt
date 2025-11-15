@@ -1,5 +1,7 @@
 package killua.dev.aitalk
 
+import android.app.ComponentCaller
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -34,7 +36,8 @@ import killua.dev.aitalk.utils.LocalNavHostController
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
-    @OptIn(ExperimentalAnimationApi::class, ExperimentalFoundationApi::class,
+    @OptIn(
+        ExperimentalAnimationApi::class, ExperimentalFoundationApi::class,
         ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class
     )
     override fun onCreate(savedInstanceState: Bundle?) {
